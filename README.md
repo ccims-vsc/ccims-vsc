@@ -3,6 +3,6 @@
 ## Running the example
 
 - Open this in VS Code 1.49+
-- `npm install`
-- `npm run watch` or `npm run compile`
+- `npm run init-all` to init project
+- `npm run build` to build project
 - `F5` to start debugging

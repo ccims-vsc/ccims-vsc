@@ -6,8 +6,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const provider = new IssueViewProvider(context.extensionUri);
 
-	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(IssueViewProvider.viewType, provider));
+	context.subscriptions.push(vscode.window.registerWebviewViewProvider(IssueViewProvider.viewType, provider));
 }
 
 
