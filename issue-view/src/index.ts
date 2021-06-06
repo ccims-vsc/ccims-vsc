@@ -1,3 +1,5 @@
+import "./components/vscode-search-select"
+
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
 

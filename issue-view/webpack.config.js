@@ -18,6 +18,12 @@ module.exports = {
       { 
         test: /\.tsx?$/,
         loader: "ts-loader"
+      },
+      {
+        test: /\.m?js/,
+        resolve: {
+            fullySpecified: false
+        }
       }
     ]
   }
