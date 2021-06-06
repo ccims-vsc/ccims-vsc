@@ -16,8 +16,3 @@ npm run serve
 npm run build
 ```
 > Note: this is also executed by `npm run build` in root project
-
-### Lints and fixes files
-```
-npm run lint
-```

@@ -41,7 +41,7 @@ export class IssueViewProvider implements vscode.WebviewViewProvider {
 		const htmlPath: vscode.Uri = vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "index.html");
 		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 		//replace js file path
-		html = html.replaceAll("/js/app.js", webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "js", "app.js")).toString())
+		html = html.replaceAll("/js/app.js", webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "js", "app.js")).toString());
 		return html;
 	}
 

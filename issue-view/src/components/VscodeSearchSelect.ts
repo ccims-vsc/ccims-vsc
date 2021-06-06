@@ -193,7 +193,7 @@ export class VscodeSearchSelect extends LitElement {
                     value: this._filterPattern
                 }
             })
-        )
+        );
     }
 
     protected _onFaceClick(): void {

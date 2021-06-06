@@ -9,7 +9,12 @@ module.exports = {
 	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
+		'plugin:vue/vue3-essential',
+		'@vue/typescript/recommended'
 	],
+	parserOptions: {
+		ecmaVersion: 2020
+	},
 	rules: {
 		'semi': [2, "always"],
 		'@typescript-eslint/no-unused-vars': 0,

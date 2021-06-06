@@ -7,15 +7,13 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { VscodeSearchSelect } from "./components/vscode-search-select";
+import { VscodeSearchSelect } from "./components/VscodeSearchSelect";
 
 if (!customElements.get("vscode-search-select")) {
     customElements.define("vscode-search-select", VscodeSearchSelect)
 }
 
-@Options({
-    
-})
+@Options({})
 export default class App extends Vue {
     
 }

@@ -1,7 +1,7 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from 'vue';
+import App from './App.vue';
 
-declare var acquireVsCodeApi: any;
+declare const acquireVsCodeApi: any;
 export const vscode = acquireVsCodeApi();
 
-createApp(App).mount('#app')
+createApp(App).mount('#app');
