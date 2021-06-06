@@ -1,0 +1,147 @@
+query getIssue($id: ID!) {
+  node(id: $id) {
+    ...on Issue {
+      title
+      body
+      bodyRendered
+      isOpen
+      category
+      linksToIssues {
+        nodes {
+          id
+          title
+        }
+      }
+      labels {
+        nodes {
+          id
+          name
+          description
+          color
+        }
+      }
+      artifacts {
+        nodes {
+          id
+          uri
+          lineRangeStart
+          lineRangeEnd
+        }
+      }
+      assignees {
+        nodes {
+          id
+          displayName
+          username
+        }
+      }
+    }
+  }
+}
+
+mutation createIssue($title: String!, $body: String!, $component: ID!) {
+  createIssue(input: {
+    title: $title
+    body: $body
+    components: [$component]
+  }) {
+    issue {
+      id
+      title
+      body
+      bodyRendered
+    }
+  }
+}
+
+mutation updateIssueTitle($id: ID!, $title: String!) {
+  renameIssueTitle(input: {
+    issue: $id
+    newTitle: $title
+  }) {
+    clientMutationID
+  }
+}
+
+mutation updateIssueBody($id: ID!, $body: String!) {
+  updateComment(input: {
+    comment: $id
+    body: $body
+  }) {
+    comment {
+      bodyRendered
+    }
+  }
+}
+
+mutation addLabelToIssue($issue: ID!, $label: ID!) {
+  addLabelToIssue(input: {
+    issue: $issue
+    label: $label
+  }) {
+    clientMutationID
+  }
+}
+
+mutation removeLabelFromIssue($issue: ID!, $label: ID!) {
+  removeLabelFromIssue(input: {
+    issue: $issue
+    label: $label
+  }) {
+    clientMutationID
+  }
+}
+
+mutation linkIssue($issue: ID!, $linkedIssue: ID!) {
+  linkIssue(input: {
+    issue: $issue
+    issueToLink: $linkedIssue
+  }) {
+    clientMutationID
+  }
+}
+
+mutation unlinkIssue($issue: ID!, $linkedIssue: ID!) {
+  unlinkIssue(input: {
+    issue: $issue
+    issueToUnlink: $linkedIssue
+  }) {
+    clientMutationID
+  }
+}
+
+mutation addAssignee($issue: ID!, $assignee: ID!) {
+  addAssignee(input: {
+    issue: $issue
+    user: $assignee
+  }) {
+    clientMutationID
+  }
+}
+
+mutation removeAssignee($issue: ID!, $assignee: ID!) {
+  removeAssignee(input: {
+    issue: $issue
+    user: $assignee
+  }) {
+    clientMutationID
+  }
+}
+
+mutation addArtifactToIssue($issue: ID!, $artifact: ID!) {
+  addArtifactToIssue(input: {
+    issue: $issue
+    artifact: $artifact
+  }) {
+    clientMutationID
+  }
+}
+
+mutation removeArtifactFromIssue($issue: ID!, $artifact: ID!) {
+  removeArtifactFromIssue(input: {
+    issue: $issue
+    artifact: $artifact
+  }) {
+    clientMutationID
+  }
+}
