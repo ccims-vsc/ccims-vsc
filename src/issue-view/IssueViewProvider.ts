@@ -38,12 +38,17 @@ export class IssueViewProvider implements vscode.WebviewViewProvider {
 	 * @returns the transformed HTML
 	 */
 	private _getHtmlForWebview(webview: vscode.Webview) {
-		const htmlPath: vscode.Uri = vscode.Uri.joinPath(this._extensionUri, "issue-view", "index.html");
-		const html = fs.readFileSync(htmlPath.fsPath, 'utf8');
-		const parsedHtml = html.replaceAll(/vsc-escape\(([a-zA-Z0-9-_/.]+)\)/g, (match, p1, offset, string) => {
-			return webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "res", p1)).toString();
-		})
+		const htmlPath: vscode.Uri = vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "index.html");
+		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
+		//replace js file path
+		html = html.replaceAll("/js/app.js", webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "js", "app.js")).toString())
+		return html;
+	}
 
-		return parsedHtml;
+	public getResourceUri(resource: string): string {
+		if (!this._view) {
+			throw new Error("view not created yet");
+		}
+		return this._view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "res", resource)).toString();
 	}
 }

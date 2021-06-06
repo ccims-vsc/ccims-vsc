@@ -1,20 +1,31 @@
 {
-  "name": "issue-view",
-  "version": "1.0.0",
-  "description": "",
+  "name": "hello-world",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "build": "webpack"
-  },
-  "keywords": [],
-  "license": "ISC",
-  "devDependencies": {
-    "ts-loader": "^9.2.2",
-    "typescript": "^4.3.2",
-    "webpack": "^5.38.1",
-    "webpack-cli": "^4.7.0"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@bendera/vscode-webview-elements": "^0.3.0",
-    "lit-element": "^2.5.1"
+    "core-js": "^3.6.5",
+    "lit-element": "^2.5.1",
+    "lit-html": "^1.4.1",
+    "vue": "^3.0.0",
+    "vue-class-component": "^8.0.0-0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^7.0.0",
+    "typescript": "~4.1.5"
   }
 }

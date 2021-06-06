@@ -4,13 +4,9 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "npm",
-			"script": "watch",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
-			},
+			"label": "npm run build",
+			"type": "shell",
+			"command": "npm run build",
 			"group": {
 				"kind": "build",
 				"isDefault": true
