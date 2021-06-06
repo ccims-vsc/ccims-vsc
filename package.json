@@ -1,0 +1,49 @@
+{
+	"name": "ccims-vsc",
+	"description": "CCIMS - Cross-Component Issue Management System integration ",
+	"version": "0.0.1",
+	"publisher": "Niklas Krieger",
+	"engines": {
+		"vscode": "^1.50.0"
+	},
+	"extensionKind": [
+		"ui",
+		"workspace"
+	],
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onView:ccims.issueView"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nk-coding/ccims-vsc.git"
+	},
+	"main": "./out/extension.js",
+	"contributes": {
+		"views": {
+			"explorer": [
+				{
+					"type": "webview",
+					"id": "ccims.issueView",
+					"name": "Issue"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint . --ext .ts,.tsx",
+		"watch": "tsc -w -p ./"
+	},
+	"devDependencies": {
+		"@types/node": "^15.12.1",
+		"@types/vscode": "^1.50.0",
+		"@typescript-eslint/eslint-plugin": "^4.16.0",
+		"@typescript-eslint/parser": "^4.16.0",
+		"eslint": "^7.21.0",
+		"typescript": "^4.2.2"
+	}
+}
