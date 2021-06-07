@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Component, getSdk, Issue, Sdk } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
+import { getIssueIcon } from "./IconProvider";
 
 /**
  * The type of the CCIMSApi used for all requests
@@ -9,11 +10,11 @@ function getSdkWrapper(sdk: Sdk) {
 	return {
 		...sdk,
 		/**
-		 * Gets a component based on its id
+		 * Gets a Component based on its id
 		 * @param id the id of the Component
 		 */
 		async getComponent(id: string): Promise<Component> {
-			const res = await sdk.getComponentInternal({ id: id });
+			const res = await this.getComponentInternal({ id: id });
 			return res.node as Component;
 		},
 		/**
@@ -23,6 +24,14 @@ function getSdkWrapper(sdk: Sdk) {
 		async getIssues(componentId: string): Promise<Issue[]> {
 			const component = await this.getComponent(componentId);
 			return component.issues?.nodes as Issue[];
+		},
+		/**
+		 * Gets an Issue based on its id
+		 * @param id the id of the Issue to load
+		 */
+		async getIssue(id: string): Promise<Issue> {
+			const res = await this.getIssueInternal({ id: id });
+			return res.node as Issue;
 		}
 	}
 }

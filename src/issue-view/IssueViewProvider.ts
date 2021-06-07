@@ -1,56 +1,32 @@
+import { IssueViewProviderBase } from "./IssueViewProviderBase";
 import * as vscode from "vscode";
-import * as fs from "fs";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
+import { getCCIMSApi } from "../data/CCIMSApi";
+import { IssueViewCommandType } from "./communication/IssueViewCommandType";
+import { OpenIssueCommand } from "./communication/OpenIssueCommand";
 
-export class IssueViewProvider implements vscode.WebviewViewProvider {
+export class IssueViewProvider extends IssueViewProviderBase {
+	constructor(extensionUri: vscode.Uri, commands: CCIMSCommands) {
+		super(extensionUri);
 
-	public static readonly viewType = "ccims.issueView";
-
-	private _view?: vscode.WebviewView;
-
-	constructor(
-		private readonly _extensionUri: vscode.Uri,
-		commands: CCIMSCommands
-	) { }
-
-	public resolveWebviewView(
-		webviewView: vscode.WebviewView,
-		context: vscode.WebviewViewResolveContext,
-		_token: vscode.CancellationToken,
-	) {
-		this._view = webviewView;
-
-		webviewView.webview.options = {
-			// Allow scripts in the webview
-			enableScripts: true,
-
-			localResourceRoots: [
-				this._extensionUri
-			]
-		};
-
-		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
+		commands.openIssueCommand.addListener(params => {
+			if (params.length !== 1 || typeof params[0] !== "string") {
+				throw new Error(`open issue called with wrong parameters: ${params}`)
+			}
+			this._openIssue(params[0]);
+		});
 	}
 
 	/**
-	 * Loads and transforms the HTML for the Issue web view
-	 * Replaes all vsc-escape(file) occurances with the appropriate res/file URI
-	 * @param webview the webview for which the generated HTML will be used
-	 * @returns the transformed HTML
+	 * Called to open an issue
+	 * @param id the id of the issue to open
 	 */
-	private _getHtmlForWebview(webview: vscode.Webview) {
-		const htmlPath: vscode.Uri = vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "index.html");
-		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
-		//replace js file path
-		html = html.replaceAll("/js/app.js", webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "js", "app.js")).toString());
-		return html;
-	}
-
-	public getResourceUri(resource: string): string {
-		if (!this._view) {
-			throw new Error("view not created yet");
-		}
-		return this._view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "res", resource)).toString();
+	private async _openIssue(id: string): Promise<void> {
+		const api = await getCCIMSApi();
+		const issue = await api.getIssue(id);
+		this.postCommand({
+			type: IssueViewCommandType.OPEN_ISSUE,
+			issue: issue
+		} as OpenIssueCommand);
 	}
 }

@@ -22,7 +22,7 @@ export class CCIMSCommand {
 		context.subscriptions.push(
 			vscode.commands.registerCommand(
 				type,
-				(params: any[]) => {
+				(...params: any[]) => {
 					this._listeners.forEach(listener => {
 						listener(params);
 					});

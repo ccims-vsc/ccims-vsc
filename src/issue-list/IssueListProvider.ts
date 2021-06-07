@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
+import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { getIssueIcon } from "../data/IconProvider";
 import { Issue } from "../generated/graphql";
@@ -17,8 +18,8 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 	 * Creates a new IssueListProvider
 	 * @param commands commands used to listen for refresh command
 	 */
-	public constructor(commands: CCIMSCommands) {
-		commands.reloadIssueListCommand.addListener(() => this.refresh());
+	public constructor(private readonly _commands: CCIMSCommands) {
+		this._commands.reloadIssueListCommand.addListener(() => this.refresh());
 	}
 
 	public onDidChangeTreeData?: vscode.Event<void | Issue | null | undefined> | undefined = this._onDidChangeTreeData.event;
@@ -34,7 +35,12 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 		return {
 			id: element.id!,
 			label: element.title,
-			iconPath: getIssueIcon(element)
+			iconPath: getIssueIcon(element),
+			command: {
+				command: CCIMSCommandType.OPEN_ISSUE,
+				title: "Open issue",
+				arguments: [element.id]
+			}
 		}
 	}
 
