@@ -15,7 +15,8 @@
 	],
 	"activationEvents": [
 		"onView:ccims.issueView",
-		"onView:ccims.issueList"
+		"onView:ccims.issueList",
+		"onCommand:ccims.reloadIssueList"
 	],
 	"repository": {
 		"type": "git",
@@ -62,7 +63,14 @@
 					"description": "The id of the component, of which issues should be displayed"
 				}
 			}
-		}
+		},
+		"commands": [
+			{
+				"command": "ccims.reloadIssueList",
+				"title": "Reload Issue list",
+				"category": "CCIMS"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run build",

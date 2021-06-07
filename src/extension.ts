@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { CCIMSCommands } from "./commands/CCIMSCommands";
 import { IssueListProvider } from "./issue-list/IssueListProvider";
 import { IssueViewProvider } from "./issue-view/IssueViewProvider";
 
@@ -14,12 +15,21 @@ let _extensionUri: vscode.Uri
 export function activate(context: vscode.ExtensionContext) {
 	console.log("activate");
 	_extensionUri = context.extensionUri;
-	const issueViewProvider = new IssueViewProvider(context.extensionUri);
-	context.subscriptions.push(vscode.window.registerWebviewViewProvider(IssueViewProvider.viewType, issueViewProvider));
+
+	const commands = new CCIMSCommands(context);
 	
-	vscode.window.registerTreeDataProvider(
-		"ccims.issueList",
-		new IssueListProvider()
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+			IssueViewProvider.viewType,
+			new IssueViewProvider(context.extensionUri, commands)
+		)
+	);
+	
+	context.subscriptions.push(
+		vscode.window.registerTreeDataProvider(
+			"ccims.issueList",
+			new IssueListProvider(commands)
+		)
 	);
 }
 

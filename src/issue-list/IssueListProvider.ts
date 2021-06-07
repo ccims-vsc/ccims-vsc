@@ -1,10 +1,18 @@
 import * as vscode from "vscode";
+import { CCIMSCommands } from "../commands/CCIMSCommands";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { getIssueIcon } from "../data/IconProvider";
 import { Issue } from "../generated/graphql";
 import { getComponentId } from "../settings";
 
+/**
+ * View used to display a tree of all Issues
+ */
 export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
+
+	public constructor(commands: CCIMSCommands) {
+
+	}
 
 	public onDidChangeTreeData?: vscode.Event<void | Issue | null | undefined> | undefined;
 

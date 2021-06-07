@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
+import { CCIMSCommands } from "../commands/CCIMSCommands";
 
 export class IssueViewProvider implements vscode.WebviewViewProvider {
 
@@ -9,6 +10,7 @@ export class IssueViewProvider implements vscode.WebviewViewProvider {
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
+		commands: CCIMSCommands
 	) { }
 
 	public resolveWebviewView(
