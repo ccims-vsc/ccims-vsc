@@ -4687,12 +4687,32 @@ export type WasUnlinkedEvent = IssueTimelineItem & Node & {
   unlinkedBy?: Maybe<Issue>;
 };
 
-export type GetIssueQueryVariables = Exact<{
+export type GetComponentInternalQueryVariables = Exact<{
   id: Scalars['ID'];
 }>;
 
 
-export type GetIssueQuery = (
+export type GetComponentInternalQuery = (
+  { __typename?: 'Query' }
+  & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | (
+    { __typename?: 'Component' }
+    & Pick<Component, 'name' | 'description'>
+    & { issues?: Maybe<(
+      { __typename?: 'IssuePage' }
+      & { nodes?: Maybe<Array<Maybe<(
+        { __typename?: 'Issue' }
+        & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
+      )>>> }
+    )> }
+  ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
+);
+
+export type GetIssueInternalQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type GetIssueInternalQuery = (
   { __typename?: 'Query' }
   & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | { __typename?: 'Component' } | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | (
     { __typename?: 'Issue' }
@@ -4893,8 +4913,27 @@ export type RemoveArtifactFromIssueMutation = (
 );
 
 
-export const GetIssueDocument = gql`
-    query getIssue($id: ID!) {
+export const GetComponentInternalDocument = gql`
+    query getComponentInternal($id: ID!) {
+  node(id: $id) {
+    ... on Component {
+      name
+      description
+      issues {
+        nodes {
+          id
+          title
+          body
+          isOpen
+          category
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetIssueInternalDocument = gql`
+    query getIssueInternal($id: ID!) {
   node(id: $id) {
     ... on Issue {
       title
@@ -5027,8 +5066,11 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    getIssue(variables: GetIssueQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetIssueQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetIssueQuery>(GetIssueDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getIssue');
+    getComponentInternal(variables: GetComponentInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetComponentInternalQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetComponentInternalQuery>(GetComponentInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getComponentInternal');
+    },
+    getIssueInternal(variables: GetIssueInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetIssueInternalQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetIssueInternalQuery>(GetIssueInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getIssueInternal');
     },
     createIssue(variables: CreateIssueMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateIssueMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateIssueMutation>(CreateIssueDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createIssue');

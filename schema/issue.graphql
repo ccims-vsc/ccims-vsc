@@ -1,4 +1,4 @@
-query getIssue($id: ID!) {
+query getIssueInternal($id: ID!) {
   node(id: $id) {
     ...on Issue {
       title

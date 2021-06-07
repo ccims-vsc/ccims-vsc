@@ -14,7 +14,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:ccims.issueView"
+		"onView:ccims.issueView",
+		"onView:ccims.issueList"
 	],
 	"repository": {
 		"type": "git",
@@ -22,14 +23,45 @@
 	},
 	"main": "./out/extension.js",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "issue-explorer",
+					"title": "CCIMS explorer",
+					"icon": "$(type-hierarchy)"
+				}
+			]
+		},
 		"views": {
-			"explorer": [
+			"issue-explorer": [
+				{
+					"type": "tree",
+					"id": "ccims.issueList",
+					"name": "Issues",
+					"visibility" :"visible"
+				},
 				{
 					"type": "webview",
 					"id": "ccims.issueView",
-					"name": "Issue"
+					"name": "Issue",
+					"visibility": "visible"
 				}
 			]
+		},
+		"configuration": {
+			"title": "CCIMS",
+			"properties": {
+				"ccims.apiUrl": {
+					"type": "string",
+					"default": "http://localhost:8080/api",
+					"description": "The api endpoint of the used CCIMS instance"
+				},
+				"ccims.componentId": {
+					"type": "string",
+					"default": "",
+					"description": "The id of the component, of which issues should be displayed"
+				}
+			}
 		}
 	},
 	"scripts": {

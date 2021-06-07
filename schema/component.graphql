@@ -1,0 +1,17 @@
+query getComponentInternal($id: ID!) {
+  node(id: $id) {
+    ...on Component {
+      name
+      description
+      issues {
+        nodes {
+          id
+          title
+          body
+          isOpen
+          category
+        }
+      }
+    }
+  }
+}
