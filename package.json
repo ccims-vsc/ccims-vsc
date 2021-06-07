@@ -68,9 +68,19 @@
 			{
 				"command": "ccims.reloadIssueList",
 				"title": "Reload Issue list",
-				"category": "CCIMS"
+				"category": "CCIMS",
+				"icon": "$(refresh)"
 			}
-		]
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "ccims.reloadIssueList",
+					"when": "view == ccims.issueList",
+					"group": "navigation"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run build",

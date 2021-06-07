@@ -22,4 +22,7 @@ export default class App extends Vue {
 <style>
     @import "./css/reset.css";
     @import "./css/vscode.css";
+    body {
+        background-color: var(--vscode-sideBar-background)
+    }
 </style>
