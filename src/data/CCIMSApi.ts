@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import { Component, getSdk, Issue, Sdk } from "../generated/graphql";
+import { Component, getSdk, Issue, Sdk, SearchComponentsInternalDocument } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
 import { getIssueIcon } from "./IconProvider";
+import { getComponentId } from "./settings";
 
 /**
  * The type of the CCIMSApi used for all requests
@@ -32,6 +33,23 @@ function getSdkWrapper(sdk: Sdk) {
 		async getIssue(id: string): Promise<Issue> {
 			const res = await this.getIssueInternal({ id: id });
 			return res.node as Issue;
+		},
+		/**
+		 * Searches for components
+		 * First seraches for components with the specified name. If not enough components are returned, 
+		 * it also searches for components with a fitting description
+		 * 
+		 * @param text the text to search for
+		 * @param minAmount if not enough components are returned for name, description is also queried
+		 * @param maxAmount the max amount requested form the api
+		 */
+		async searchComponents(text: string, minAmount: number, maxAmount: number): Promise<Component[]> {
+			const components = (await this.searchComponentsInternal({ name: text, maxAmount: maxAmount})).components?.nodes as Component[];
+			if (components.length < minAmount) {
+				const descriptionComponents = (await this.searchComponentsInternal({ description: text, maxAmount: maxAmount})).components?.nodes as Component[];
+				components.push(...descriptionComponents);
+			}
+			return components;
 		}
 	}
 }
@@ -49,4 +67,39 @@ export async function getCCIMSApi(): Promise<CCIMSApi> {
 		const client = new GraphQLClient(apiUrl);
 		resolve(getSdkWrapper(getSdk(client)));
 	});
+}
+
+/**
+ * Checks if the api is available
+ * @returns true if the api is available, otherwise false
+ */
+export async function isApiAvailable(): Promise<boolean> {
+	const apiUrl = vscode.workspace.getConfiguration("ccims").get("apiUrl") as string;
+	if (!apiUrl) {
+		return false;
+	}
+	const api = await getCCIMSApi();
+	try {
+		return (await api.echo({input: "echo"})).echo === "echo";
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * Checks if the api is available
+ * @returns true if the api is available, otherwise false
+ */
+ export async function isComponentAvailable(): Promise<boolean> {
+	const api = await getCCIMSApi();
+	const componentId = getComponentId();
+	if (!componentId) {
+		return false;
+	}
+
+	try {
+		return (await api.getComponentInternal({ id: componentId }))?.node != undefined;
+	} catch {
+		return false;
+	}
 }

@@ -940,6 +940,14 @@ export type ComponentFilter = {
   createdAfter?: Maybe<Scalars['Date']>;
   /** The Component must have been created __before__ the given date (inclusive) */
   createdBefore?: Maybe<Scalars['Date']>;
+  /** The name of the Component must match the given RegEx */
+  name?: Maybe<Scalars['String']>;
+  /** The __RegEx__ the description of the Component needs to match */
+  description?: Maybe<Scalars['String']>;
+  /** The last update to this Component must have occurred __after__ the given date (inclusive) */
+  lastUpdatedAfter?: Maybe<Scalars['Date']>;
+  /** The last update to this Component must have occurred __before__ the given date (inclusive) */
+  lastUpdatedBefore?: Maybe<Scalars['Date']>;
   /** The components repositoryURL must match the given __RegEx__ */
   repositoryURL?: Maybe<Scalars['String']>;
   /** The IMS type of a component must be one of the given ones */
@@ -1024,6 +1032,14 @@ export type ComponentInterfaceFilter = {
   createdAfter?: Maybe<Scalars['Date']>;
   /** The ComponentInterface must have been created __before__ the given date (inclusive) */
   createdBefore?: Maybe<Scalars['Date']>;
+  /** The name of the ComponentInterface must match the given RegEx */
+  name?: Maybe<Scalars['String']>;
+  /** The __RegEx__ the description of the ComponentInterface needs to match */
+  description?: Maybe<Scalars['String']>;
+  /** The last update to this ComponentInterface must have occurred __after__ the given date (inclusive) */
+  lastUpdatedAfter?: Maybe<Scalars['Date']>;
+  /** The last update to this ComponentInterface must have occurred __before__ the given date (inclusive) */
+  lastUpdatedBefore?: Maybe<Scalars['Date']>;
   /** The __RegEx__ the type of the ComponentInterface needs to match */
   type?: Maybe<Scalars['String']>;
   /** If given, only interfaces, that are __offered by__ one of the components with the IDs given can match the given filter */
@@ -2356,6 +2372,14 @@ export type IssueLocationFilter = {
   createdAfter?: Maybe<Scalars['Date']>;
   /** The IssueLocation must have been created __before__ the given date (inclusive) */
   createdBefore?: Maybe<Scalars['Date']>;
+  /** The name of the IssueLocation must match the given RegEx */
+  name?: Maybe<Scalars['String']>;
+  /** The __RegEx__ the description of the IssueLocation needs to match */
+  description?: Maybe<Scalars['String']>;
+  /** The last update to this IssueLocation must have occurred __after__ the given date (inclusive) */
+  lastUpdatedAfter?: Maybe<Scalars['Date']>;
+  /** The last update to this IssueLocation must have occurred __before__ the given date (inclusive) */
+  lastUpdatedBefore?: Maybe<Scalars['Date']>;
 };
 
 /** A page of multiple IssueLocations */
@@ -4719,6 +4743,34 @@ export type GetComponentInternalQuery = (
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
 );
 
+export type SearchComponentsInternalQueryVariables = Exact<{
+  name?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  maxAmount: Scalars['Int'];
+}>;
+
+
+export type SearchComponentsInternalQuery = (
+  { __typename?: 'Query' }
+  & { components?: Maybe<(
+    { __typename?: 'ComponentPage' }
+    & { nodes?: Maybe<Array<Maybe<(
+      { __typename?: 'Component' }
+      & Pick<Component, 'id' | 'name' | 'description'>
+    )>>> }
+  )> }
+);
+
+export type EchoQueryVariables = Exact<{
+  input: Scalars['String'];
+}>;
+
+
+export type EchoQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'echo'>
+);
+
 export type GetIssueInternalQueryVariables = Exact<{
   id: Scalars['ID'];
 }>;
@@ -4944,6 +4996,25 @@ export const GetComponentInternalDocument = gql`
   }
 }
     `;
+export const SearchComponentsInternalDocument = gql`
+    query searchComponentsInternal($name: String, $description: String, $maxAmount: Int!) {
+  components(
+    first: $maxAmount
+    filterBy: {name: $name, description: $description}
+  ) {
+    nodes {
+      id
+      name
+      description
+    }
+  }
+}
+    `;
+export const EchoDocument = gql`
+    query echo($input: String!) {
+  echo(input: $input)
+}
+    `;
 export const GetIssueInternalDocument = gql`
     query getIssueInternal($id: ID!) {
   node(id: $id) {
@@ -5078,6 +5149,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     getComponentInternal(variables: GetComponentInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetComponentInternalQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetComponentInternalQuery>(GetComponentInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getComponentInternal');
+    },
+    searchComponentsInternal(variables: SearchComponentsInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchComponentsInternalQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchComponentsInternalQuery>(SearchComponentsInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchComponentsInternal');
+    },
+    echo(variables: EchoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<EchoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<EchoQuery>(EchoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'echo');
     },
     getIssueInternal(variables: GetIssueInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetIssueInternalQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetIssueInternalQuery>(GetIssueInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getIssueInternal');

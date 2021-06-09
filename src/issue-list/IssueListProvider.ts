@@ -4,7 +4,7 @@ import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { getIssueIcon } from "../data/IconProvider";
 import { Issue } from "../generated/graphql";
-import { getComponentId } from "../settings";
+import { getComponentId } from "../data/settings";
 
 /**
  * View used to display a tree of all Issues
@@ -50,7 +50,7 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 			return new Promise(resolve => resolve(undefined));
 		} else {
 			const api = await getCCIMSApi();
-			const componentId = await getComponentId();
+			const componentId =  getComponentId();
 			if (componentId != null) {
 				return await api.getIssues(componentId);
 			} else {

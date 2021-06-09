@@ -15,3 +15,16 @@ query getComponentInternal($id: ID!) {
     }
   }
 }
+
+query searchComponentsInternal($name: String, $description: String, $maxAmount: Int!) {
+  components(first: $maxAmount, filterBy: {
+    name: $name
+    description: $description
+  }) {
+    nodes {
+      id
+      name
+      description
+    }
+  }
+}
