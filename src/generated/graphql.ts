@@ -3585,8 +3585,10 @@ export type Query = {
   node?: Maybe<Node>;
   /** Returns the string which is given as input */
   echo?: Maybe<Scalars['String']>;
-  /** Requests all projects within the current ccims instance mathcing the `filterBy` */
+  /** Requests all projects within the current ccims instance matching the `filterBy` */
   projects?: Maybe<ProjectPage>;
+  /** Requests all components within the current ccims instance matching the `filterBy` */
+  components?: Maybe<ComponentPage>;
   /** Returns the user from which the PAI is currently being accessed */
   currentUser?: Maybe<User>;
   /**
@@ -3616,6 +3618,16 @@ export type QueryProjectsArgs = {
   after?: Maybe<Scalars['String']>;
   before?: Maybe<Scalars['String']>;
   filterBy?: Maybe<ProjectFilter>;
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+};
+
+
+/** All queries for requesting stuff */
+export type QueryComponentsArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  filterBy?: Maybe<ComponentFilter>;
   first?: Maybe<Scalars['Int']>;
   last?: Maybe<Scalars['Int']>;
 };
@@ -4716,7 +4728,7 @@ export type GetIssueInternalQuery = (
   { __typename?: 'Query' }
   & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | { __typename?: 'Component' } | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | (
     { __typename?: 'Issue' }
-    & Pick<Issue, 'title' | 'body' | 'bodyRendered' | 'isOpen' | 'category'>
+    & Pick<Issue, 'title' | 'body' | 'isOpen' | 'category'>
     & { linksToIssues?: Maybe<(
       { __typename?: 'IssuePage' }
       & { nodes?: Maybe<Array<Maybe<(
@@ -4761,7 +4773,7 @@ export type CreateIssueMutation = (
     { __typename?: 'CreateIssuePayload' }
     & { issue?: Maybe<(
       { __typename?: 'Issue' }
-      & Pick<Issue, 'id' | 'title' | 'body' | 'bodyRendered'>
+      & Pick<Issue, 'id' | 'title' | 'body'>
     )> }
   )> }
 );
@@ -4792,10 +4804,10 @@ export type UpdateIssueBodyMutation = (
     { __typename?: 'UpdateCommentPayload' }
     & { comment?: Maybe<(
       { __typename?: 'Issue' }
-      & Pick<Issue, 'bodyRendered'>
+      & Pick<Issue, 'body'>
     ) | (
       { __typename?: 'IssueComment' }
-      & Pick<IssueComment, 'bodyRendered'>
+      & Pick<IssueComment, 'body'>
     )> }
   )> }
 );
@@ -4938,7 +4950,6 @@ export const GetIssueInternalDocument = gql`
     ... on Issue {
       title
       body
-      bodyRendered
       isOpen
       category
       linksToIssues {
@@ -4981,7 +4992,6 @@ export const CreateIssueDocument = gql`
       id
       title
       body
-      bodyRendered
     }
   }
 }
@@ -4997,7 +5007,7 @@ export const UpdateIssueBodyDocument = gql`
     mutation updateIssueBody($id: ID!, $body: String!) {
   updateComment(input: {comment: $id, body: $body}) {
     comment {
-      bodyRendered
+      body
     }
   }
 }

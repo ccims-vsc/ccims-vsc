@@ -3,7 +3,6 @@ query getIssueInternal($id: ID!) {
     ...on Issue {
       title
       body
-      bodyRendered
       isOpen
       category
       linksToIssues {
@@ -49,7 +48,6 @@ mutation createIssue($title: String!, $body: String!, $component: ID!) {
       id
       title
       body
-      bodyRendered
     }
   }
 }
@@ -69,7 +67,7 @@ mutation updateIssueBody($id: ID!, $body: String!) {
     body: $body
   }) {
     comment {
-      bodyRendered
+      body
     }
   }
 }
