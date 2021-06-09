@@ -23,8 +23,8 @@ export class SelectComponentQuickPick {
 	public constructor() {
 		this.quickpick = vscode.window.createQuickPick();
 		this.quickpick.placeholder = "Search for component";
-		this.quickpick.title = "Select component";
 		this.quickpick.ignoreFocusOut = true;
+		this.quickpick.matchOnDescription = true;
 		this.quickpick.onDidChangeValue(value => {
 			this._onDidChangeValue(value);
 		});
@@ -60,8 +60,7 @@ export class SelectComponentQuickPick {
 				this.quickpick.items = components.map(component => ({
 					label: component.name,
 					id: component.id,
-					description: component.description,
-					detail: component.description
+					description: component.description
 				}));
 			}
 		} catch(e) {
