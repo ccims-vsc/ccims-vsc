@@ -19,7 +19,8 @@
 		"onCommand:ccims.reloadIssueList",
 		"onCommand:ccims.checkComponentStatus",
 		"onCommand:ccims.checkApiStatus",
-		"onCommand:ccims.selectComponent"
+		"onCommand:ccims.selectComponent",
+		"onCommand:ccims.newIssue"
 	],
 	"repository": {
 		"type": "git",
@@ -90,12 +91,23 @@
 				"command": "ccims.selectComponent",
 				"title": "Select component",
 				"category": "CCIMS"
+			},
+			{
+				"command": "ccims.newIssue",
+				"title": "Create new issue",
+				"category": "CCIMS",
+				"icon": "$(add)"
 			}
 		],
 		"menus": {
 			"view/title": [
 				{
 					"command": "ccims.reloadIssueList",
+					"when": "view == ccims.issueList",
+					"group": "navigation"
+				},
+				{
+					"command": "ccims.newIssue",
 					"when": "view == ccims.issueList",
 					"group": "navigation"
 				}
@@ -115,12 +127,12 @@
 			{
 				"view": "ccims.issueList",
 				"contents": "There is no component configured\n[Select component](command:ccims.selectComponent)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "workbenchState != empty && !config.ccims.componentId && ccims.initialized"
+				"when": "workbenchState != empty && ccims.apiAvailable && !config.ccims.componentId && ccims.initialized"
 			},
 			{
 				"view": "ccims.issueList",
 				"contents": "The currently configured component does not exist or is not accessible\n[Select component](command:ccims.selectComponent)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "config.ccims.componentId && !ccims.componentAvailable && ccims.initialized"
+				"when": "config.ccims.componentId && ccims.apiAvailable && !ccims.componentAvailable && ccims.initialized"
 			},
 			{
 				"view": "ccims.issueList",

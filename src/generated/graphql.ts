@@ -4780,7 +4780,7 @@ export type GetIssueInternalQuery = (
   { __typename?: 'Query' }
   & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | { __typename?: 'Component' } | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | (
     { __typename?: 'Issue' }
-    & Pick<Issue, 'title' | 'body' | 'isOpen' | 'category'>
+    & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
     & { linksToIssues?: Maybe<(
       { __typename?: 'IssuePage' }
       & { nodes?: Maybe<Array<Maybe<(
@@ -5019,6 +5019,7 @@ export const GetIssueInternalDocument = gql`
     query getIssueInternal($id: ID!) {
   node(id: $id) {
     ... on Issue {
+      id
       title
       body
       isOpen

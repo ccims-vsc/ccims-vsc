@@ -8,5 +8,6 @@ export enum CCIMSCommandType {
 	CHECK_COMPONENT_STATUS = "ccims.checkComponentStatus",
 	API_URL_CHANGED = "ccims.apiUrlChanged",
 	COMPONENT_ID_CHANGED = "ccims.componentIdChanged",
-	SELECT_COMPONENT = "ccims.selectComponent"
+	SELECT_COMPONENT = "ccims.selectComponent",
+	NEW_ISSUE = "ccims.newIssue"
 }

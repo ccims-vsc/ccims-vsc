@@ -1,6 +1,7 @@
 query getIssueInternal($id: ID!) {
   node(id: $id) {
     ...on Issue {
+      id
       title
       body
       isOpen

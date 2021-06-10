@@ -1,24 +1,23 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { CCIMSCommands } from "../commands/CCIMSCommands";
-import { IssueViewCommand } from "./communication/IssueViewCommand";
-import { IssueViewCommandType } from "./communication/IssueViewCommandType";
+import { IssueViewMessage } from "./communication/IssueViewMessage";
+import { IssueViewMessageType } from "./communication/IssueViewMessageType";
 
 /**
- * Type for the CommandListener
+ * Type for the MessageListener
  */
-type CommandListener = (command: IssueViewCommand) => void;
+type MessageListener = (message: IssueViewMessage) => void;
 
-export class IssueViewProviderBase implements vscode.WebviewViewProvider {
+export abstract class IssueViewProviderBase implements vscode.WebviewViewProvider {
 
 	public static readonly viewType = "ccims.issueView";
 
-	private _view?: vscode.WebviewView;
+	protected view?: vscode.WebviewView;
 
 	/**
-	 * map of command listeners
+	 * map of message listeners
 	 */
-	private readonly _commandListeners: Map<IssueViewCommandType, CommandListener> = new Map();
+	private readonly _messageListeners: Map<IssueViewMessageType, MessageListener> = new Map();
 
 	protected constructor(
 		private readonly _extensionUri: vscode.Uri
@@ -29,12 +28,11 @@ export class IssueViewProviderBase implements vscode.WebviewViewProvider {
 		context: vscode.WebviewViewResolveContext,
 		_token: vscode.CancellationToken,
 	) {
-		this._view = webviewView;
+		this.view = webviewView;
 
 		webviewView.webview.options = {
 			// Allow scripts in the webview
 			enableScripts: true,
-
 			localResourceRoots: [
 				this._extensionUri
 			]
@@ -43,13 +41,19 @@ export class IssueViewProviderBase implements vscode.WebviewViewProvider {
 		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
 		webviewView.webview.onDidReceiveMessage(data => {
-			if (!this._commandListeners.has(data.type)) {
-				throw new Error(`Unknown command type: ${data.type}`);
+			if (!this._messageListeners.has(data.type)) {
+				throw new Error(`Unknown message type: ${data.type}`);
 			}
-			this._commandListeners.get(data.type)!(data);
-		})
+			this._messageListeners.get(data.type)!(data);
+		});
 
+		this.postResolveWebView();
 	}
+
+	/**
+	 * Called after the WebView has been resolved
+	 */
+	protected abstract postResolveWebView(): void;
 
 	/**
 	 * Loads and transforms the HTML for the Issue web view
@@ -71,31 +75,31 @@ export class IssueViewProviderBase implements vscode.WebviewViewProvider {
 	 * @returns A string which represents the resource
 	 */
 	protected getResourceUri(resource: string): string {
-		if (!this._view) {
+		if (!this.view) {
 			throw new Error("view not created yet");
 		}
-		return this._view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "res", resource)).toString();
+		return this.view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "res", resource)).toString();
 	}
 
 	/**
-	 * Sends a command to the issue web view
-	 * @param command the command to send to the web view
+	 * Sends a message to the issue web view
+	 * @param message the message to send to the web view
 	 */
-	protected postCommand(command: IssueViewCommand): void {
-		this._view?.webview?.postMessage(command);
+	protected postMessage(message: IssueViewMessage): void {
+		this.view?.webview?.postMessage(message);
 	}
 
 	/**
-	 * Adds a listener for a specific command type
-	 * Warning: there can only be one listener foreach command type
+	 * Adds a listener for a specific message type
+	 * Warning: there can only be one listener foreach message type
 	 * @param type the type for which the listener is registered
-	 * @param listener the listener which is called when a command of the specified type is received
-	 * @throws if a second listener is registered for the same command type
+	 * @param listener the listener which is called when a message of the specified type is received
+	 * @throws if a second listener is registered for the same message type
 	 */
-	protected addCommandListener(type: IssueViewCommandType, listener: CommandListener): void {
-		if (this._commandListeners.has(type)) {
+	protected setMessageListener(type: IssueViewMessageType, listener: MessageListener): void {
+		if (this._messageListeners.has(type)) {
 			throw new Error("There is already a listener for this type");
 		}
-		this._commandListeners.set(type, listener);
+		this._messageListeners.set(type, listener);
 	}
 }

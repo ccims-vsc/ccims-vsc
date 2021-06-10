@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Component, getSdk, Issue, Sdk, SearchComponentsInternalDocument } from "../generated/graphql";
+import { Component, getSdk, Issue, Sdk, SearchComponentsInternalDocument, UpdateIssueBodyDocument } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
 import { getIssueIcon } from "./IconProvider";
 import { getComponentId } from "./settings";
@@ -50,6 +50,16 @@ function getSdkWrapper(sdk: Sdk) {
 				components.push(...descriptionComponents);
 			}
 			return components;
+		},
+		/**
+		 * Updates both the id and the body of an Issue
+		 * @param id the id of the Issue to update
+		 * @param title the new title for the issue
+		 * @param body the new body for the issue
+		 */
+		async updateIssue(id: string, title: string, body: string): Promise<void> {
+			await this.updateIssueTitle({ id: id, title: title });
+			await this.updateIssueBody({ id: id, body: body });
 		}
 	}
 }

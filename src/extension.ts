@@ -29,7 +29,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			IssueViewProvider.viewType,
-			new IssueViewProvider(context.extensionUri, commands)
+			new IssueViewProvider(context.extensionUri, commands),
+			{
+				webviewOptions: {
+					retainContextWhenHidden: true
+				}
+			}
 		)
 	);
 	
@@ -57,7 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
  * @param milliseconds the delay of the timer
  */
 function _scheduleTimer(milliseconds: number): void {
-	setTimeout(() => {
+	setInterval(() => {
 		if (!getContext(CCIMSContext.API_AVAILABLE)) {
 			vscode.commands.executeCommand(CCIMSCommandType.CHECK_API_STATUS);
 		}

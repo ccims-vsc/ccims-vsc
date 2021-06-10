@@ -50,6 +50,12 @@ export class CCIMSCommands {
 	public readonly selectComponentCommand: CCIMSCommand;
 
 	/**
+	 * Command executed to create a new issue
+	 * expects no parameters
+	 */
+	public readonly newIssueCommand: CCIMSCommand;
+
+	/**
 	 * Creates all ccims extension commands
 	 * Note: only one instance of this class can be created
 	 * @param context the context used to create the commands
@@ -62,5 +68,6 @@ export class CCIMSCommands {
 		this.apiUrlChangedCommand = new CCIMSCommand(CCIMSCommandType.API_URL_CHANGED, context);
 		this.componentIdChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPONENT_ID_CHANGED, context);
 		this.selectComponentCommand = new CCIMSCommand(CCIMSCommandType.SELECT_COMPONENT, context);
+		this.newIssueCommand = new CCIMSCommand(CCIMSCommandType.NEW_ISSUE, context);
 	}
 }
