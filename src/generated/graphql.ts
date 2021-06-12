@@ -4815,6 +4815,7 @@ export type GetIssueInternalQuery = (
 export type CreateIssueMutationVariables = Exact<{
   title: Scalars['String'];
   body: Scalars['String'];
+  category?: Maybe<IssueCategory>;
   component: Scalars['ID'];
 }>;
 
@@ -4860,6 +4861,55 @@ export type UpdateIssueBodyMutation = (
     ) | (
       { __typename?: 'IssueComment' }
       & Pick<IssueComment, 'body'>
+    )> }
+  )> }
+);
+
+export type UpdateIssueCategoryMutationVariables = Exact<{
+  id: Scalars['ID'];
+  category: IssueCategory;
+}>;
+
+
+export type UpdateIssueCategoryMutation = (
+  { __typename?: 'Mutation' }
+  & { changeIssueCategory?: Maybe<(
+    { __typename?: 'ChangeIssueCategoryPayload' }
+    & { issue?: Maybe<(
+      { __typename?: 'Issue' }
+      & Pick<Issue, 'category'>
+    )> }
+  )> }
+);
+
+export type CloseIssueMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type CloseIssueMutation = (
+  { __typename?: 'Mutation' }
+  & { closeIssue?: Maybe<(
+    { __typename?: 'CloseIssuePayload' }
+    & { issue?: Maybe<(
+      { __typename?: 'Issue' }
+      & Pick<Issue, 'isOpen'>
+    )> }
+  )> }
+);
+
+export type ReopenIssueMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type ReopenIssueMutation = (
+  { __typename?: 'Mutation' }
+  & { reopenIssue?: Maybe<(
+    { __typename?: 'ReopenIssuePayload' }
+    & { issue?: Maybe<(
+      { __typename?: 'Issue' }
+      & Pick<Issue, 'isOpen'>
     )> }
   )> }
 );
@@ -5058,8 +5108,10 @@ export const GetIssueInternalDocument = gql`
 }
     `;
 export const CreateIssueDocument = gql`
-    mutation createIssue($title: String!, $body: String!, $component: ID!) {
-  createIssue(input: {title: $title, body: $body, components: [$component]}) {
+    mutation createIssue($title: String!, $body: String!, $category: IssueCategory, $component: ID!) {
+  createIssue(
+    input: {title: $title, body: $body, category: $category, components: [$component]}
+  ) {
     issue {
       id
       title
@@ -5080,6 +5132,33 @@ export const UpdateIssueBodyDocument = gql`
   updateComment(input: {comment: $id, body: $body}) {
     comment {
       body
+    }
+  }
+}
+    `;
+export const UpdateIssueCategoryDocument = gql`
+    mutation updateIssueCategory($id: ID!, $category: IssueCategory!) {
+  changeIssueCategory(input: {issue: $id, newCategory: $category}) {
+    issue {
+      category
+    }
+  }
+}
+    `;
+export const CloseIssueDocument = gql`
+    mutation closeIssue($id: ID!) {
+  closeIssue(input: {issue: $id}) {
+    issue {
+      isOpen
+    }
+  }
+}
+    `;
+export const ReopenIssueDocument = gql`
+    mutation reopenIssue($id: ID!) {
+  reopenIssue(input: {issue: $id}) {
+    issue {
+      isOpen
     }
   }
 }
@@ -5168,6 +5247,15 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     updateIssueBody(variables: UpdateIssueBodyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateIssueBodyMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateIssueBodyMutation>(UpdateIssueBodyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateIssueBody');
+    },
+    updateIssueCategory(variables: UpdateIssueCategoryMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateIssueCategoryMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateIssueCategoryMutation>(UpdateIssueCategoryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateIssueCategory');
+    },
+    closeIssue(variables: CloseIssueMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CloseIssueMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CloseIssueMutation>(CloseIssueDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'closeIssue');
+    },
+    reopenIssue(variables: ReopenIssueMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ReopenIssueMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ReopenIssueMutation>(ReopenIssueDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'reopenIssue');
     },
     addLabelToIssue(variables: AddLabelToIssueMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddLabelToIssueMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddLabelToIssueMutation>(AddLabelToIssueDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'addLabelToIssue');

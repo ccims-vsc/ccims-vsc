@@ -1,3 +1,4 @@
+import { IssueDiff } from "./IssueDiff";
 import { IssueViewMessage } from "./IssueViewMessage";
 import { IssueViewMessageType } from "./IssueViewMessageType";
 
@@ -7,6 +8,5 @@ import { IssueViewMessageType } from "./IssueViewMessageType";
 export interface UpdateIssueMessage extends IssueViewMessage {
 	type: IssueViewMessageType.UPDATE_ISSUE,
 	id: string,
-	title: string,
-	body: string
+	diff: IssueDiff
 }

@@ -1,7 +1,7 @@
 import { IssueViewProviderBase } from "./IssueViewProviderBase";
 import * as vscode from "vscode";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
-import { getCCIMSApi } from "../data/CCIMSApi";
+import { CCIMSApi, getCCIMSApi } from "../data/CCIMSApi";
 import { IssueViewMessageType } from "./communication/IssueViewMessageType";
 import { OpenIssueMessage } from "./communication/OpenIssueMessage";
 import { ThemeChangedMessage } from "./communication/ThemeChangedMessage";
@@ -9,6 +9,7 @@ import { CreateIssueMessage } from "./communication/CreateIssueMessage";
 import { getComponentId } from "../data/settings";
 import { UpdateIssueMessage } from "./communication/UpdateIssueMessage";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { IssueDiff } from "./communication/IssueDiff";
 
 export class IssueViewProvider extends IssueViewProviderBase {
 	constructor(extensionUri: vscode.Uri, commands: CCIMSCommands) {
@@ -41,27 +42,91 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	private _initListeners(): void {
 		this.setMessageListener(IssueViewMessageType.CREATE_ISSUE, async message => {
 			const createIssueMessage = message as CreateIssueMessage;
-			const api = await getCCIMSApi();
-			const component = getComponentId();
-			if (component != null) {
-				const mutationResult = await api.createIssue({
-					component: component, 
-					title: createIssueMessage.title,
-					body: createIssueMessage.body
-				});
-				vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, mutationResult.createIssue?.issue?.id);
-				vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
-			} else {
-				//TODO error handling
-			}
+			this._createIssue(createIssueMessage.diff);
 		});
 
 		this.setMessageListener(IssueViewMessageType.UPDATE_ISSUE, async message => {
 			const updateIssueMessage = message as UpdateIssueMessage;
-			const api = await getCCIMSApi();
-			await api.updateIssue(updateIssueMessage.id, updateIssueMessage.title, updateIssueMessage.body);
-			vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+			this._updateIssue(updateIssueMessage.diff, updateIssueMessage.id);
 		});
+	}
+
+	/**
+	 * Creates a new Issue based on the provided IssueDiff
+	 * @param diff the IssueDiff which defines the new image
+	 */
+	private async _createIssue(diff: IssueDiff): Promise<void> {
+		const api = await getCCIMSApi();
+		const component = getComponentId();
+
+		if (component != null) {
+			const result = await api.createIssue({
+				component: component,
+				title: diff.title ?? "",
+				body: diff.body ?? "",
+				category: diff.category
+			});
+			const id = result.createIssue?.issue?.id;
+			if (id != undefined) {
+				await this._updateRemainingIssue(diff, id, api);
+				vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result.createIssue?.issue?.id);
+				vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+			} else {
+				//TODO error handling
+			}
+		} else {
+			//TODO error handling
+		}
+	}
+
+	/**
+	 * Updates an existing Issue based on the provided IssueDiff
+	 * @param diff the IssueDiff which defines how to update the Issue
+	 * @param id the id of the Issue to update
+	 */
+	private async _updateIssue(diff: IssueDiff, id: string): Promise<void> {
+		const api = await getCCIMSApi();
+		if (diff.title != undefined) {
+			await api.updateIssueTitle({
+				id: id,
+				title: diff.title
+			});
+		}
+
+		if (diff.body != undefined) {
+			await api.updateIssueBody({
+				id: id,
+				body: diff.body
+			});
+		}
+
+		if (diff.category != undefined) {
+			await api.updateIssueCategory({
+				id: id,
+				category: diff.category
+			});
+		}
+
+		await this._updateRemainingIssue(diff, id, api);
+
+		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+	}
+
+	/**
+	 * Updates the remaining properties of an Issue based on an IssueDiff
+	 * does not update body, title or category
+	 * @param diff the IssueDiff which defines the update
+	 * @param id the id of the Issue to update
+	 * @param api used to update the Issue
+	 */
+	private async _updateRemainingIssue(diff: IssueDiff, id: string, api: CCIMSApi): Promise<void> {
+		if (diff.isOpen != undefined) {
+			if (diff.isOpen) {
+				await api.reopenIssue({ id: id });
+			} else {
+				await api.closeIssue({ id: id });
+			}
+		}
 	}
 
 	/**

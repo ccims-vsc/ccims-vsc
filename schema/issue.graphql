@@ -39,10 +39,11 @@ query getIssueInternal($id: ID!) {
   }
 }
 
-mutation createIssue($title: String!, $body: String!, $component: ID!) {
+mutation createIssue($title: String!, $body: String!, $category: IssueCategory, $component: ID!) {
   createIssue(input: {
     title: $title
     body: $body
+    category: $category
     components: [$component]
   }) {
     issue {
@@ -69,6 +70,37 @@ mutation updateIssueBody($id: ID!, $body: String!) {
   }) {
     comment {
       body
+    }
+  }
+}
+
+mutation updateIssueCategory($id: ID!, $category: IssueCategory!) {
+  changeIssueCategory(input: {
+    issue: $id
+    newCategory: $category
+  }) {
+    issue {
+      category
+    }
+  }
+}
+
+mutation closeIssue($id: ID!) {
+  closeIssue(input: {
+    issue: $id
+  }) {
+    issue {
+      isOpen
+    }
+  }
+}
+
+mutation reopenIssue($id: ID!) {
+  reopenIssue(input: {
+    issue: $id
+  }) {
+    issue {
+      isOpen
     }
   }
 }

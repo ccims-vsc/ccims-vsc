@@ -1,3 +1,4 @@
+import { IssueDiff } from "./IssueDiff";
 import { IssueViewMessage } from "./IssueViewMessage";
 import { IssueViewMessageType } from "./IssueViewMessageType";
 
@@ -6,6 +7,5 @@ import { IssueViewMessageType } from "./IssueViewMessageType";
  */
 export interface CreateIssueMessage extends IssueViewMessage {
 	type: IssueViewMessageType.CREATE_ISSUE,
-	title: string,
-	body: string
+	diff: IssueDiff
 }

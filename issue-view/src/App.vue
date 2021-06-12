@@ -1,33 +1,53 @@
 <template>
-    <div id="title-container" v-if="issue != null">
-        <div 
-            class="codicon codicon-type-hierarchy"
-            style="align-self: center"
-        />
-        <input 
-            id="title-input" 
-            class="flex-grow"
-            v-model="issue.title"
-            :disabled="mode == 'read'"
-            placeholder="Enter Title"
-        />
-        <button 
-            class="codicon"
-            :class="mode == 'read' ? 'codicon-edit' : 'codicon-save'"
-            style="width: 42px"
-            @click="updateMode(mode == 'read' ? 'edit' : 'read')"
-        />
-    </div>
-    <div id="body-container">
-        <div 
-            v-html="compiledBody"
-            v-if="mode == 'read' && issue != null"
-        />
-        <div :style="(mode == 'read' || issue == null) ? 'height: 0px; visibility: hidden' : ''">
-            <div
-                id="md-editor"
-                :style="`height: ${mdHeight}px`"
+    <div :class="(issue == null) ? 'collapsed' : ''">
+        <div id="title-container" v-if="issue != null">
+            <div 
+                class="codicon codicon-type-hierarchy"
+                style="align-self: center"
             />
+            <input 
+                id="title-input" 
+                class="flex-grow"
+                v-model="issue.title"
+                :disabled="mode == 'read'"
+                placeholder="Enter Title"
+            />
+            <button 
+                class="codicon"
+                :class="mode == 'read' ? 'codicon-edit' : 'codicon-save'"
+                style="width: 42px"
+                @click="updateMode(mode == 'read' ? 'edit' : 'read')"
+            />
+        </div>
+        <div id="body-container">
+            <div 
+                v-html="compiledBody"
+                v-if="mode == 'read' && issue != null"
+            />
+            <div :class="(mode == 'read') ? 'collapsed' : ''">
+                <div
+                    id="md-editor"
+                    :style="`height: ${mdHeight}px`"
+                />
+            </div>
+        </div>
+        <div id="category-container">
+            <vscode-single-select 
+                id="category-select" 
+                class="half-row"
+                @vsc-change="onIssueCategoryChanged($event.detail.selectedIndex)"
+            >
+                <vscode-option description="Issue describes an error, flaw or fault">Bug</vscode-option>
+                <vscode-option description="Issue describes a functionality that is to be implemented">Feature request</vscode-option>
+                <vscode-option description="Not classified or not fitting in any other category">Unclassified</vscode-option>
+            </vscode-single-select>
+            <button 
+                @click="onIssueClose" 
+                v-if="issue != null && mode != 'new'"
+                class="half-row"
+            >
+                {{ issue.isOpen ? "Close" : "Reopen" }}
+            </button>
         </div>
     </div>
 </template>
@@ -35,7 +55,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { VscodeSearchSelect } from "./components/VscodeSearchSelect";
-import { Issue } from "../../src/generated/graphql";
+import { Issue, IssueCategory } from "../../src/generated/graphql";
 import { IssueViewMessage } from "../../src/issue-view/communication/IssueViewMessage";
 import { OpenIssueMessage } from "../../src/issue-view/communication/OpenIssueMessage";
 import { ThemeChangedMessage } from "../../src/issue-view/communication/ThemeChangedMessage";
@@ -47,9 +67,20 @@ import emoji from 'markdown-it-emoji'
 import { vscode } from "./main";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
+import { VscodeSingleSelect } from "@bendera/vscode-webview-elements";
+import { VscodeOption } from "@bendera/vscode-webview-elements";
+import { Watch } from "vue-property-decorator"
+import { IssueDiff } from "../../src/issue-view/communication/IssueDiff";
+
 
 if (!customElements.get("vscode-search-select")) {
     customElements.define("vscode-search-select", VscodeSearchSelect)
+}
+if (!customElements.get("vscode-single-select")) {
+    customElements.define("vscode-single-select", VscodeSingleSelect);
+}
+if (!customElements.get("vscode-option")) {
+    customElements.define("vscode-option", VscodeOption);
 }
 
 @Options({
@@ -120,7 +151,8 @@ export default class App extends Vue {
                 this.updateMode("read", false); //TODO: better implementation which shows an error message because there are unsafed changes
                 this.issue = {
                     title: "",
-                    body: ""
+                    body: "",
+                    category: IssueCategory.Unclassified
                 };
                 this.updateMode("new");
                 break;
@@ -138,7 +170,7 @@ export default class App extends Vue {
     /**
      * Updates the current 
      */
-    private updateMode(newMode: "new" | "edit" | "read", save = true) {
+    private updateMode(newMode: "new" | "edit" | "read", save = true): void {
         if (newMode != 'read') {
             if (this.mdEditor == undefined) {
                 this.initMonaco();
@@ -150,22 +182,45 @@ export default class App extends Vue {
             }
             if (this.issue != null && save) {
                 if (this.mode == "new") {
-                    this.postMessage({
-                        type: IssueViewMessageType.CREATE_ISSUE,
-                        title: this.issue.title,
-                        body: this.issue.body
-                    } as CreateIssueMessage);
+                    this.sendCreateIssueMessage();
                 } else if (this.mode == "edit") {
-                    this.postMessage({
-                        type: IssueViewMessageType.UPDATE_ISSUE,
+                    this.sendUpdateDiff({
                         title: this.issue.title,
                         body: this.issue.body,
-                        id: this.issue.id
-                    } as UpdateIssueMessage);
+                    });
                 }
             }
         }
         this.mode = newMode;
+    }
+
+    /**
+     * Sends a diff to update the current issue
+     */
+    private sendUpdateDiff(diff: IssueDiff): void {
+        if (this.issue?.id != null) {
+            this.postMessage({
+                type: IssueViewMessageType.UPDATE_ISSUE,
+                id: this.issue.id,
+                diff: diff
+            } as UpdateIssueMessage);
+        }
+    }
+
+    /**
+     * Sends a message to create a new Issue
+     */
+    private sendCreateIssueMessage(): void {
+        if (this.issue != null) {
+            this.postMessage({
+                type: IssueViewMessageType.CREATE_ISSUE,
+                diff: {
+                    title: this.issue.title,
+                    body: this.issue.body,
+                    category: this.issue.category
+                }
+            } as CreateIssueMessage);
+        }
     }
 
     /**
@@ -209,6 +264,90 @@ export default class App extends Vue {
         });
     }
 
+    /**
+     * Called to close or reopen the issue
+     * Can only be called if not in 'new' mode
+     */
+    private onIssueClose(): void {
+        if (this.mode == 'new') {
+            throw new Error("Cannot close / reopen issue in new mode")
+        }
+
+        if (this.issue != null) {
+            this.issue.isOpen = !this.issue.isOpen;
+            this.sendUpdateDiff({
+                isOpen: this.issue.isOpen
+            });
+        }
+    }
+
+    /**
+     * Called when the issue category changes
+     * @param index the index of the new IssueCategory
+     */
+    private onIssueCategoryChanged(index: number): void {
+        const newCategory: IssueCategory = this.issueCategoryOfIndex(index);
+        if (this.issue != null && this.issue.category != newCategory) {
+            this.issue.category = newCategory;
+            if (this.mode != 'new') {
+                this.sendUpdateDiff({
+                    category: newCategory
+                });
+            }
+        }
+    }
+
+    /**
+     * Gets the index of the IssueCategory of the current Issue
+     * returns null if Issue is null
+     */
+    private indexOfIssueCategory(): number | null {
+        console.log(this.issue?.category);
+        if (this.issue == null) {
+            return null;
+        }
+        switch(this.issue.category!) {
+            case IssueCategory.Bug: {
+                return 0;
+            }
+            case IssueCategory.FeatureRequest: {
+                return 1;
+            }
+            case IssueCategory.Unclassified: {
+                return 2;
+            }
+        }
+    }
+
+    private issueCategoryOfIndex(index: number): IssueCategory {
+        switch(index) {
+            case 0: {
+                return IssueCategory.Bug;
+            }
+            case 1: {
+                return IssueCategory.FeatureRequest;
+            }
+            case 2: {
+                return IssueCategory.Unclassified;
+            }
+            default: {
+                throw Error(`Unknown index of IssueCategory: ${index}`)
+            }
+        }
+    }
+
+    /**
+     * Called when issue changes
+     * Sets the correct value for all components that cannot update on their own
+     */
+    @Watch("issue")
+    private issueChanged(): void {
+        const categorySelect = document.getElementById("category-select") as VscodeSingleSelect | null;
+        if (categorySelect != null) {
+            categorySelect.selectedIndex = this.indexOfIssueCategory() ?? 0;
+            (categorySelect as any)._onSlotChange();
+        }
+    }
 }
 </script>
 
@@ -242,5 +381,24 @@ export default class App extends Vue {
 
     #md-editor {
         width: 100%;
+    }
+
+    #body-container {
+        margin-bottom: 10px;
+    }
+
+    .collapsed {
+        height: 0px;
+        visibility: hidden
+    }
+
+    #category-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .half-row {
+        width: calc(50% - 10px);
     }
 </style>
