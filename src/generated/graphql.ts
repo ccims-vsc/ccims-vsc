@@ -4817,6 +4817,9 @@ export type CreateIssueMutationVariables = Exact<{
   body: Scalars['String'];
   category?: Maybe<IssueCategory>;
   component: Scalars['ID'];
+  artifacts?: Maybe<Array<Scalars['ID']> | Scalars['ID']>;
+  assignees?: Maybe<Array<Scalars['ID']> | Scalars['ID']>;
+  labels?: Maybe<Array<Scalars['ID']> | Scalars['ID']>;
 }>;
 
 
@@ -5108,9 +5111,9 @@ export const GetIssueInternalDocument = gql`
 }
     `;
 export const CreateIssueDocument = gql`
-    mutation createIssue($title: String!, $body: String!, $category: IssueCategory, $component: ID!) {
+    mutation createIssue($title: String!, $body: String!, $category: IssueCategory, $component: ID!, $artifacts: [ID!], $assignees: [ID!], $labels: [ID!]) {
   createIssue(
-    input: {title: $title, body: $body, category: $category, components: [$component]}
+    input: {title: $title, body: $body, category: $category, components: [$component], labels: $labels, artifacts: $artifacts, assignees: $assignees}
   ) {
     issue {
       id

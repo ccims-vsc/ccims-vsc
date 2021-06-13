@@ -1,6 +1,10 @@
 <template>
     <div :class="(issue == null) ? 'collapsed' : ''">
-        <div id="title-container" v-if="issue != null">
+        <div 
+            id="title-container" 
+            v-if="issue != null"
+            class="container"
+        >
             <div 
                 class="codicon codicon-type-hierarchy"
                 style="align-self: center"
@@ -14,12 +18,15 @@
             />
             <button 
                 class="codicon"
-                :class="mode == 'read' ? 'codicon-edit' : 'codicon-save'"
+                :class="{'codicon-edit': mode == 'read', 'codicon-save': mode != 'read'}"
                 style="width: 42px"
                 @click="updateMode(mode == 'read' ? 'edit' : 'read')"
             />
         </div>
-        <div id="body-container">
+        <div 
+            id="body-container"
+            class="container"
+        >
             <div 
                 v-html="compiledBody"
                 v-if="mode == 'read' && issue != null"
@@ -31,7 +38,10 @@
                 />
             </div>
         </div>
-        <div id="category-container">
+        <div 
+            id="category-container"
+            class="container"
+        >
             <vscode-single-select 
                 id="category-select" 
                 class="half-row"
@@ -49,6 +59,25 @@
                 {{ issue.isOpen ? "Close" : "Reopen" }}
             </button>
         </div>
+        <tree-view-container 
+            v-slot="itemProps"
+            :contents="testContents"
+        >
+            <tree-view-item
+                :content="itemProps.content"
+                :defaultInput="itemProps.defaultInput"
+            >
+                <template #subcontent="subcontentProps">
+                    <tree-view-item
+                        :content="subcontentProps.content"
+                        :defaultInput="subcontentProps.defaultInput"
+                        :commands="[{icon: 'codicon-file', command: 'new'}]"
+                    >
+                    </tree-view-item>
+                </template>
+            </tree-view-item>
+        </tree-view-container>
+        <button @click="testContents[0].subcontents.push({id: 'new', label: 'newer'})">TEST</button>
     </div>
 </template>
 
@@ -71,6 +100,8 @@ import { VscodeSingleSelect } from "@bendera/vscode-webview-elements";
 import { VscodeOption } from "@bendera/vscode-webview-elements";
 import { Watch } from "vue-property-decorator"
 import { IssueDiff } from "../../src/issue-view/communication/IssueDiff";
+import TreeViewItem from "./components/TreeViewItem.vue";
+import TreeViewContainer from "./components/TreeViewContainer.vue";
 
 
 if (!customElements.get("vscode-search-select")) {
@@ -84,8 +115,37 @@ if (!customElements.get("vscode-option")) {
 }
 
 @Options({
+    components: {
+        TreeViewItem,
+        TreeViewContainer
+    }
 })
 export default class App extends Vue {
+
+
+    private testContents = [{
+        id: 'main',
+        label: 'main',
+        icon: 'codicon-file',
+        isCodiconIcon: true,
+        subcontents: [
+            {
+                id: '1', 
+                label: 'hello'
+            }, 
+            {
+                id: '2', 
+                label: 'world'
+            }
+        ]
+    }];
+
+
+
+
+
+
+
 
     /**
      * markdown instance used for rendering
@@ -106,11 +166,6 @@ export default class App extends Vue {
      * Monaco editor instance for body
      */
     private mdEditor: monaco.editor.IStandaloneCodeEditor | undefined;
-
-    /**
-     * The height of the mdEditor div
-     */
-    private mdHeight: number = 40;
 
     /**
      * gets the compiled body
@@ -251,17 +306,28 @@ export default class App extends Vue {
         this.mdEditor.onDidContentSizeChange(sizeChangedEvent => {
             if (sizeChangedEvent.contentHeightChanged && !ignoreEvent) {
                 ignoreEvent = true;
-                this.mdHeight = Math.max(40, sizeChangedEvent.contentHeight);
-                try {
-                    this.mdEditor?.layout({
-                        width: this.mdEditor.getLayoutInfo().width,
-                        height: this.mdHeight
-                    });
-                } finally {
-                    ignoreEvent = false;
-                }
+                this.layoutMonaco();
+                ignoreEvent = false;
             }
         });
+        window.addEventListener("resize", this.layoutMonaco);
+    }
+
+    /**
+     * Layouts the editor
+     */
+    private layoutMonaco(): void {
+        if (this.mdEditor != null) {
+            try {
+                this.mdEditor?.layout();
+                this.mdEditor?.layout({
+                    width: this.mdEditor.getLayoutInfo().width,
+                    height:  Math.max(40, this.mdEditor.getContentHeight())
+                });
+            } catch(e) {
+                console.error(e);
+            }
+        }
     }
 
     /**
@@ -362,6 +428,8 @@ export default class App extends Vue {
 
     body {
         background-color: var(--vscode-sideBar-background);
+        padding-left: 0px;
+        padding-right: 0px;
     }
 
     #title-input {
@@ -376,15 +444,10 @@ export default class App extends Vue {
 
     #title-container {
         display: flex;
-        margin-bottom: 10px;
     }
 
     #md-editor {
         width: 100%;
-    }
-
-    #body-container {
-        margin-bottom: 10px;
     }
 
     .collapsed {
@@ -400,5 +463,11 @@ export default class App extends Vue {
 
     .half-row {
         width: calc(50% - 10px);
+    }
+
+    .container {
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-bottom: 10px;
     }
 </style>

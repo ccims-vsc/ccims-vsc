@@ -64,11 +64,13 @@ export class IssueViewProvider extends IssueViewProviderBase {
 				component: component,
 				title: diff.title ?? "",
 				body: diff.body ?? "",
-				category: diff.category
+				category: diff.category,
+				labels: diff.addedLabels,
+				assignees: diff.addedAssignees,
+				artifacts: diff.addedArtifacts
 			});
 			const id = result.createIssue?.issue?.id;
 			if (id != undefined) {
-				await this._updateRemainingIssue(diff, id, api);
 				vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result.createIssue?.issue?.id);
 				vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 			} else {
@@ -107,19 +109,6 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			});
 		}
 
-		await this._updateRemainingIssue(diff, id, api);
-
-		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
-	}
-
-	/**
-	 * Updates the remaining properties of an Issue based on an IssueDiff
-	 * does not update body, title or category
-	 * @param diff the IssueDiff which defines the update
-	 * @param id the id of the Issue to update
-	 * @param api used to update the Issue
-	 */
-	private async _updateRemainingIssue(diff: IssueDiff, id: string, api: CCIMSApi): Promise<void> {
 		if (diff.isOpen != undefined) {
 			if (diff.isOpen) {
 				await api.reopenIssue({ id: id });
@@ -127,6 +116,8 @@ export class IssueViewProvider extends IssueViewProviderBase {
 				await api.closeIssue({ id: id });
 			}
 		}
+
+		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 	}
 
 	/**
