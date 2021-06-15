@@ -384,7 +384,7 @@ export class VscodeSearchSelect extends LitElement {
 		<input
           id="comboboxFace"
 		  class="combobox-input"
-          style="border: none"
+          style="border: none; width: 100%"
 		  spellcheck="false"
 		  type="text"
 		  .value=""

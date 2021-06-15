@@ -78,7 +78,7 @@
                     <tree-view-item
                         :content="labelProps.content"
                         :defaultInput="labelProps.defaultInput"
-                        :commands="[{icon: 'codicon-trash', command: 'delete'}]"
+                        :commands="[{icon: labelProps.content.id == 'new' ? 'codicon-close' : 'codicon-trash', command: 'delete'}]"
                         @command="onDeleteLabel(labelProps.content.id)"
                     >
                         <template #icon v-if="labelProps.content.id != 'new'">  
@@ -95,6 +95,7 @@
                         <template v-if="labelProps.content.id == 'new'">
                             <add-select 
                                 :options="labelOptions"
+                                placeholder="Search for label"
                                 @vsc-search-text="onSearchLabel($event.detail.value)"
                                 @focusout="onLabelLostFocus()"
                                 @vsc-change="onLabelSelected($event.detail.value)"
@@ -232,7 +233,6 @@ export default class App extends Vue {
                 break;
             }
             case IssueViewMessageType.FOUND_LABELS: {
-                console.log((message as FoundLabelsMessage).labels);
                 this.labelOptions = (message as FoundLabelsMessage).labels.map(label => ({
                     label: label.name ?? "",
                     description: label.description ?? "",
@@ -240,7 +240,6 @@ export default class App extends Vue {
                     selected: false,
                     node: label
                 }));
-                console.log(this.labelOptions);
                 break;
             }
         }
@@ -303,7 +302,8 @@ export default class App extends Vue {
                 diff: {
                     title: this.issue.title,
                     body: this.issue.body,
-                    category: this.issue.category
+                    category: this.issue.category,
+                    addedLabels: this.labelsTreeContent?.subcontents?.map(label => label.id)
                 }
             } as CreateIssueMessage);
         }
@@ -342,6 +342,7 @@ export default class App extends Vue {
             }
         });
         window.addEventListener("resize", this.layoutMonaco);
+        this.layoutMonaco();
     }
 
     /**
@@ -399,7 +400,6 @@ export default class App extends Vue {
      * returns null if Issue is null
      */
     private indexOfIssueCategory(): number | null {
-        console.log(this.issue?.category);
         if (this.issue == null) {
             return null;
         }
@@ -481,7 +481,6 @@ export default class App extends Vue {
      * Called when the add label button is pressed
      */
     private onAddLabel(): void {
-        console.log("on add label");
         if (this.labelsTreeContent != null && this.labelsTreeContent.subcontents != undefined) {
             this.labelsTreeContent.subcontents.unshift({
                 id: "new",
@@ -491,19 +490,35 @@ export default class App extends Vue {
         }
     }
 
+    /**
+     * Called to remove the label with the specified index from the current issue
+     */
     private onDeleteLabel(id: string): void {
-        console.log("on delete label: " + id);
+        const contentIndex = this.labelsTreeContent?.subcontents?.findIndex(content => content.id == id);
+        if (contentIndex != undefined && contentIndex >= 0) {
+            this.labelsTreeContent?.subcontents?.splice(contentIndex, 1);
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    removedLabels: [id]  
+                });
+            }
+        }
     }
 
+    /**
+     * Called when a new search text was entered
+     */
     private onSearchLabel(text: string): void {
-        console.log("search label");
-        console.log(event);
         this.postMessage({
             type: IssueViewMessageType.SEARCH_LABELS,
             text: text
         } as SearchLabelsMessage);
     }
 
+    /**
+     * Called when the label sarch input looses focus,
+     * removes the temporary label element
+     */
     private onLabelLostFocus(): void {
         this.$nextTick(() => {
             if (this.labelsTreeContent?.subcontents?.[0]?.id == "new") {
@@ -512,21 +527,24 @@ export default class App extends Vue {
         });
     }
 
+    /**
+     * Called when a label is selected, 
+     * replaces the temporary label element with the real label
+     */
     private onLabelSelected(id: string): void {
-        console.log("selectd label");
-        console.log(this.labelsTreeContent?.subcontents?.some(content => content.id == id));
         const canAdd = !(this.labelsTreeContent?.subcontents?.some(content => content.id == id) ?? true);
         if (canAdd) {
-            console.log("does not contain yet");
             const newContent = this.labelsTreeContent?.subcontents?.[0] as ColorTreeViewContent;
             const label = this.labelOptions.find(option => option.value == id)?.node;
-            console.log(newContent);
-            console.log(label);
             if (newContent != undefined && label != undefined) {
-                console.log("updte content");
                 newContent.id = label.id!;
                 newContent.label = label.name;
                 newContent.color = label.color;
+            }
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    addedLabels: [id]
+                });
             }
         } else {
             this.labelsTreeContent?.subcontents?.shift();
@@ -542,6 +560,9 @@ interface ColorTreeViewContent extends TreeViewContent {
     color: string
 }
 
+/**
+ * Option which adds a node
+ */
 interface NodeOption<T> extends Option {
     node: T
 }

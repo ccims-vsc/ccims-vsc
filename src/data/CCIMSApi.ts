@@ -63,7 +63,6 @@ function getSdkWrapper(sdk: Sdk) {
 		async searchLabels(components: string[], text: string, minAmount: number, maxAmount: number): Promise<Label[]> {
 			const labels: Map<string, Label> = new Map();
 			for (const component of components) {
-				console.log("search on component: " + component);
 				if (labels.size >= minAmount) {
 					break;
 				}
@@ -84,7 +83,6 @@ function getSdkWrapper(sdk: Sdk) {
 				if (labels.size >= minAmount) {
 					break;
 				}
-				console.log("end search on component");
 			}
 			return [...labels.values()];
 		}
@@ -100,7 +98,6 @@ export type CCIMSApi = ReturnType<typeof getSdkWrapper>;
 export async function getCCIMSApi(): Promise<CCIMSApi> {
 	return new Promise<CCIMSApi>((resolve, reject) => {
 		const apiUrl = vscode.workspace.getConfiguration("ccims").get("apiUrl") as string;
-		console.log(apiUrl);
 		const client = new GraphQLClient(apiUrl);
 		resolve(getSdkWrapper(getSdk(client)));
 	});

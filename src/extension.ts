@@ -18,7 +18,6 @@ let _extensionUri: vscode.Uri
  * @param context the context when the extension is activated
  */
 export function activate(context: vscode.ExtensionContext) {
-	console.log("activate");
 	_extensionUri = context.extensionUri;
 	//set default value, so that welcome message is only displayed if connect actively failed
 	setContext(CCIMSContext.API_AVAILABLE, true);

@@ -39,7 +39,6 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 */
 	private get _components(): string[] | null {
 		const issueComponents = this._issue?.components?.nodes?.map(component => component?.id).filter(id => id != undefined) as string[] | undefined;
-		console.log("ids: " + issueComponents + ", " + getComponentId());
 		if (issueComponents != undefined && issueComponents.length > 0) {
 			return issueComponents;
 		} else {
@@ -103,15 +102,18 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			const searchLabelsMessage = message as SearchLabelsMessage;
 			const components = this._components;
 			if (components != null) {
-				const labels = await labelSearch.search({ components: components, text: searchLabelsMessage.text});
-				console.log(labels);
-				this.postMessage({
-					type: IssueViewMessageType.FOUND_LABELS,
-					labels: labels
-				} as FoundLabelsMessage);
+				labelSearch.search({ components: components, text: searchLabelsMessage.text},
+					labels => {
+						this.postMessage({
+							type: IssueViewMessageType.FOUND_LABELS,
+							labels: labels
+						} as FoundLabelsMessage);
+					}
+				);
 			}
 		});
 
+		/*
 		const issueSearch = new IssueSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
 		this.setMessageListener(IssueViewMessageType.SEARCH_ISSUES, async message => {
 			const searchIssuesMessage = message as SearchIssuesMessage;
@@ -147,6 +149,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 				} as FoundArtifactsMessage);
 			}
 		});
+		*/
 	}
 
 	/**
@@ -215,6 +218,17 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			}
 		}
 
+		if (diff.addedLabels != undefined) {
+			for (const label of diff.addedLabels) {
+				await api.addLabelToIssue({ issue: id, label: label });
+			}
+		}
+		if (diff.removedLabels != undefined) {
+			for (const label of diff.removedLabels) {
+				await api.removeLabelFromIssue({ issue: id, label: label });
+			}
+		}
+
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 	}
 
@@ -246,7 +260,6 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	private async _openIssue(id: string): Promise<void> {
 		const api = await getCCIMSApi();
 		this._issue = await api.getIssue(id);
-		console.log(this._issue);
 		this.postMessage({
 			type: IssueViewMessageType.OPEN_ISSUE,
 			issue: this._issue

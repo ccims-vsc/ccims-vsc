@@ -53,14 +53,15 @@ export default class AddSelect extends Vue {
     mounted(): void {
         this.$nextTick(() => {
             (this.$refs.searchSelect as VscodeSearchSelect).focusInput();
+            this.onOptionsChanged(this.options);
         });
     }
 }
 </script>
 <style>
     vscode-search-select {
-        margin-right: 8px;
         flex-grow: 1;
         padding: 1px;
+        width: min-content;
     }
 </style>

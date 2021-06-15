@@ -11,7 +11,6 @@ export function getComponentId(): string|null {
 	}
 
 	const id = vscode.workspace.getConfiguration("ccims").get("componentId") as string | null;
-	console.log(id);
 	if (!id) {
 		return null;
 	} else {

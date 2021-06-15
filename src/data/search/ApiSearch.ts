@@ -19,9 +19,9 @@ export abstract class ApiSearch<T, R> {
 	 * Called to get new results
 	 * @param value the new value of the input field
 	 */
-	//@debounce(300)
-	public async search(value: T): Promise<R[]> {
-		return await this._queryWrapper(value);
+	@debounce(300)
+	public search(value: T, callback: ((value: R[]) => void)): void {
+		this._queryWrapper(value).then(callback);
 	}
  
 	 /**
