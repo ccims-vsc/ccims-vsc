@@ -1,0 +1,17 @@
+query searchLabelsInternal($id: ID!, $name: String, $description: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Component {
+      labels(first: $maxAmount, filterBy: {
+        name: $name,
+        description: $description
+      }) {
+        nodes {
+          id
+          name
+          description
+          color
+        }
+      }
+    }
+  }
+}

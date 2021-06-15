@@ -22,27 +22,26 @@
                 'codicon-chevron-down': open && hasSubcontents
             }"
         />
+        <div 
+            class="label-icon-container"
+            style="align-self: center;"
+        >
+            <slot name="icon"/>
+        </div>
         <div style="display: flex; width: 100%">
-            <div 
-                v-if="content.icon != undefined"
-                style="align-self: center;"
-            >
-                <div
-                    v-if="content.isCodiconIcon"
-                    class="label-icon codicon"
-                    :class="content.icon"
-                />
-            </div>
-            <span 
-                v-if="mode == 'default'"
-                class="label"
-            >
-                {{ content.label }}
-            </span>
+            <slot>
+                <span 
+                    v-if="mode == 'default'"
+                    class="label"
+                >
+                    {{ content.label }}
+                </span>
+            </slot>
             <div style="margin-left: auto; align-self: center;">
                 <div 
                     class="command-icon-container"
                     v-for="{ icon, command } in commands" :key="command"
+                    @click.stop="$emit('command', command)"
                 >
                     <div
                         class="codicon command-icon"
@@ -51,11 +50,6 @@
                 </div>
             </div>
         </div>
-        <slot
-            v-if="mode != 'default'"
-            :name="mode"
-            :ident="defaultInput.ident"
-        />
     </span>
     <tree-view-container
         v-if="hasSubcontents && open"
@@ -82,7 +76,7 @@
 import { Options, Vue } from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import { VscodeIcon } from "@bendera/vscode-webview-elements";
-import { IconDef, TreeViewContent } from "./TreeViewContent";
+import { TreeViewContent } from "./TreeViewContent";
 import TreeViewContainer from "./TreeViewContainer.vue";
 
 
@@ -161,26 +155,6 @@ export default class TreeViewItem extends Vue {
      */
     private get hasSubcontents(): boolean {
         return this.content.subcontents != null && this.content.subcontents.length > 0;
-    }
-
-    private get iconDef(): IconDef | null {
-        if (this.hasSubcontents) {
-            if (this.open) {
-                return this.content.openIcon ?? null;
-            } else {
-                return this.content.branchIcon ?? null;
-            }
-        } else {
-            return this.content.leafIcon ?? null;
-        }
-    }
-
-    private get icon(): string | null {
-        return this.iconDef?.icon ?? null;
-    }
-
-    private get isCodiconIcon(): boolean {
-        return this.iconDef?.isCodiconIcon ?? false;
     }
 
     private subcontentContainer: TreeViewContainer | undefined;
@@ -297,7 +271,6 @@ export interface DefaultInput {
     font-size: var(--vscode-font-size);
     font-weight: var(--vscode-font-weight);
     outline: none;
-    padding-right: 8px;
 }
 .multi .contents {
     align-items: flex-start;
@@ -317,6 +290,12 @@ ul:focus-within .contents.selected {
     outline-offset: -1px;
     outline: 1px solid;
 }
+.contents:not(:focus):focus-within {
+    outline-offset: -1px;
+    outline: 1px solid;
+    background-color: var(--vscode-settings-numberInputBackground);
+    outline-color: var(--vscode-focusBorder);
+}
 .icon-arrow {
     display: block;
     margin: 3px 2px 3px 0;
@@ -324,11 +303,10 @@ ul:focus-within .contents.selected {
     height: 16px;
     font-size: 16px;
 }
-.label-icon {
-    display: block;
+.label-icon-container {
+    display: flex;
     margin-right: 6px;
     width: 16px;
-    height: 16px;
     font-size: 16px;
 }
 
@@ -342,11 +320,12 @@ ul:focus-within .contents.selected {
     height: 22px;
     border-radius: 5px;
     padding: 3px;
+    margin-right: 4px;
     display: none;
 }
 .contents:hover .command-icon-container,
 .contents.selected .command-icon-container,
-.contents:focus .command-icon-container {
+.contents:focus-within .command-icon-container {
     display: block;
 }
 .command-icon-container:hover {

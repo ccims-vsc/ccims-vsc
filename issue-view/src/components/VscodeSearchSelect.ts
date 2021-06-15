@@ -76,9 +76,6 @@ export class VscodeSearchSelect extends LitElement {
         return this._filter;
     }
 
-    @property({ type: Boolean, reflect: true })
-    focused = false;
-
     /**
      * @attr [options=[]]
      * @type {Option[]}
@@ -103,15 +100,11 @@ export class VscodeSearchSelect extends LitElement {
         super.connectedCallback();
         this.dataCloak = false;
         this.addEventListener('keydown', this._onComponentKeyDown);
-        this.addEventListener('focus', this._onComponentFocus);
-        this.addEventListener('blur', this._onComponentBlur);
     }
 
     disconnectedCallback(): void {
         super.disconnectedCallback();
         this.removeEventListener('keydown', this._onComponentKeyDown);
-        this.removeEventListener('focus', this._onComponentFocus);
-        this.removeEventListener('blur', this._onComponentBlur);
     }
 
     @internalProperty()
@@ -139,9 +132,6 @@ export class VscodeSearchSelect extends LitElement {
     protected _filterPattern = '';
 
     @internalProperty()
-    protected _showDropdown = false;
-
-    @internalProperty()
     protected _options: InternalOption[] = [];
 
     @internalProperty()
@@ -165,15 +155,11 @@ export class VscodeSearchSelect extends LitElement {
         return this._filteredOptions;
     }
 
-    protected async _toggleDropdown(visible: boolean): Promise<void> {
-        this._showDropdown = visible;
-        this.ariaExpanded = String(visible);
-
-        if (visible) {
-            window.addEventListener('click', this._onClickOutsideBound);
-        } else {
-            window.removeEventListener('click', this._onClickOutsideBound);
-        }
+    /**
+     * Focuses the input
+     */
+    public focusInput(): void {
+        this.shadowRoot?.getElementById("comboboxFace")?.focus();
     }
 
     protected _dispatchChangeEvent(): void {
@@ -196,16 +182,11 @@ export class VscodeSearchSelect extends LitElement {
         );
     }
 
-    protected _onFaceClick(): void {
-        this._toggleDropdown(!this._showDropdown);
-    }
-
     protected _onClickOutside(event: MouseEvent): void {
         const path = event.composedPath();
         const found = path.findIndex((et) => et === this);
 
         if (found === -1) {
-            this._toggleDropdown(false);
             window.removeEventListener('click', this._onClickOutsideBound);
         }
     }
@@ -221,7 +202,6 @@ export class VscodeSearchSelect extends LitElement {
 
     private _toggleComboboxDropdown() {
         this._filterPattern = '';
-        this._toggleDropdown(!this._showDropdown);
     }
 
     protected _onComboboxButtonClick(): void {
@@ -263,35 +243,14 @@ export class VscodeSearchSelect extends LitElement {
         const index = Number((optEl as HTMLElement).dataset.index);
         this._value = this._options[index].value;
 
-        this._toggleDropdown(false);
         this._dispatchChangeEvent();
     }
 
     protected _onEnterKeyDown(): void {
         const list = this._filteredOptions;
-        const showDropdownNext = !this._showDropdown;
 
-        this._toggleDropdown(showDropdownNext);
-
-        if (
-            !showDropdownNext
-        ) {
-            this._value = this._options[list[this._activeIndex].index].value;
-            this._dispatchChangeEvent();
-        }
-
-        if (showDropdownNext) {
-            this.updateComplete.then(() => {
-                this._scrollActiveElementToTop();
-            });
-        }
-    }
-
-    private _onSpaceKeyDown() {
-        if (!this._showDropdown) {
-            this._toggleDropdown(true);
-            return;
-        }
+        this._value = this._options[list[this._activeIndex].index].value;
+        this._dispatchChangeEvent();
     }
 
     private _scrollActiveElementToTop() {
@@ -330,25 +289,21 @@ export class VscodeSearchSelect extends LitElement {
     }
 
     protected _onArrowUpKeyDown(): void {
-        if (this._showDropdown) {
-            if (this._activeIndex <= 0) {
-                return;
-            }
-
-            this._activeIndex -= 1;
-            this._adjustOptionListScrollPos('up');
+        if (this._activeIndex <= 0) {
+            return;
         }
+
+        this._activeIndex -= 1;
+        this._adjustOptionListScrollPos('up');
     }
 
     protected _onArrowDownKeyDown(): void {
-        if (this._showDropdown) {
-            if (this._activeIndex >= this._currentOptions.length - 1) {
-                return;
-            }
-
-            this._activeIndex += 1;
-            this._adjustOptionListScrollPos('down');
+        if (this._activeIndex >= this._currentOptions.length - 1) {
+            return;
         }
+
+        this._activeIndex += 1;
+        this._adjustOptionListScrollPos('down');
     }
 
     private _onComponentKeyDown(event: KeyboardEvent) {
@@ -361,14 +316,6 @@ export class VscodeSearchSelect extends LitElement {
             this._onEnterKeyDown();
         }
 
-        if (event.key === ' ') {
-            this._onSpaceKeyDown();
-        }
-
-        if (event.key === 'Escape') {
-            this._toggleDropdown(false);
-        }
-
         if (event.key === 'ArrowUp') {
             this._onArrowUpKeyDown();
         }
@@ -378,14 +325,6 @@ export class VscodeSearchSelect extends LitElement {
         }
     }
 
-    private _onComponentFocus() {
-        this.focused = true;
-    }
-
-    private _onComponentBlur() {
-        this.focused = false;
-    }
-
     protected _onComboboxInputFocus(ev: FocusEvent): void {
         (ev.target as HTMLInputElement).select();
     }
@@ -393,7 +332,6 @@ export class VscodeSearchSelect extends LitElement {
     protected _onComboboxInputInput(ev: InputEvent): void {
         this._filterPattern = (ev.target as HTMLInputElement).value;
         this._activeIndex = -1;
-        this._toggleDropdown(true);
         this._dispatchSearchTextEvent();
     }
 
@@ -442,24 +380,17 @@ export class VscodeSearchSelect extends LitElement {
 
     protected _renderComboboxFace(): TemplateResult {
         return html`
-	  <div class="combobox-face">
+	  <div class="combobox-face" style="height: 22px">
 		<input
+          id="comboboxFace"
 		  class="combobox-input"
+          style="border: none"
 		  spellcheck="false"
 		  type="text"
 		  .value=""
 		  placeholder="${this._placeholder}"
-		  @focus="${this._onComboboxInputFocus}"
 		  @input="${this._onComboboxInputInput}"
 		/>
-		<button
-		  class="combobox-button"
-		  type="button"
-		  @click="${this._onComboboxButtonClick}"
-		  @keydown="${this._onComboboxButtonKeyDown}"
-		>
-		  ${chevronDownIcon}
-		</button>
 	  </div>
 	`;
     }
@@ -474,7 +405,7 @@ export class VscodeSearchSelect extends LitElement {
         });
 
         return html`
-		<div class="${classes}">
+		<div class="${classes}" style="border-color: var(--vscode-focusBorder);">
 		  ${this._renderOptions()} ${this._renderDropdownControls()}
 		  ${this._renderDescription()}
 		</div>
@@ -486,7 +417,7 @@ export class VscodeSearchSelect extends LitElement {
     render(): TemplateResult {
         return html`
 		${this._renderComboboxFace()}
-		${this._showDropdown ? this._renderDropdown() : nothing}
+		${this._renderDropdown()}
 	  `;
     }
 }

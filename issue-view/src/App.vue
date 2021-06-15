@@ -60,36 +60,63 @@
             </button>
         </div>
         <tree-view-container 
+            v-if="issue != null"
             v-slot="itemProps"
-            :contents="testContents"
+            :contents="issueTreeContent"
         >
             <tree-view-item
+                v-if="itemProps.content.id == 'labels'"
                 :content="itemProps.content"
                 :defaultInput="itemProps.defaultInput"
+                :commands="[{icon: 'codicon-plus', command: 'new'}]"
+                @command="onAddLabel()"
             >
-                <template #subcontent="subcontentProps">
+                <template #icon>
+                    <div class="codicon codicon-output" />
+                </template>
+                <template #subcontent="labelProps">
                     <tree-view-item
-                        :content="subcontentProps.content"
-                        :defaultInput="subcontentProps.defaultInput"
-                        :commands="[{icon: 'codicon-file', command: 'new'}]"
+                        :content="labelProps.content"
+                        :defaultInput="labelProps.defaultInput"
+                        :commands="[{icon: 'codicon-trash', command: 'delete'}]"
+                        @command="onDeleteLabel(labelProps.content.id)"
                     >
+                        <template #icon v-if="labelProps.content.id != 'new'">  
+                            <div 
+                                class="codicon codicon-circle-filled" 
+                                :style="`color: ${labelProps.content.color};`"
+                            />
+                        </template>
+                        <template #icon v-else>
+                            <div
+                                class="codicon codicon-plus"
+                            />
+                        </template>
+                        <template v-if="labelProps.content.id == 'new'">
+                            <add-select 
+                                :options="labelOptions"
+                                @vsc-search-text="onSearchLabel($event.detail.value)"
+                                @focusout="onLabelLostFocus()"
+                                @vsc-change="onLabelSelected($event.detail.value)"
+                            />
+                        </template>
                     </tree-view-item>
                 </template>
             </tree-view-item>
         </tree-view-container>
-        <button @click="testContents[0].subcontents.push({id: 'new', label: 'newer'})">TEST</button>
     </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { VscodeSearchSelect } from "./components/VscodeSearchSelect";
-import { Issue, IssueCategory } from "../../src/generated/graphql";
+import { Issue, IssueCategory, Label } from "../../src/generated/graphql";
 import { IssueViewMessage } from "../../src/issue-view/communication/IssueViewMessage";
 import { OpenIssueMessage } from "../../src/issue-view/communication/OpenIssueMessage";
 import { ThemeChangedMessage } from "../../src/issue-view/communication/ThemeChangedMessage";
 import { CreateIssueMessage } from "../../src/issue-view/communication/CreateIssueMessage";
 import { UpdateIssueMessage } from "../../src/issue-view/communication/UpdateIssueMessage";
+import { SearchLabelsMessage } from "../../src/issue-view/communication/SearchLabelsMessage";
+import { FoundLabelsMessage } from "../../src/issue-view/communication/FoundLabelsMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -102,11 +129,12 @@ import { Watch } from "vue-property-decorator"
 import { IssueDiff } from "../../src/issue-view/communication/IssueDiff";
 import TreeViewItem from "./components/TreeViewItem.vue";
 import TreeViewContainer from "./components/TreeViewContainer.vue";
+import { TreeViewContent } from "./components/TreeViewContent";
+import AddSelect from "./components/AddSelect.vue";
+import { Option } from '@bendera/vscode-webview-elements/dist/vscode-select/includes/types';
 
 
-if (!customElements.get("vscode-search-select")) {
-    customElements.define("vscode-search-select", VscodeSearchSelect)
-}
+
 if (!customElements.get("vscode-single-select")) {
     customElements.define("vscode-single-select", VscodeSingleSelect);
 }
@@ -117,35 +145,11 @@ if (!customElements.get("vscode-option")) {
 @Options({
     components: {
         TreeViewItem,
-        TreeViewContainer
+        TreeViewContainer,
+        AddSelect
     }
 })
 export default class App extends Vue {
-
-
-    private testContents = [{
-        id: 'main',
-        label: 'main',
-        icon: 'codicon-file',
-        isCodiconIcon: true,
-        subcontents: [
-            {
-                id: '1', 
-                label: 'hello'
-            }, 
-            {
-                id: '2', 
-                label: 'world'
-            }
-        ]
-    }];
-
-
-
-
-
-
-
 
     /**
      * markdown instance used for rendering
@@ -156,6 +160,21 @@ export default class App extends Vue {
      * The issue which is currently displayed
      */
     private issue: Partial<Issue> & { body: string, title: string } | null = null;
+
+    /**
+     * The content definition for the TreeView which displays labels, assignees, linkedIssues and artifacts
+     */
+    private issueTreeContent: TreeViewContent[] = [];
+
+    /**
+     * The content definition for the labels
+     */
+    private labelsTreeContent: TreeViewContent | null = null;
+
+    /**
+     * The options for the label AddSelect
+     */
+    private labelOptions: NodeOption<Label>[] = [];
 
     /**
      * if true, the viewer is in edit mode
@@ -210,6 +229,18 @@ export default class App extends Vue {
                     category: IssueCategory.Unclassified
                 };
                 this.updateMode("new");
+                break;
+            }
+            case IssueViewMessageType.FOUND_LABELS: {
+                console.log((message as FoundLabelsMessage).labels);
+                this.labelOptions = (message as FoundLabelsMessage).labels.map(label => ({
+                    label: label.name ?? "",
+                    description: label.description ?? "",
+                    value: label.id!,
+                    selected: false,
+                    node: label
+                }));
+                console.log(this.labelOptions);
                 break;
             }
         }
@@ -407,14 +438,114 @@ export default class App extends Vue {
      * Sets the correct value for all components that cannot update on their own
      */
     @Watch("issue")
-    private issueChanged(): void {
+    private issueChanged(newIssue: Partial<Issue> & { body: string, title: string } | null): void {
         const categorySelect = document.getElementById("category-select") as VscodeSingleSelect | null;
         if (categorySelect != null) {
             categorySelect.selectedIndex = this.indexOfIssueCategory() ?? 0;
             (categorySelect as any)._onSlotChange();
         }
+        this.generateIssueTreeContent(newIssue);
     }
+
+    /**
+     * Generates the content of the TreeView based on an Issue
+     */
+    private generateIssueTreeContent(issue: Partial<Issue> & { body: string, title: string } | null): void {
+        if (issue == null) {
+            this.issueTreeContent = [];
+        } else {
+            this.labelsTreeContent = {
+                id: "labels",
+                label: "Labels",
+                subcontents: (issue.labels?.nodes ?? []).filter(label => label != null).map(label => this.mapLabelToTreeViewContent(label as Label))
+            }
+
+            this.issueTreeContent = [
+                this.labelsTreeContent
+            ]
+        }
+    }
+
+    /**
+     * Maps a label to a TreeViewContent
+     */
+    private mapLabelToTreeViewContent(label: Label): ColorTreeViewContent {
+        return {
+            id: label.id!,
+            label: label.name,
+            color: label.color
+        }
+    }
+
+    /**
+     * Called when the add label button is pressed
+     */
+    private onAddLabel(): void {
+        console.log("on add label");
+        if (this.labelsTreeContent != null && this.labelsTreeContent.subcontents != undefined) {
+            this.labelsTreeContent.subcontents.unshift({
+                id: "new",
+                label: "new"
+            });
+            this.onSearchLabel("");
+        }
+    }
+
+    private onDeleteLabel(id: string): void {
+        console.log("on delete label: " + id);
+    }
+
+    private onSearchLabel(text: string): void {
+        console.log("search label");
+        console.log(event);
+        this.postMessage({
+            type: IssueViewMessageType.SEARCH_LABELS,
+            text: text
+        } as SearchLabelsMessage);
+    }
+
+    private onLabelLostFocus(): void {
+        this.$nextTick(() => {
+            if (this.labelsTreeContent?.subcontents?.[0]?.id == "new") {
+                this.labelsTreeContent.subcontents.shift();
+            }
+        });
+    }
+
+    private onLabelSelected(id: string): void {
+        console.log("selectd label");
+        console.log(this.labelsTreeContent?.subcontents?.some(content => content.id == id));
+        const canAdd = !(this.labelsTreeContent?.subcontents?.some(content => content.id == id) ?? true);
+        if (canAdd) {
+            console.log("does not contain yet");
+            const newContent = this.labelsTreeContent?.subcontents?.[0] as ColorTreeViewContent;
+            const label = this.labelOptions.find(option => option.value == id)?.node;
+            console.log(newContent);
+            console.log(label);
+            if (newContent != undefined && label != undefined) {
+                console.log("updte content");
+                newContent.id = label.id!;
+                newContent.label = label.name;
+                newContent.color = label.color;
+            }
+        } else {
+            this.labelsTreeContent?.subcontents?.shift();
+        }
+    }
+
 }
+
+/**
+ * TreeViewContent with a color, used for labels
+ */
+interface ColorTreeViewContent extends TreeViewContent {
+    color: string
+}
+
+interface NodeOption<T> extends Option {
+    node: T
+}
+
 </script>
 
 <style>

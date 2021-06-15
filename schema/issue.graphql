@@ -35,6 +35,11 @@ query getIssueInternal($id: ID!) {
           username
         }
       }
+      components {
+        nodes {
+          id
+        }
+      }
     }
   }
 }

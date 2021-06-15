@@ -10,8 +10,48 @@ import { getComponentId } from "../data/settings";
 import { UpdateIssueMessage } from "./communication/UpdateIssueMessage";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 import { IssueDiff } from "./communication/IssueDiff";
+import { Issue } from "../generated/graphql";
+import { SearchLabelsMessage } from "./communication/SearchLabelsMessage";
+import { LabelSearch } from "../data/search/LabelSearch";
+import { FoundLabelsMessage } from "./communication/FoundLabelsMessage";
+import { IssueSearch } from "../data/search/IssueSearch";
+import { SearchIssuesMessage } from "./communication/SearchIssuesMessage";
+import { FoundIssuesMessage } from "./communication/FoundIssuesMessage";
+import { UserSearch } from "../data/search/UserSearch";
+import { FoundUsersMessage } from "./communication/FoundUsersMessage";
+import { SearchUsersMessage } from "./communication/SearchUsersMessage";
+import { ArtifactSearch } from "../data/search/ArtifactSearch";
+import { SearchArtifactsMessage } from "./communication/SearchArtifactsMessage";
+import { FoundArtifactsMessage } from "./communication/FoundArtifactsMessage";
+
+const MIN_SEARCH_AMOUNT = 10;
+const MAX_SEARCH_AMOUNT = 100;
 
 export class IssueViewProvider extends IssueViewProviderBase {
+	/**
+	 * The current issue, undefined if none selected yet or new in creation
+	 */
+	private _issue?: Issue;
+
+	/**
+	 * Getter for the component list of the current issue
+	 * if no issue is set, the current component is returned
+	 */
+	private get _components(): string[] | null {
+		const issueComponents = this._issue?.components?.nodes?.map(component => component?.id).filter(id => id != undefined) as string[] | undefined;
+		console.log("ids: " + issueComponents + ", " + getComponentId());
+		if (issueComponents != undefined && issueComponents.length > 0) {
+			return issueComponents;
+		} else {
+			const currentComponent = getComponentId();
+			if (currentComponent != null) {
+				return [currentComponent];
+			} else {
+				return null;
+			}
+		}
+	}
+
 	constructor(extensionUri: vscode.Uri, commands: CCIMSCommands) {
 		super(extensionUri);
 
@@ -39,7 +79,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	/**
 	 * Called to init the listeners which listen for messages from the webview
 	 */
-	private _initListeners(): void {
+	private async _initListeners(): Promise<void> {
 		this.setMessageListener(IssueViewMessageType.CREATE_ISSUE, async message => {
 			const createIssueMessage = message as CreateIssueMessage;
 			this._createIssue(createIssueMessage.diff);
@@ -48,6 +88,64 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		this.setMessageListener(IssueViewMessageType.UPDATE_ISSUE, async message => {
 			const updateIssueMessage = message as UpdateIssueMessage;
 			this._updateIssue(updateIssueMessage.diff, updateIssueMessage.id);
+		});
+
+		await this._initSearchListeners();
+	}
+
+	/**
+	 * Called to init search related listeners
+	 */
+	private async _initSearchListeners(): Promise<void> {
+		const api = await getCCIMSApi();
+		const labelSearch = new LabelSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		this.setMessageListener(IssueViewMessageType.SEARCH_LABELS, async message => {
+			const searchLabelsMessage = message as SearchLabelsMessage;
+			const components = this._components;
+			if (components != null) {
+				const labels = await labelSearch.search({ components: components, text: searchLabelsMessage.text});
+				console.log(labels);
+				this.postMessage({
+					type: IssueViewMessageType.FOUND_LABELS,
+					labels: labels
+				} as FoundLabelsMessage);
+			}
+		});
+
+		const issueSearch = new IssueSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		this.setMessageListener(IssueViewMessageType.SEARCH_ISSUES, async message => {
+			const searchIssuesMessage = message as SearchIssuesMessage;
+			const components = this._components;
+			if (components != null) {
+				this.postMessage({
+					type: IssueViewMessageType.FOUND_ISSUES,
+					issues: await issueSearch.search({ components: components, text: searchIssuesMessage.text})
+				} as FoundIssuesMessage);
+			}
+		});
+
+		const userSearch = new UserSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		this.setMessageListener(IssueViewMessageType.SEARCH_USERS, async message => {
+			const searchUsersMessage = message as SearchUsersMessage;
+			const components = this._components;
+			if (components != null) {
+				this.postMessage({
+					type: IssueViewMessageType.FOUND_USERS,
+					users: await userSearch.search({ components: components, text: searchUsersMessage.text})
+				} as FoundUsersMessage);
+			}
+		});
+
+		const artifactSearch = new ArtifactSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		this.setMessageListener(IssueViewMessageType.SEARCH_ARTIFACTS, async message => {
+			const searchArtifactsMessage = message as SearchArtifactsMessage;
+			const components = this._components;
+			if (components != null) {
+				this.postMessage({
+					type: IssueViewMessageType.FOUND_ARTIFACTS,
+					artifacts: await artifactSearch.search({ components: components, text: searchArtifactsMessage.text})
+				} as FoundArtifactsMessage);
+			}
 		});
 	}
 
@@ -147,11 +245,11 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 */
 	private async _openIssue(id: string): Promise<void> {
 		const api = await getCCIMSApi();
-		const issue = await api.getIssue(id);
-		console.log(issue);
+		this._issue = await api.getIssue(id);
+		console.log(this._issue);
 		this.postMessage({
 			type: IssueViewMessageType.OPEN_ISSUE,
-			issue: issue
+			issue: this._issue
 		} as OpenIssueMessage);
 	}
 
@@ -159,6 +257,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 * Called to sent a message to the weview to create a new issue
 	 */
 	private _newIssue(): void {
+		this._issue = undefined;
 		this.postMessage({
 			type: IssueViewMessageType.NEW_ISSUE
 		});

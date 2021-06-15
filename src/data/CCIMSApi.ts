@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
-import { Component, getSdk, Issue, Sdk, SearchComponentsInternalDocument, UpdateIssueBodyDocument } from "../generated/graphql";
+import { Component, getSdk, Issue, Label, Sdk } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
-import { getIssueIcon } from "./IconProvider";
 import { getComponentId } from "./settings";
 
 /**
@@ -46,10 +45,48 @@ function getSdkWrapper(sdk: Sdk) {
 		async searchComponents(text: string, minAmount: number, maxAmount: number): Promise<Component[]> {
 			const components = (await this.searchComponentsInternal({ name: text, maxAmount: maxAmount})).components?.nodes as Component[];
 			if (components.length < minAmount) {
-				const descriptionComponents = (await this.searchComponentsInternal({ description: text, maxAmount: maxAmount})).components?.nodes as Component[];
+				const descriptionComponents = (await this.searchComponentsInternal({ description: text, maxAmount: maxAmount - components.length})).components?.nodes as Component[];
 				components.push(...descriptionComponents);
 			}
 			return components;
+		},
+		/**
+		 * Searches for labels with the defined name of description on all specified components
+		 * It searches per component until enough were found
+		 * First, a component is queried by name, then by description
+		 * @param components the components on which to search
+		 * @param text the text to search for
+		 * @param minAmount the min amount of labels to find
+		 * @param maxAmount the max amount of labels to find
+		 * @returns the found labels
+		 */
+		async searchLabels(components: string[], text: string, minAmount: number, maxAmount: number): Promise<Label[]> {
+			const labels: Map<string, Label> = new Map();
+			for (const component of components) {
+				console.log("search on component: " + component);
+				if (labels.size >= minAmount) {
+					break;
+				}
+				const nameComponent = (await this.searchLabelsInternal({id: component, name: text, maxAmount: maxAmount - labels.size}))?.node as Component | undefined;
+				const nameResults = nameComponent?.labels?.nodes as Label[] | undefined;
+				if (nameResults != undefined) {
+					for (const label of nameResults) {
+						labels.set(label.id!, label);
+					}
+				}
+				const descriptionComponent = (await this.searchLabelsInternal({id: component, description: text, maxAmount: maxAmount - labels.size}))?.node as Component | undefined;
+				const descriptionResults = descriptionComponent?.labels?.nodes as Label[] | undefined;
+				if (descriptionResults != undefined) {
+					for (const label of descriptionResults) {
+						labels.set(label.id!, label);
+					}
+				}
+				if (labels.size >= minAmount) {
+					break;
+				}
+				console.log("end search on component");
+			}
+			return [...labels.values()];
 		}
 	}
 }
@@ -90,7 +127,7 @@ export async function isApiAvailable(): Promise<boolean> {
  * Checks if the api is available
  * @returns true if the api is available, otherwise false
  */
- export async function isComponentAvailable(): Promise<boolean> {
+export async function isComponentAvailable(): Promise<boolean> {
 	const api = await getCCIMSApi();
 	const componentId = getComponentId();
 	if (!componentId) {
