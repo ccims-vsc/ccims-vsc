@@ -104,6 +104,43 @@
                     </tree-view-item>
                 </template>
             </tree-view-item>
+            <tree-view-item
+                v-else-if="itemProps.content.id == 'linkedIssues'"
+                :content="itemProps.content"
+                :defaultInput="itemProps.defaultInput"
+                :commands="[{icon: 'codicon-plus', command: 'new'}]"
+                @command="onAddLinkedIssue()"
+            >
+                <template #icon>
+                    <div class="codicon codicon-reply" />
+                </template>
+                <template #subcontent="linkedIssueProps">
+                    <tree-view-item
+                        :content="linkedIssueProps.content"
+                        :defaultInput="linkedIssueProps.defaultInput"
+                        :commands="[{icon: linkedIssueProps.content.id == 'new' ? 'codicon-close' : 'codicon-trash', command: 'delete'}]"
+                        @command="onDeleteLinkedIssue(linkedIssueProps.content.id)"
+                    >
+                        <template #icon v-if="linkedIssueProps.content.id != 'new'">  
+                            <!--TODO-->
+                        </template>
+                        <template #icon v-else>
+                            <div
+                                class="codicon codicon-plus"
+                            />
+                        </template>
+                        <template v-if="linkedIssueProps.content.id == 'new'">
+                            <add-select 
+                                :options="linkedIssueOptions"
+                                placeholder="Search for issues"
+                                @vsc-search-text="onSearchLinkedIssue($event.detail.value)"
+                                @focusout="onLinkedIssueLostFocus()"
+                                @vsc-change="onLinkedIssueSelected($event.detail.value)"
+                            />
+                        </template>
+                    </tree-view-item>
+                </template>
+            </tree-view-item>
         </tree-view-container>
     </div>
 </template>
@@ -118,6 +155,8 @@ import { CreateIssueMessage } from "../../src/issue-view/communication/CreateIss
 import { UpdateIssueMessage } from "../../src/issue-view/communication/UpdateIssueMessage";
 import { SearchLabelsMessage } from "../../src/issue-view/communication/SearchLabelsMessage";
 import { FoundLabelsMessage } from "../../src/issue-view/communication/FoundLabelsMessage";
+import { SearchIssuesMessage } from "../../src/issue-view/communication/SearchIssuesMessage";
+import { FoundIssuesMessage } from "../../src/issue-view/communication/FoundIssuesMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -176,6 +215,16 @@ export default class App extends Vue {
      * The options for the label AddSelect
      */
     private labelOptions: NodeOption<Label>[] = [];
+
+    /**
+     * The content definition for the linkedIssues
+     */
+    private linkedIssuesTreeContent: TreeViewContent | null = null;
+
+    /**
+     * The options for the linkedIssue AddSelect
+     */
+    private linkedIssueOptions: NodeOption<Issue>[] = [];
 
     /**
      * if true, the viewer is in edit mode
@@ -242,6 +291,16 @@ export default class App extends Vue {
                 }));
                 break;
             }
+            case IssueViewMessageType.FOUND_ISSUES: {
+                this.linkedIssueOptions = (message as FoundIssuesMessage).issues.filter(issue => issue.id != this.issue?.id).map(issue => ({
+                    label: issue.title ?? "",
+                    description: issue.body ?? "",
+                    value: issue.id!,
+                    selected: false,
+                    node: issue
+                }));
+                break;
+            }
         }
     }
 
@@ -303,7 +362,8 @@ export default class App extends Vue {
                     title: this.issue.title,
                     body: this.issue.body,
                     category: this.issue.category,
-                    addedLabels: this.labelsTreeContent?.subcontents?.map(label => label.id)
+                    addedLabels: this.labelsTreeContent?.subcontents?.map(label => label.id),
+                    addedLinkedIssues: this.linkedIssuesTreeContent?.subcontents?.map(issue => issue.id)
                 }
             } as CreateIssueMessage);
         }
@@ -457,11 +517,21 @@ export default class App extends Vue {
             this.labelsTreeContent = {
                 id: "labels",
                 label: "Labels",
-                subcontents: (issue.labels?.nodes ?? []).filter(label => label != null).map(label => this.mapLabelToTreeViewContent(label as Label))
+                subcontents: (issue.labels?.nodes ?? [])
+                    .filter(label => label != null)
+                    .map(label => this.mapLabelToTreeViewContent(label as Label))
+            }
+            this.linkedIssuesTreeContent = {
+                id: "linkedIssues",
+                label: "Linked issues",
+                subcontents: (issue.linksToIssues?.nodes ?? [])
+                    .filter(linkedIssue => linkedIssue != null)
+                    .map(linkedIssue => this.mapLinkedIssueToTreeViewContent(linkedIssue as Issue))
             }
 
             this.issueTreeContent = [
-                this.labelsTreeContent
+                this.labelsTreeContent,
+                this.linkedIssuesTreeContent
             ]
         }
     }
@@ -548,6 +618,89 @@ export default class App extends Vue {
             }
         } else {
             this.labelsTreeContent?.subcontents?.shift();
+        }
+    }
+
+        /**
+     * Maps a linkedIssue to a TreeViewContent
+     */
+    private mapLinkedIssueToTreeViewContent(linkedIssue: Issue): TreeViewContent {
+        return {
+            id: linkedIssue.id!,
+            label: linkedIssue.title
+        }
+    }
+
+    /**
+     * Called when the add linkedIssue button is pressed
+     */
+    private onAddLinkedIssue(): void {
+        if (this.linkedIssuesTreeContent != null && this.linkedIssuesTreeContent.subcontents != undefined) {
+            this.linkedIssuesTreeContent.subcontents.unshift({
+                id: "new",
+                label: "new"
+            });
+            this.onSearchLinkedIssue("");
+        }
+    }
+
+    /**
+     * Called to remove the linkedIssue with the specified index from the current issue
+     */
+    private onDeleteLinkedIssue(id: string): void {
+        const contentIndex = this.linkedIssuesTreeContent?.subcontents?.findIndex(content => content.id == id);
+        if (contentIndex != undefined && contentIndex >= 0) {
+            this.linkedIssuesTreeContent?.subcontents?.splice(contentIndex, 1);
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    removedLinkedIssues: [id]  
+                });
+            }
+        }
+    }
+
+    /**
+     * Called when a new search text was entered
+     */
+    private onSearchLinkedIssue(text: string): void {
+        this.postMessage({
+            type: IssueViewMessageType.SEARCH_ISSUES,
+            text: text
+        } as SearchIssuesMessage);
+    }
+
+    /**
+     * Called when the linkedIssue sarch input looses focus,
+     * removes the temporary linkedIssue element
+     */
+    private onLinkedIssueLostFocus(): void {
+        this.$nextTick(() => {
+            if (this.linkedIssuesTreeContent?.subcontents?.[0]?.id == "new") {
+                this.linkedIssuesTreeContent.subcontents.shift();
+            }
+        });
+    }
+
+    /**
+     * Called when a linkedIssue is selected, 
+     * replaces the temporary linkedIssue element with the real linkedIssue
+     */
+    private onLinkedIssueSelected(id: string): void {
+        const canAdd = !(this.linkedIssuesTreeContent?.subcontents?.some(content => content.id == id) ?? true);
+        if (canAdd) {
+            const newContent = this.linkedIssuesTreeContent?.subcontents?.[0] as ColorTreeViewContent;
+            const linkedIssue = this.linkedIssueOptions.find(option => option.value == id)?.node;
+            if (newContent != undefined && linkedIssue != undefined) {
+                newContent.id = linkedIssue.id!;
+                newContent.label = linkedIssue.title;
+            }
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    addedLinkedIssues: [id]
+                });
+            }
+        } else {
+            this.linkedIssuesTreeContent?.subcontents?.shift();
         }
     }
 

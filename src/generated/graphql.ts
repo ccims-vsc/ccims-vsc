@@ -5035,6 +5035,28 @@ export type RemoveArtifactFromIssueMutation = (
   )> }
 );
 
+export type SearchIssuesInternalQueryVariables = Exact<{
+  id: Scalars['ID'];
+  title?: Maybe<Scalars['String']>;
+  body?: Maybe<Scalars['String']>;
+  maxAmount: Scalars['Int'];
+}>;
+
+
+export type SearchIssuesInternalQuery = (
+  { __typename?: 'Query' }
+  & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | (
+    { __typename?: 'Component' }
+    & { issues?: Maybe<(
+      { __typename?: 'IssuePage' }
+      & { nodes?: Maybe<Array<Maybe<(
+        { __typename?: 'Issue' }
+        & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
+      )>>> }
+    )> }
+  ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
+);
+
 export type SearchLabelsInternalQueryVariables = Exact<{
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
@@ -5255,6 +5277,23 @@ export const RemoveArtifactFromIssueDocument = gql`
   }
 }
     `;
+export const SearchIssuesInternalDocument = gql`
+    query searchIssuesInternal($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ... on Component {
+      issues(first: $maxAmount, filterBy: {title: $title, body: $body}) {
+        nodes {
+          id
+          title
+          body
+          isOpen
+          category
+        }
+      }
+    }
+  }
+}
+    `;
 export const SearchLabelsInternalDocument = gql`
     query searchLabelsInternal($id: ID!, $name: String, $description: String, $maxAmount: Int!) {
   node(id: $id) {
@@ -5332,6 +5371,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     removeArtifactFromIssue(variables: RemoveArtifactFromIssueMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RemoveArtifactFromIssueMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RemoveArtifactFromIssueMutation>(RemoveArtifactFromIssueDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'removeArtifactFromIssue');
+    },
+    searchIssuesInternal(variables: SearchIssuesInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchIssuesInternalQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchIssuesInternalQuery>(SearchIssuesInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchIssuesInternal');
     },
     searchLabelsInternal(variables: SearchLabelsInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchLabelsInternalQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<SearchLabelsInternalQuery>(SearchLabelsInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchLabelsInternal');

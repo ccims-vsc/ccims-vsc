@@ -85,6 +85,42 @@ function getSdkWrapper(sdk: Sdk) {
 				}
 			}
 			return [...labels.values()];
+		},
+		/**
+		 * Searches for isses with the defined title of body on all specified components
+		 * It searches per component until enough were found
+		 * First, a component is queried by title, then by body
+		 * @param components the components on which to search
+		 * @param text the text to search for
+		 * @param minAmount the min amount of Issues to find
+		 * @param maxAmount the max amount of Issues to find
+		 * @returns the found Issues
+		 */
+		 async searchIssues(components: string[], text: string, minAmount: number, maxAmount: number): Promise<Issue[]> {
+			const issues: Map<string, Issue> = new Map();
+			for (const component of components) {
+				if (issues.size >= minAmount) {
+					break;
+				}
+				const nameComponent = (await this.searchIssuesInternal({id: component, title: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const nameResults = nameComponent?.issues?.nodes as Issue[] | undefined;
+				if (nameResults != undefined) {
+					for (const issue of nameResults) {
+						issues.set(issue.id!, issue);
+					}
+				}
+				const descriptionComponent = (await this.searchIssuesInternal({id: component, body: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const descriptionResults = descriptionComponent?.issues?.nodes as Issue[] | undefined;
+				if (descriptionResults != undefined) {
+					for (const issue of descriptionResults) {
+						issues.set(issue.id!, issue);
+					}
+				}
+				if (issues.size >= minAmount) {
+					break;
+				}
+			}
+			return [...issues.values()];
 		}
 	}
 }

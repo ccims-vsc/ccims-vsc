@@ -14,5 +14,7 @@ export interface IssueDiff {
 	addedAssignees?: string[],
 	removedAssignees?: string[],
 	addedArtifacts?: string[],
-	removedArtifacts?: string[]
+	removedArtifacts?: string[],
+	addedLinkedIssues?: string[],
+	removedLinkedIssues?: string[]
 }

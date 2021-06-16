@@ -113,16 +113,19 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			}
 		});
 
-		/*
 		const issueSearch = new IssueSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
 		this.setMessageListener(IssueViewMessageType.SEARCH_ISSUES, async message => {
 			const searchIssuesMessage = message as SearchIssuesMessage;
 			const components = this._components;
 			if (components != null) {
-				this.postMessage({
-					type: IssueViewMessageType.FOUND_ISSUES,
-					issues: await issueSearch.search({ components: components, text: searchIssuesMessage.text})
-				} as FoundIssuesMessage);
+				issueSearch.search({ components: components, text: searchIssuesMessage.text},
+					issues => {
+						this.postMessage({
+							type: IssueViewMessageType.FOUND_ISSUES,
+							issues: issues
+						} as FoundIssuesMessage);
+					}
+				);
 			}
 		});
 
@@ -131,10 +134,14 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			const searchUsersMessage = message as SearchUsersMessage;
 			const components = this._components;
 			if (components != null) {
-				this.postMessage({
-					type: IssueViewMessageType.FOUND_USERS,
-					users: await userSearch.search({ components: components, text: searchUsersMessage.text})
-				} as FoundUsersMessage);
+				userSearch.search({ components: components, text: searchUsersMessage.text},
+					users => {
+						this.postMessage({
+							type: IssueViewMessageType.FOUND_USERS,
+							users: users
+						} as FoundUsersMessage);
+					}
+				);
 			}
 		});
 
@@ -143,13 +150,16 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			const searchArtifactsMessage = message as SearchArtifactsMessage;
 			const components = this._components;
 			if (components != null) {
-				this.postMessage({
-					type: IssueViewMessageType.FOUND_ARTIFACTS,
-					artifacts: await artifactSearch.search({ components: components, text: searchArtifactsMessage.text})
-				} as FoundArtifactsMessage);
+				artifactSearch.search({ components: components, text: searchArtifactsMessage.text},
+					artifacts => {
+						this.postMessage({
+							type: IssueViewMessageType.FOUND_ARTIFACTS,
+							artifacts: artifacts
+						} as FoundArtifactsMessage);
+					}
+				);
 			}
 		});
-		*/
 	}
 
 	/**
@@ -168,10 +178,22 @@ export class IssueViewProvider extends IssueViewProviderBase {
 				category: diff.category,
 				labels: diff.addedLabels,
 				assignees: diff.addedAssignees,
-				artifacts: diff.addedArtifacts
+				artifacts: diff.addedArtifacts,
 			});
 			const id = result.createIssue?.issue?.id;
+
 			if (id != undefined) {
+				if (diff.addedLinkedIssues != undefined) {
+					for (const linkedIssue of diff.addedLinkedIssues) {
+						await api.linkIssue({ issue: id, linkedIssue: linkedIssue });
+					}
+				}
+				if (diff.removedLinkedIssues != undefined) {
+					for (const linkedIssue of diff.removedLinkedIssues) {
+						await api.unlinkIssue({ issue: id, linkedIssue: linkedIssue });
+					}
+				}
+
 				vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result.createIssue?.issue?.id);
 				vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 			} else {
@@ -226,6 +248,17 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		if (diff.removedLabels != undefined) {
 			for (const label of diff.removedLabels) {
 				await api.removeLabelFromIssue({ issue: id, label: label });
+			}
+		}
+
+		if (diff.addedLinkedIssues != undefined) {
+			for (const linkedIssue of diff.addedLinkedIssues) {
+				await api.linkIssue({ issue: id, linkedIssue: linkedIssue });
+			}
+		}
+		if (diff.removedLinkedIssues != undefined) {
+			for (const linkedIssue of diff.removedLinkedIssues) {
+				await api.unlinkIssue({ issue: id, linkedIssue: linkedIssue });
 			}
 		}
 

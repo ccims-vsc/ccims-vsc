@@ -10,7 +10,9 @@ import {
     internalProperty,
     query,
     html,
-    TemplateResult
+    TemplateResult,
+    CSSResult,
+    css
 } from 'lit-element';
 import { nothing } from 'lit-html';
 import { classMap } from 'lit-html/directives/class-map';
@@ -18,7 +20,6 @@ import '@bendera/vscode-webview-elements/dist/vscode-button';
 import dropdownStyles from '@bendera/vscode-webview-elements/dist/vscode-select/includes/styles';
 import { InternalOption, Option, SearchMethod } from '@bendera/vscode-webview-elements/dist/vscode-select/includes/types';
 import { filterOptionsByPattern } from '@bendera/vscode-webview-elements/dist/vscode-select/includes/helpers';
-import { chevronDownIcon } from '@bendera/vscode-webview-elements/dist/vscode-select/includes/template-elements';
 
 const VISIBLE_OPTS = 10;
 const OPT_HEIGHT = 19;
@@ -412,12 +413,46 @@ export class VscodeSearchSelect extends LitElement {
 	  `;
     }
 
-    static styles = dropdownStyles;
-
     render(): TemplateResult {
         return html`
 		${this._renderComboboxFace()}
 		${this._renderDropdown()}
 	  `;
+    }
+
+    static get styles(): CSSResult[] {
+        return [css`
+      
+        .options::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .options::-webkit-scrollbar-track {
+            opacity: 0;
+        }
+        
+        .options::-webkit-scrollbar-thumb {
+            min-height: 20px;
+            background-color: var(--vscode-scrollbarSlider-background);
+        }
+
+        .options::-webkit-scrollbar-thumb:hover {
+            background-color: var(--vscode-scrollbarSlider-hoverBackground);
+        }
+
+        .options::-webkit-scrollbar-thumb:active {
+            background-color: var(--vscode-scrollbarSlider-activeBackground);
+        }
+
+        .description {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            padding: 6px 4px 0px 4px !important;
+            margin-bottom: 6px;
+        }
+        `, dropdownStyles]
     }
 }

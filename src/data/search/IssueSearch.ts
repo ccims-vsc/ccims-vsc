@@ -11,6 +11,6 @@ export class IssueSearch extends ApiSearch<{components: string[], text: string},
 	 * @param value defines the components on which to search and the text to search for
 	 */
 	protected query(value: { components: string[]; text: string; }): Promise<Issue[]> {
-		throw new Error("Method not implemented.");
+		return this.api.searchIssues(value.components, value.text, this.minAmount, this.maxAmount);
 	}
 }

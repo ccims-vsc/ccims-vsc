@@ -184,3 +184,22 @@ mutation removeArtifactFromIssue($issue: ID!, $artifact: ID!) {
     clientMutationID
   }
 }
+
+query searchIssuesInternal($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Component {
+      issues(first: $maxAmount, filterBy: {
+        title: $title,
+        body: $body,
+      }) {
+        nodes {
+          id
+          title
+          body
+          isOpen
+          category
+        }
+      }
+    }
+  }
+}
