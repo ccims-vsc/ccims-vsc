@@ -3622,6 +3622,8 @@ export type Query = {
    * `false, if it __IS__ already taken and can't be used for a new user
    */
   checkUsername?: Maybe<Scalars['Boolean']>;
+  /** Searches for users with a similar displayName or username, returns max 10 users */
+  searchUser: Array<User>;
 };
 
 
@@ -3660,6 +3662,12 @@ export type QueryComponentsArgs = {
 /** All queries for requesting stuff */
 export type QueryCheckUsernameArgs = {
   username: Scalars['String'];
+};
+
+
+/** All queries for requesting stuff */
+export type QuerySearchUserArgs = {
+  text: Scalars['String'];
 };
 
 /** A relation of users who have reacted with a certain reaction to something */
@@ -5079,6 +5087,22 @@ export type SearchLabelsInternalQuery = (
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
 );
 
+export type SearchUsersQueryVariables = Exact<{
+  text: Scalars['String'];
+}>;
+
+
+export type SearchUsersQuery = (
+  { __typename?: 'Query' }
+  & { searchUser: Array<(
+    { __typename?: 'CCIMSUser' }
+    & Pick<CcimsUser, 'id' | 'username' | 'displayName'>
+  ) | (
+    { __typename?: 'IMSUser' }
+    & Pick<ImsUser, 'id' | 'username' | 'displayName'>
+  )> }
+);
+
 
 export const GetComponentInternalDocument = gql`
     query getComponentInternal($id: ID!) {
@@ -5310,6 +5334,15 @@ export const SearchLabelsInternalDocument = gql`
   }
 }
     `;
+export const SearchUsersDocument = gql`
+    query searchUsers($text: String!) {
+  searchUser(text: $text) {
+    id
+    username
+    displayName
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string) => Promise<T>;
 
@@ -5377,6 +5410,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     searchLabelsInternal(variables: SearchLabelsInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchLabelsInternalQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<SearchLabelsInternalQuery>(SearchLabelsInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchLabelsInternal');
+    },
+    searchUsers(variables: SearchUsersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchUsersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchUsersQuery>(SearchUsersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchUsers');
     }
   };
 }

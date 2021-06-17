@@ -134,7 +134,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			const searchUsersMessage = message as SearchUsersMessage;
 			const components = this._components;
 			if (components != null) {
-				userSearch.search({ components: components, text: searchUsersMessage.text},
+				userSearch.search(searchUsersMessage.text,
 					users => {
 						this.postMessage({
 							type: IssueViewMessageType.FOUND_USERS,
@@ -259,6 +259,17 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		if (diff.removedLinkedIssues != undefined) {
 			for (const linkedIssue of diff.removedLinkedIssues) {
 				await api.unlinkIssue({ issue: id, linkedIssue: linkedIssue });
+			}
+		}
+
+		if (diff.addedAssignees != undefined) {
+			for (const assignee of diff.addedAssignees) {
+				await api.addAssignee({ issue: id, assignee: assignee });
+			}
+		}
+		if (diff.removedAssignees != undefined) {
+			for (const assignee of diff.removedAssignees) {
+				await api.removeAssignee({ issue: id, assignee: assignee });
 			}
 		}
 

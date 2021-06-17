@@ -95,7 +95,7 @@
                         <template v-if="labelProps.content.id == 'new'">
                             <add-select 
                                 :options="labelOptions"
-                                placeholder="Search for label"
+                                placeholder="Search for labels"
                                 @vsc-search-text="onSearchLabel($event.detail.value)"
                                 @focusout="onLabelLostFocus()"
                                 @vsc-change="onLabelSelected($event.detail.value)"
@@ -141,13 +141,50 @@
                     </tree-view-item>
                 </template>
             </tree-view-item>
+            <tree-view-item
+                v-if="itemProps.content.id == 'assignees'"
+                :content="itemProps.content"
+                :defaultInput="itemProps.defaultInput"
+                :commands="[{icon: 'codicon-plus', command: 'new'}]"
+                @command="onAddAssignee()"
+            >
+                <template #icon>
+                    <div class="codicon codicon-account" />
+                </template>
+                <template #subcontent="assigneeProps">
+                    <tree-view-item
+                        :content="assigneeProps.content"
+                        :defaultInput="assigneeProps.defaultInput"
+                        :commands="[{icon: assigneeProps.content.id == 'new' ? 'codicon-close' : 'codicon-trash', command: 'delete'}]"
+                        @command="onDeleteAssignee(assigneeProps.content.id)"
+                    >
+                        <template #icon v-if="assigneeProps.content.id != 'new'">  
+                            <!--TODO-->
+                        </template>
+                        <template #icon v-else>
+                            <div
+                                class="codicon codicon-plus"
+                            />
+                        </template>
+                        <template v-if="assigneeProps.content.id == 'new'">
+                            <add-select 
+                                :options="assigneeOptions"
+                                placeholder="Search for users"
+                                @vsc-search-text="onSearchAssignee($event.detail.value)"
+                                @focusout="onAssigneeLostFocus()"
+                                @vsc-change="onAssigneeSelected($event.detail.value)"
+                            />
+                        </template>
+                    </tree-view-item>
+                </template>
+            </tree-view-item>
         </tree-view-container>
     </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { Issue, IssueCategory, Label } from "../../src/generated/graphql";
+import { Issue, IssueCategory, Label, User } from "../../src/generated/graphql";
 import { IssueViewMessage } from "../../src/issue-view/communication/IssueViewMessage";
 import { OpenIssueMessage } from "../../src/issue-view/communication/OpenIssueMessage";
 import { ThemeChangedMessage } from "../../src/issue-view/communication/ThemeChangedMessage";
@@ -157,6 +194,8 @@ import { SearchLabelsMessage } from "../../src/issue-view/communication/SearchLa
 import { FoundLabelsMessage } from "../../src/issue-view/communication/FoundLabelsMessage";
 import { SearchIssuesMessage } from "../../src/issue-view/communication/SearchIssuesMessage";
 import { FoundIssuesMessage } from "../../src/issue-view/communication/FoundIssuesMessage";
+import { SearchUsersMessage } from "../../src/issue-view/communication/SearchUsersMessage";
+import { FoundUsersMessage } from "../../src/issue-view/communication/FoundUsersMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -225,6 +264,16 @@ export default class App extends Vue {
      * The options for the linkedIssue AddSelect
      */
     private linkedIssueOptions: NodeOption<Issue>[] = [];
+
+    /**
+     * The content definition for the assignees
+     */
+    private assigneesTreeContent: TreeViewContent | null = null;
+
+    /**
+     * The options for the assignee AddSelect
+     */
+    private assigneeOptions: NodeOption<User>[] = [];
 
     /**
      * if true, the viewer is in edit mode
@@ -300,6 +349,15 @@ export default class App extends Vue {
                     node: issue
                 }));
                 break;
+            }
+            case IssueViewMessageType.FOUND_USERS: {
+                this.assigneeOptions = (message as FoundUsersMessage).users.map(assignee => ({
+                    label: assignee.displayName ?? assignee.username ?? "",
+                    description: assignee.username ?? "",
+                    value: assignee.id!,
+                    selected: false,
+                    node: assignee
+                }));
             }
         }
     }
@@ -528,10 +586,18 @@ export default class App extends Vue {
                     .filter(linkedIssue => linkedIssue != null)
                     .map(linkedIssue => this.mapLinkedIssueToTreeViewContent(linkedIssue as Issue))
             }
+            this.assigneesTreeContent = {
+                id: "assignees",
+                label: "Assignees",
+                subcontents: (issue.assignees?.nodes ?? [])
+                    .filter(assignee => assignee != null)
+                    .map(assignee => this.mapAssigneeToTreeViewContent(assignee as User))
+            }
 
             this.issueTreeContent = [
                 this.labelsTreeContent,
-                this.linkedIssuesTreeContent
+                this.linkedIssuesTreeContent,
+                this.assigneesTreeContent
             ]
         }
     }
@@ -688,7 +754,7 @@ export default class App extends Vue {
     private onLinkedIssueSelected(id: string): void {
         const canAdd = !(this.linkedIssuesTreeContent?.subcontents?.some(content => content.id == id) ?? true);
         if (canAdd) {
-            const newContent = this.linkedIssuesTreeContent?.subcontents?.[0] as ColorTreeViewContent;
+            const newContent = this.linkedIssuesTreeContent?.subcontents?.[0] as TreeViewContent;
             const linkedIssue = this.linkedIssueOptions.find(option => option.value == id)?.node;
             if (newContent != undefined && linkedIssue != undefined) {
                 newContent.id = linkedIssue.id!;
@@ -703,6 +769,89 @@ export default class App extends Vue {
             this.linkedIssuesTreeContent?.subcontents?.shift();
         }
     }
+
+        /**
+     * Maps a assignee to a TreeViewContent
+     */
+    private mapAssigneeToTreeViewContent(assignee: User): TreeViewContent {
+        return {
+            id: assignee.id!,
+            label: assignee.displayName ?? assignee.username,
+        }
+    }
+
+    /**
+     * Called when the add assignee button is pressed
+     */
+    private onAddAssignee(): void {
+        if (this.assigneesTreeContent != null && this.assigneesTreeContent.subcontents != undefined) {
+            this.assigneesTreeContent.subcontents.unshift({
+                id: "new",
+                label: "new"
+            });
+        }
+    }
+
+    /**
+     * Called to remove the assignee with the specified index from the current issue
+     */
+    private onDeleteAssignee(id: string): void {
+        const contentIndex = this.assigneesTreeContent?.subcontents?.findIndex(content => content.id == id);
+        if (contentIndex != undefined && contentIndex >= 0) {
+            this.assigneesTreeContent?.subcontents?.splice(contentIndex, 1);
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    removedAssignees: [id]  
+                });
+            }
+        }
+    }
+
+    /**
+     * Called when a new search text was entered
+     */
+    private onSearchAssignee(text: string): void {
+        this.postMessage({
+            type: IssueViewMessageType.SEARCH_USERS,
+            text: text
+        } as SearchUsersMessage);
+    }
+
+    /**
+     * Called when the assignee sarch input looses focus,
+     * removes the temporary assignee element
+     */
+    private onAssigneeLostFocus(): void {
+        this.$nextTick(() => {
+            if (this.assigneesTreeContent?.subcontents?.[0]?.id == "new") {
+                this.assigneesTreeContent.subcontents.shift();
+            }
+        });
+    }
+
+    /**
+     * Called when a assignee is selected, 
+     * replaces the temporary assignee element with the real assignee
+     */
+    private onAssigneeSelected(id: string): void {
+        const canAdd = !(this.assigneesTreeContent?.subcontents?.some(content => content.id == id) ?? true);
+        if (canAdd) {
+            const newContent = this.assigneesTreeContent?.subcontents?.[0] as TreeViewContent;
+            const assignee = this.assigneeOptions.find(option => option.value == id)?.node;
+            if (newContent != undefined && assignee != undefined) {
+                newContent.id = assignee.id!;
+                newContent.label = assignee.displayName ?? assignee.username;
+            }
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    addedAssignees: [id]
+                });
+            }
+        } else {
+            this.assigneesTreeContent?.subcontents?.shift();
+        }
+    }
+                
 
 }
 

@@ -7,7 +7,7 @@
 import {
     LitElement,
     property,
-    internalProperty,
+    state,
     query,
     html,
     TemplateResult,
@@ -108,16 +108,16 @@ export class VscodeSearchSelect extends LitElement {
         this.removeEventListener('keydown', this._onComponentKeyDown);
     }
 
-    @internalProperty()
+    @state()
     protected _activeIndex = -1;
 
-    @internalProperty()
+    @state()
     protected _currentDescription = '';
 
-    @internalProperty()
+    @state()
     protected _filter: SearchMethod = 'fuzzy';
 
-    @internalProperty()
+    @state()
     protected get _filteredOptions(): InternalOption[] {
         return filterOptionsByPattern(
             this._options,
@@ -126,22 +126,22 @@ export class VscodeSearchSelect extends LitElement {
         );
     }
 
-    @internalProperty()
+    @state()
     protected _placeholder = ';'
 
-    @internalProperty()
+    @state()
     protected _filterPattern = '';
 
-    @internalProperty()
+    @state()
     protected _options: InternalOption[] = [];
 
-    @internalProperty()
+    @state()
     protected _value = '';
 
-    @internalProperty()
+    @state()
     protected _values: string[] = [];
 
-    @internalProperty()
+    @state()
     protected _listScrollTop = 0;
 
     @query('.main-slot')
@@ -405,12 +405,16 @@ export class VscodeSearchSelect extends LitElement {
             dropdown: true,
         });
 
-        return html`
-		<div class="${classes}" style="border-color: var(--vscode-focusBorder);">
-		  ${this._renderOptions()} ${this._renderDropdownControls()}
-		  ${this._renderDescription()}
-		</div>
-	  `;
+        if (this._options.length > 0) {
+            return html`
+                <div class="${classes}" style="border-color: var(--vscode-focusBorder);">
+                ${this._renderOptions()} ${this._renderDropdownControls()}
+                ${this._renderDescription()}
+                </div>
+            `;
+        } else {
+            return nothing;
+        }
     }
 
     render(): TemplateResult {
