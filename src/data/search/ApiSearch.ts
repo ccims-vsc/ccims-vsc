@@ -1,3 +1,4 @@
+import { ExtensionContext } from "vscode";
 import { debounce, throttle } from "../../util/decorators";
 import { CCIMSApi } from "../CCIMSApi";
 
@@ -13,7 +14,7 @@ export abstract class ApiSearch<T, R> {
 	 * @param minAmount the min amount of requested nodes
 	 * @param maxAmount the max amount of requested nodes
 	 */
-	public constructor(protected readonly api: CCIMSApi, protected readonly minAmount: number, protected readonly maxAmount: number) {}
+	public constructor(protected readonly context: ExtensionContext, protected readonly minAmount: number, protected readonly maxAmount: number) {}
 
 	/**
 	 * Called to get new results

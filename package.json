@@ -17,10 +17,11 @@
 		"onView:ccims.issueView",
 		"onView:ccims.issueList",
 		"onCommand:ccims.reloadIssueList",
-		"onCommand:ccims.checkComponentStatus",
 		"onCommand:ccims.checkApiStatus",
 		"onCommand:ccims.selectComponent",
-		"onCommand:ccims.newIssue"
+		"onCommand:ccims.newIssue",
+		"onCommand:ccims.setupExtension",
+		"onCommand:ccims.login"
 	],
 	"repository": {
 		"type": "git",
@@ -43,7 +44,7 @@
 					"type": "tree",
 					"id": "ccims.issueList",
 					"name": "Issues",
-					"visibility" :"visible"
+					"visibility": "visible"
 				},
 				{
 					"type": "webview",
@@ -56,10 +57,10 @@
 		"configuration": {
 			"title": "CCIMS",
 			"properties": {
-				"ccims.apiUrl": {
+				"ccims.url": {
 					"type": "string",
-					"default": "http://localhost:8080/api",
-					"description": "The api endpoint of the used CCIMS instance",
+					"default": "http://localhost:8080",
+					"description": "The endpoint of the used CCIMS instance",
 					"scope": "window"
 				},
 				"ccims.componentId": {
@@ -83,11 +84,6 @@
 				"category": "CCIMS"
 			},
 			{
-				"command": "ccims.checkComponentStatus",
-				"title": "Check component status",
-				"category": "CCIMS"
-			},
-			{
 				"command": "ccims.selectComponent",
 				"title": "Select component",
 				"category": "CCIMS"
@@ -97,6 +93,16 @@
 				"title": "Create new issue",
 				"category": "CCIMS",
 				"icon": "$(add)"
+			},
+			{
+				"command": "ccims.setupExtension",
+				"title": "Setup extension",
+				"category": "CCIMS"
+			},
+			{
+				"command": "ccims.login",
+				"title": "Login",
+				"category": "CCIMS"
 			}
 		],
 		"menus": {
@@ -117,27 +123,42 @@
 			{
 				"view": "ccims.issueList",
 				"contents": "In order to use CCIMS features, please open a folder.\n[Open Folder](command:vscode.openFolder)",
-				"when": "workbenchState == empty && ccims.initialized"
+				"when": "workbenchState == empty"
 			},
 			{
 				"view": "ccims.issueList",
-				"contents": "The api is currently not available.\n[Check again](command:ccims.checkApiStatus)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "!ccims.apiAvailable && ccims.initialized"
+				"contents": "The api URL is currently not set\n[Setup extension](command:ccims.setupExtension)\n[Open Settings](command:workbench.action.openSettings2)",
+				"when": "workbenchState != empty && ccims.apiStatus == 2"
+			},
+			{
+				"view": "ccims.issueList",
+				"contents": "The api is currently not available.\n[Setup extension](command:ccims.setupExtension)\n[Check again](command:ccims.checkApiStatus)\n[Open Settings](command:workbench.action.openSettings2)",
+				"when": "workbenchState != empty && ccims.apiStatus == 3"
+			},
+			{
+				"view": "ccims.issueList",
+				"contents": "You are currently not logged in.\n[Login](command:ccims.login)",
+				"when": "workbenchState != empty && ccims.apiStatus == 4"
+			},
+			{
+				"view": "ccims.issueList",
+				"contents": "Your login data is invalid.\n[Login](command:ccims.login)",
+				"when": "workbenchState != empty && ccims.apiStatus == 5"
 			},
 			{
 				"view": "ccims.issueList",
 				"contents": "There is no component configured\n[Select component](command:ccims.selectComponent)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "workbenchState != empty && ccims.apiAvailable && !config.ccims.componentId && ccims.initialized"
+				"when": "workbenchState != empty && ccims.apiStatus == 6"
 			},
 			{
 				"view": "ccims.issueList",
 				"contents": "The currently configured component does not exist or is not accessible\n[Select component](command:ccims.selectComponent)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "config.ccims.componentId && ccims.apiAvailable && !ccims.componentAvailable && ccims.initialized"
+				"when": "workbenchState != empty && ccims.apiStatus == 7"
 			},
 			{
 				"view": "ccims.issueList",
-				"contents": "There are no issues on the selected component\n[Select component](command:ccims.selectComponent)",
-				"when": "workbenchState != empty && ccims.apiAvailable && ccims.componentAvailable && ccims.initialized"
+				"contents": "There are no issues on the selected component\n[Create issue](command:ccims.newIssue)\n[Select component](command:ccims.selectComponent)",
+				"when": "workbenchState != empty && ccims.apiStatus == 1"
 			}
 		]
 	},
@@ -166,7 +187,9 @@
 		"typescript": "^4.2.2"
 	},
 	"dependencies": {
+		"axios": "^0.21.1",
 		"graphql": "^15.5.0",
-		"graphql-tools": "^7.0.5"
+		"graphql-tools": "^7.0.5",
+		"keytar": "^7.7.0"
 	}
 }

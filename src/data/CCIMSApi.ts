@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 import { Component, getSdk, Issue, Label, Sdk } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
-import { getComponentId } from "./settings";
+import { getApiUrl, getComponentId, getLoginUrl, getPublicApiUrl } from "./settings";
+import axios from "axios";
+import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 
 /**
  * The type of the CCIMSApi used for all requests
@@ -29,9 +31,9 @@ function getSdkWrapper(sdk: Sdk) {
 		 * Gets an Issue based on its id
 		 * @param id the id of the Issue to load
 		 */
-		async getIssue(id: string): Promise<Issue> {
+		async getIssue(id: string): Promise<Issue | undefined> {
 			const res = await this.getIssueInternal({ id: id });
-			return res.node as Issue;
+			return res?.node as Issue | undefined;
 		},
 		/**
 		 * Searches for components
@@ -131,27 +133,60 @@ export type CCIMSApi = ReturnType<typeof getSdkWrapper>;
  * Gets a new CCIMSApi
  * @returns a new instance of the CCIMSApi
  */
-export async function getCCIMSApi(): Promise<CCIMSApi> {
-	return new Promise<CCIMSApi>((resolve, reject) => {
-		const apiUrl = vscode.workspace.getConfiguration("ccims").get("apiUrl") as string;
-		const client = new GraphQLClient(apiUrl);
-		resolve(getSdkWrapper(getSdk(client)));
-	});
+export async function getCCIMSApi(context: vscode.ExtensionContext): Promise<CCIMSApi | undefined> {
+	const apiUrl = getApiUrl();
+	if (apiUrl != undefined) {
+		try {
+			const client = new GraphQLClient(apiUrl, {
+				headers: {
+					authorization: `bearer ${await context.secrets.get("ccims-bearer")}`
+				}
+			});
+			return getSdkWrapper(getSdk(client));
+		} catch {
+			return undefined
+		}
+		
+	} else {
+		return undefined;
+	}
+}
+
+/**
+ * Checks if the api is reachable
+ * does not check if login information exists
+ * @returns true if the api is reachable, otherwise false
+ */
+export async function isApiReachable(): Promise<boolean> {
+	const publicApiUrl = getPublicApiUrl();
+	if (publicApiUrl != undefined) {
+		try {
+			const result = await axios.post(publicApiUrl, {
+				query: "query { echo(input: \"available\") }"
+			});
+
+			return result.data.data.echo === "available"
+		} catch {
+			return false;
+		}
+	} else {
+		return false;
+	}
 }
 
 /**
  * Checks if the api is available
  * @returns true if the api is available, otherwise false
  */
-export async function isApiAvailable(): Promise<boolean> {
-	const apiUrl = vscode.workspace.getConfiguration("ccims").get("apiUrl") as string;
+export async function isApiAvailable(context: vscode.ExtensionContext): Promise<boolean> {
+	const apiUrl = getApiUrl();
 	if (!apiUrl) {
 		return false;
 	}
-	const api = await getCCIMSApi();
+	const api = await getCCIMSApi(context);
 	try {
-		return (await api.echo({input: "echo"})).echo === "echo";
-	} catch {
+		return (await api?.echo({input: "echo"}))?.echo === "echo";
+	} catch(e) {
 		return false;
 	}
 }
@@ -160,16 +195,37 @@ export async function isApiAvailable(): Promise<boolean> {
  * Checks if the api is available
  * @returns true if the api is available, otherwise false
  */
-export async function isComponentAvailable(): Promise<boolean> {
-	const api = await getCCIMSApi();
+export async function isComponentAvailable(context: vscode.ExtensionContext): Promise<boolean> {
+	const api = await getCCIMSApi(context);
 	const componentId = getComponentId();
 	if (!componentId) {
 		return false;
 	}
 
 	try {
-		return (await api.getComponentInternal({ id: componentId }))?.node != undefined;
+		return (await api?.getComponentInternal({ id: componentId }))?.node != undefined;
 	} catch {
+		return false;
+	}
+}
+
+export async function updateApiSecret(username: string, password: string, context: vscode.ExtensionContext): Promise<boolean> {
+	const loginUrl = getLoginUrl();
+	console.log(loginUrl);
+	if (loginUrl != undefined) {
+		try {
+			const response = await axios.post(loginUrl, {
+				username: username,
+				password: password
+			});
+
+			await context.secrets.store("ccims-bearer", response.data.token);
+			vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
+			return true;
+		} catch {
+			return false;
+		}
+	} else {
 		return false;
 	}
 }

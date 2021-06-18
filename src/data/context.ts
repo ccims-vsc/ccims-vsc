@@ -29,7 +29,5 @@ export function getContext(context: CCIMSContext): any {
  * Enum for all common ccims contexts
  */
 export enum CCIMSContext {
-	API_AVAILABLE = "ccims.apiAvailable",
-	COMPONENT_AVAILABLE = "ccims.componentAvailable",
-	INITIALIZED = "ccims.initialized"
+	API_STATUS = "ccims.apiStatus",
 }

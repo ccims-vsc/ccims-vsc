@@ -1,7 +1,6 @@
 import { IssueViewProviderBase } from "./IssueViewProviderBase";
 import * as vscode from "vscode";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
-import { CCIMSApi, getCCIMSApi } from "../data/CCIMSApi";
 import { IssueViewMessageType } from "./communication/IssueViewMessageType";
 import { OpenIssueMessage } from "./communication/OpenIssueMessage";
 import { ThemeChangedMessage } from "./communication/ThemeChangedMessage";
@@ -23,6 +22,7 @@ import { SearchUsersMessage } from "./communication/SearchUsersMessage";
 import { ArtifactSearch } from "../data/search/ArtifactSearch";
 import { SearchArtifactsMessage } from "./communication/SearchArtifactsMessage";
 import { FoundArtifactsMessage } from "./communication/FoundArtifactsMessage";
+import { CCIMSApi, getCCIMSApi } from "../data/CCIMSApi";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -51,11 +51,16 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		}
 	}
 
-	constructor(extensionUri: vscode.Uri, commands: CCIMSCommands) {
+	constructor(extensionUri: vscode.Uri, commands: CCIMSCommands, private readonly _context: vscode.ExtensionContext) {
 		super(extensionUri);
 
 		this._initCommands(commands);
 		this._initListeners();
+		commands.reloadIssueListCommand.addListener(() => {
+			if (this._issue != undefined) {
+				this._openIssue(this._issue.id ?? "");
+			}
+		});
 	}
 
 	/**
@@ -96,8 +101,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 * Called to init search related listeners
 	 */
 	private async _initSearchListeners(): Promise<void> {
-		const api = await getCCIMSApi();
-		const labelSearch = new LabelSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		const labelSearch = new LabelSearch(this._context, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
 		this.setMessageListener(IssueViewMessageType.SEARCH_LABELS, async message => {
 			const searchLabelsMessage = message as SearchLabelsMessage;
 			const components = this._components;
@@ -113,7 +117,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			}
 		});
 
-		const issueSearch = new IssueSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		const issueSearch = new IssueSearch(this._context, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
 		this.setMessageListener(IssueViewMessageType.SEARCH_ISSUES, async message => {
 			const searchIssuesMessage = message as SearchIssuesMessage;
 			const components = this._components;
@@ -129,7 +133,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			}
 		});
 
-		const userSearch = new UserSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		const userSearch = new UserSearch(this._context, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
 		this.setMessageListener(IssueViewMessageType.SEARCH_USERS, async message => {
 			const searchUsersMessage = message as SearchUsersMessage;
 			const components = this._components;
@@ -145,7 +149,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			}
 		});
 
-		const artifactSearch = new ArtifactSearch(api, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
+		const artifactSearch = new ArtifactSearch(this._context, MIN_SEARCH_AMOUNT, MAX_SEARCH_AMOUNT);
 		this.setMessageListener(IssueViewMessageType.SEARCH_ARTIFACTS, async message => {
 			const searchArtifactsMessage = message as SearchArtifactsMessage;
 			const components = this._components;
@@ -167,11 +171,10 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 * @param diff the IssueDiff which defines the new image
 	 */
 	private async _createIssue(diff: IssueDiff): Promise<void> {
-		const api = await getCCIMSApi();
 		const component = getComponentId();
-
-		if (component != null) {
-			const result = await api.createIssue({
+		const api = await getCCIMSApi(this._context);
+		if (component != undefined && api != undefined) {
+			const result = await api?.createIssue({
 				component: component,
 				title: diff.title ?? "",
 				body: diff.body ?? "",
@@ -180,21 +183,21 @@ export class IssueViewProvider extends IssueViewProviderBase {
 				assignees: diff.addedAssignees,
 				artifacts: diff.addedArtifacts,
 			});
-			const id = result.createIssue?.issue?.id;
+			const id = result?.createIssue?.issue?.id;
 
 			if (id != undefined) {
 				if (diff.addedLinkedIssues != undefined) {
 					for (const linkedIssue of diff.addedLinkedIssues) {
-						await api.linkIssue({ issue: id, linkedIssue: linkedIssue });
+						await api?.linkIssue({ issue: id, linkedIssue: linkedIssue });
 					}
 				}
 				if (diff.removedLinkedIssues != undefined) {
 					for (const linkedIssue of diff.removedLinkedIssues) {
-						await api.unlinkIssue({ issue: id, linkedIssue: linkedIssue });
+						await api?.unlinkIssue({ issue: id, linkedIssue: linkedIssue });
 					}
 				}
 
-				vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result.createIssue?.issue?.id);
+				vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result?.createIssue?.issue?.id);
 				vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 			} else {
 				//TODO error handling
@@ -210,70 +213,72 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 * @param id the id of the Issue to update
 	 */
 	private async _updateIssue(diff: IssueDiff, id: string): Promise<void> {
-		const api = await getCCIMSApi();
-		if (diff.title != undefined) {
-			await api.updateIssueTitle({
-				id: id,
-				title: diff.title
-			});
-		}
-
-		if (diff.body != undefined) {
-			await api.updateIssueBody({
-				id: id,
-				body: diff.body
-			});
-		}
-
-		if (diff.category != undefined) {
-			await api.updateIssueCategory({
-				id: id,
-				category: diff.category
-			});
-		}
-
-		if (diff.isOpen != undefined) {
-			if (diff.isOpen) {
-				await api.reopenIssue({ id: id });
-			} else {
-				await api.closeIssue({ id: id });
+		const api = await getCCIMSApi(this._context);
+		if (api != undefined) {
+			if (diff.title != undefined) {
+				await api?.updateIssueTitle({
+					id: id,
+					title: diff.title
+				});
 			}
-		}
-
-		if (diff.addedLabels != undefined) {
-			for (const label of diff.addedLabels) {
-				await api.addLabelToIssue({ issue: id, label: label });
+	
+			if (diff.body != undefined) {
+				await api?.updateIssueBody({
+					id: id,
+					body: diff.body
+				});
 			}
-		}
-		if (diff.removedLabels != undefined) {
-			for (const label of diff.removedLabels) {
-				await api.removeLabelFromIssue({ issue: id, label: label });
+	
+			if (diff.category != undefined) {
+				await api?.updateIssueCategory({
+					id: id,
+					category: diff.category
+				});
 			}
-		}
-
-		if (diff.addedLinkedIssues != undefined) {
-			for (const linkedIssue of diff.addedLinkedIssues) {
-				await api.linkIssue({ issue: id, linkedIssue: linkedIssue });
+	
+			if (diff.isOpen != undefined) {
+				if (diff.isOpen) {
+					await api?.reopenIssue({ id: id });
+				} else {
+					await api?.closeIssue({ id: id });
+				}
 			}
-		}
-		if (diff.removedLinkedIssues != undefined) {
-			for (const linkedIssue of diff.removedLinkedIssues) {
-				await api.unlinkIssue({ issue: id, linkedIssue: linkedIssue });
+	
+			if (diff.addedLabels != undefined) {
+				for (const label of diff.addedLabels) {
+					await api?.addLabelToIssue({ issue: id, label: label });
+				}
 			}
-		}
-
-		if (diff.addedAssignees != undefined) {
-			for (const assignee of diff.addedAssignees) {
-				await api.addAssignee({ issue: id, assignee: assignee });
+			if (diff.removedLabels != undefined) {
+				for (const label of diff.removedLabels) {
+					await api?.removeLabelFromIssue({ issue: id, label: label });
+				}
 			}
-		}
-		if (diff.removedAssignees != undefined) {
-			for (const assignee of diff.removedAssignees) {
-				await api.removeAssignee({ issue: id, assignee: assignee });
+	
+			if (diff.addedLinkedIssues != undefined) {
+				for (const linkedIssue of diff.addedLinkedIssues) {
+					await api?.linkIssue({ issue: id, linkedIssue: linkedIssue });
+				}
 			}
+			if (diff.removedLinkedIssues != undefined) {
+				for (const linkedIssue of diff.removedLinkedIssues) {
+					await api?.unlinkIssue({ issue: id, linkedIssue: linkedIssue });
+				}
+			}
+	
+			if (diff.addedAssignees != undefined) {
+				for (const assignee of diff.addedAssignees) {
+					await api?.addAssignee({ issue: id, assignee: assignee });
+				}
+			}
+			if (diff.removedAssignees != undefined) {
+				for (const assignee of diff.removedAssignees) {
+					await api?.removeAssignee({ issue: id, assignee: assignee });
+				}
+			}
+	
+			vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 		}
-
-		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 	}
 
 	/**
@@ -302,12 +307,14 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 * @param id the id of the issue to open
 	 */
 	private async _openIssue(id: string): Promise<void> {
-		const api = await getCCIMSApi();
-		this._issue = await api.getIssue(id);
-		this.postMessage({
-			type: IssueViewMessageType.OPEN_ISSUE,
-			issue: this._issue
-		} as OpenIssueMessage);
+		const api = await getCCIMSApi(this._context);
+		if (api != undefined) {
+			this._issue = await api?.getIssue(id);
+			this.postMessage({
+				type: IssueViewMessageType.OPEN_ISSUE,
+				issue: this._issue
+			} as OpenIssueMessage);
+		}
 	}
 
 	/**

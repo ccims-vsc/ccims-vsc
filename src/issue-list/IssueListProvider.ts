@@ -18,7 +18,7 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 	 * Creates a new IssueListProvider
 	 * @param commands commands used to listen for refresh command
 	 */
-	public constructor(private readonly _commands: CCIMSCommands) {
+	public constructor(private readonly _commands: CCIMSCommands, private readonly _context: vscode.ExtensionContext) {
 		this._commands.reloadIssueListCommand.addListener(() => this.refresh());
 	}
 
@@ -49,10 +49,10 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 			//TODO: maybe add artifacts etc. here
 			return new Promise(resolve => resolve(undefined));
 		} else {
-			const api = await getCCIMSApi();
+			const api = await getCCIMSApi(this._context);
 			const componentId =  getComponentId();
 			if (componentId != null) {
-				return await api.getIssues(componentId);
+				return await api?.getIssues(componentId);
 			} else {
 				return undefined;
 			}

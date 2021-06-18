@@ -12,7 +12,7 @@
 			"runtimeExecutable": "${execPath}",
 			"args": ["--extensionDevelopmentPath=${workspaceRoot}"],
 			"outFiles": ["${workspaceFolder}/out/**/*.js"],
-			"preLaunchTask": "run-build"
+			"preLaunchTask": "run-compile"
 		}
 	]
 }
