@@ -308,7 +308,7 @@ export class VscodeSearchSelect extends LitElement {
     }
 
     private _onComponentKeyDown(event: KeyboardEvent) {
-        if ([' ', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
+        if (['ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
             event.stopPropagation();
             event.preventDefault();
         }

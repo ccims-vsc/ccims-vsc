@@ -1,4 +1,4 @@
-export interface TreeViewContent {
+export interface TreeViewContent<T extends TreeViewContent = any> {
     /**
      * The id of the content
      */
@@ -10,5 +10,5 @@ export interface TreeViewContent {
     /**
      * Subcontents
      */
-    subcontents?: TreeViewContent[]
+    subcontents?: T[]
 }

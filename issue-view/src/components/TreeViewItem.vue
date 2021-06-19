@@ -28,26 +28,24 @@
         >
             <slot name="icon"/>
         </div>
-        <div style="display: flex; width: 100%">
-            <slot>
-                <span 
-                    v-if="mode == 'default'"
-                    class="label"
-                >
-                    {{ content.label }}
-                </span>
-            </slot>
-            <div style="margin-left: auto; align-self: center;">
-                <div 
-                    class="command-icon-container"
-                    v-for="{ icon, command } in commands" :key="command"
-                    @click.stop="$emit('command', command)"
-                >
-                    <div
-                        class="codicon command-icon"
-                        :class="icon"
-                    />
-                </div>
+        <slot>
+            <span 
+                v-if="mode == 'default'"
+                class="label"
+            >
+                {{ content.label }}
+            </span>
+        </slot>
+        <div style="margin-left: auto; align-self: center;">
+            <div 
+                class="command-icon-container"
+                v-for="{ icon, command } in commands" :key="command"
+                @click.stop="$emit('command', command)"
+            >
+                <div
+                    class="codicon command-icon"
+                    :class="icon"
+                />
             </div>
         </div>
     </span>
@@ -317,7 +315,7 @@ ul:focus-within .contents.selected {
 }
 .command-icon-container {
     width: 22px;
-    height: 22px;
+    height: 21px;
     border-radius: 5px;
     padding: 3px;
     margin-right: 4px;

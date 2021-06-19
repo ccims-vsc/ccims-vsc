@@ -6,7 +6,7 @@
             class="container"
         >
             <img 
-                :src="iconTable[getIssueIcon(issue)]"
+                :src="iconTable[icon(issue)]"
                 style="align-self: center; height: 25px"
             />
             <input 
@@ -122,7 +122,10 @@
                         @command="onDeleteLinkedIssue(linkedIssueProps.content.id)"
                     >
                         <template #icon v-if="linkedIssueProps.content.id != 'new'">  
-                            <!--TODO-->
+                            <img
+                                :src="iconTable[getIssueIcon(linkedIssueProps.content.issue)]" 
+                                style="width: 16px; height: 22px;"
+                            />
                         </template>
                         <template #icon v-else>
                             <div
@@ -198,6 +201,7 @@ import { SearchUsersMessage } from "../../src/issue-view/communication/SearchUse
 import { FoundUsersMessage } from "../../src/issue-view/communication/FoundUsersMessage";
 import { UserIdChangedMessage } from "../../src/issue-view/communication/UserIdChangedMessage";
 import { IconTableMessage } from "../../src/issue-view/communication/IconTableMessage";
+import { ComplexListIconsChangedMessage } from "../../src/issue-view/communication/ComplexListIconsChangedMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -249,6 +253,11 @@ export default class App extends Vue {
     private userId: string | null = null;
 
     /**
+     * If true, the complex icons are used
+     */
+    private complexIcons: boolean = false;
+
+    /**
      * Table with all icons
      */
     private iconTable: { [key: string]: string } = {};
@@ -261,7 +270,7 @@ export default class App extends Vue {
     /**
      * The content definition for the labels
      */
-    private labelsTreeContent: TreeViewContent | null = null;
+    private labelsTreeContent: TreeViewContent<ColorTreeViewContent> | null = null;
 
     /**
      * The options for the label AddSelect
@@ -271,7 +280,7 @@ export default class App extends Vue {
     /**
      * The content definition for the linkedIssues
      */
-    private linkedIssuesTreeContent: TreeViewContent | null = null;
+    private linkedIssuesTreeContent: TreeViewContent<IssueTreeViewContent> | null = null;
 
     /**
      * The options for the linkedIssue AddSelect
@@ -374,15 +383,17 @@ export default class App extends Vue {
                 break;
             }
             case IssueViewMessageType.USER_ID_CHANGED: {
-                console.log("user id changed");
                 this.userId = (message as UserIdChangedMessage).id ?? null;
-                console.log(this.userId);
                 break;
             }
             case IssueViewMessageType.ICON_TABLE: {
-                console.log("icon table");
                 this.iconTable = (message as IconTableMessage).icons;
-                console.log(this.iconTable);
+                break;
+            }
+            case IssueViewMessageType.COMPLEX_LIST_ICONS_CHANGED: {
+                console.log("complex icons");
+                this.complexIcons = (message as ComplexListIconsChangedMessage).complex;
+                console.log(this.complexIcons);
             }
         }
     }
@@ -645,7 +656,8 @@ export default class App extends Vue {
         if (this.labelsTreeContent != null && this.labelsTreeContent.subcontents != undefined) {
             this.labelsTreeContent.subcontents.unshift({
                 id: "new",
-                label: "new"
+                label: "new",
+                color: "#00000000"
             });
             this.onSearchLabel("");
         }
@@ -715,10 +727,11 @@ export default class App extends Vue {
         /**
      * Maps a linkedIssue to a TreeViewContent
      */
-    private mapLinkedIssueToTreeViewContent(linkedIssue: Issue): TreeViewContent {
+    private mapLinkedIssueToTreeViewContent(linkedIssue: Issue): IssueTreeViewContent {
         return {
             id: linkedIssue.id!,
-            label: linkedIssue.title
+            label: linkedIssue.title,
+            issue: linkedIssue
         }
     }
 
@@ -729,7 +742,8 @@ export default class App extends Vue {
         if (this.linkedIssuesTreeContent != null && this.linkedIssuesTreeContent.subcontents != undefined) {
             this.linkedIssuesTreeContent.subcontents.unshift({
                 id: "new",
-                label: "new"
+                label: "new",
+                issue: null
             });
             this.onSearchLinkedIssue("");
         }
@@ -779,11 +793,12 @@ export default class App extends Vue {
     private onLinkedIssueSelected(id: string): void {
         const canAdd = !(this.linkedIssuesTreeContent?.subcontents?.some(content => content.id == id) ?? true);
         if (canAdd) {
-            const newContent = this.linkedIssuesTreeContent?.subcontents?.[0] as TreeViewContent;
+            const newContent = this.linkedIssuesTreeContent?.subcontents?.[0] as IssueTreeViewContent;
             const linkedIssue = this.linkedIssueOptions.find(option => option.value == id)?.node;
             if (newContent != undefined && linkedIssue != undefined) {
                 newContent.id = linkedIssue.id!;
                 newContent.label = linkedIssue.title;
+                newContent.issue = linkedIssue;
             }
             if (this.mode != "new") {
                 this.sendUpdateDiff({
@@ -878,16 +893,32 @@ export default class App extends Vue {
     }
     
     /**
-     * Gets the icon for an issue
+     * Gets the icon of the issue
      */
-    private getIssueIcon(issue: Issue, complex = true): string {
-        if (complex) {
+    private icon(): string {
+        return getComplexIssueIcon(
+            this.issue?.category ?? IssueCategory.Unclassified, 
+            this.issue?.isOpen ?? true, 
+            this.linkedIssuesTreeContent?.subcontents?.some(content => content.id != "new") ?? false,
+            ((this.issue?.linkedByIssues?.nodes?.length ?? 0) > 0),
+            this.assigneesTreeContent?.subcontents?.some(content => content.id == (this.userId ?? "")) ?? false
+        );
+    }
+
+    /**
+     * Gets the simple icon for the issue
+     * requires that both category and isOpen are provided
+     * @param issue the issue to get the icon for
+     * @returns the icon
+     */
+    private getIssueIcon(issue: Issue): string {
+        if (this.complexIcons) {
             return getComplexIssueIcon(
                 issue.category, 
                 issue.isOpen, 
-                this.linkedIssuesTreeContent?.subcontents?.some(content => content.id != "new") ?? false,
-                ((this.issue?.linkedByIssues?.nodes?.length ?? 0) > 0) || (this.linkedIssuesTreeContent?.subcontents?.some(content => content.id == issue.id) ?? false),
-                this.assigneesTreeContent?.subcontents?.some(content => content.id == (this.userId ?? "")) ?? false
+                (issue.linksToIssues?.nodes?.length ?? 0) > 0,
+                (issue.linkedByIssues?.nodes?.length ?? 0) > 0  || (this.linkedIssuesTreeContent?.subcontents?.some(content => content.id == this.issue?.id) ?? false),
+                issue.assignees?.nodes?.some(user => user?.id === this.userId) ?? false
             );
         } else {
             return getSimpleIssueIcon(
@@ -904,6 +935,13 @@ export default class App extends Vue {
  */
 interface ColorTreeViewContent extends TreeViewContent {
     color: string
+}
+
+/**
+ * TreeViewContent with a color, used for labels
+ */
+interface IssueTreeViewContent extends TreeViewContent {
+    issue: Issue | null
 }
 
 /**

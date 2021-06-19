@@ -1,0 +1,1 @@
+All icons in folders complex and simple are modified versions based on icons from https://github.com/microsoft/vscode-codicons

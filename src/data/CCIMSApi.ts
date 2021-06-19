@@ -36,9 +36,9 @@ function getSdkWrapper(sdk: Sdk) {
 		 */
 		async getIssue(id: string): Promise<Issue | undefined> {
 			if (isComplexListIcons()) {
-				return (await this.getIssueInternalSimple({ id: id })).node as Issue | undefined;
-			} else {
 				return (await this.getIssueInternalComplex({ id: id })).node as Issue | undefined;
+			} else {
+				return (await this.getIssueInternalSimple({ id: id })).node as Issue | undefined;
 			}
 		},
 		/**
@@ -106,18 +106,19 @@ function getSdkWrapper(sdk: Sdk) {
 		 */
 		 async searchIssues(components: string[], text: string, minAmount: number, maxAmount: number): Promise<Issue[]> {
 			const issues: Map<string, Issue> = new Map();
+			const searchFunction = isComplexListIcons() ? this.searchIssuesInternalComplex : this.searchIssuesInternalSimple;
 			for (const component of components) {
 				if (issues.size >= minAmount) {
 					break;
 				}
-				const nameComponent = (await this.searchIssuesInternal({id: component, title: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const nameComponent = (await searchFunction({id: component, title: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
 				const nameResults = nameComponent?.issues?.nodes as Issue[] | undefined;
 				if (nameResults != undefined) {
 					for (const issue of nameResults) {
 						issues.set(issue.id!, issue);
 					}
 				}
-				const descriptionComponent = (await this.searchIssuesInternal({id: component, body: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const descriptionComponent = (await searchFunction({id: component, body: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
 				const descriptionResults = descriptionComponent?.issues?.nodes as Issue[] | undefined;
 				if (descriptionResults != undefined) {
 					for (const issue of descriptionResults) {

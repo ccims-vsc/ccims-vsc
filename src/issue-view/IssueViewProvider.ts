@@ -5,7 +5,7 @@ import { IssueViewMessageType } from "./communication/IssueViewMessageType";
 import { OpenIssueMessage } from "./communication/OpenIssueMessage";
 import { ThemeChangedMessage } from "./communication/ThemeChangedMessage";
 import { CreateIssueMessage } from "./communication/CreateIssueMessage";
-import { getComponentId } from "../data/settings";
+import { getComponentId, isComplexListIcons } from "../data/settings";
 import { UpdateIssueMessage } from "./communication/UpdateIssueMessage";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 import { IssueDiff } from "./communication/IssueDiff";
@@ -26,6 +26,7 @@ import { CCIMSApi, getCCIMSApi } from "../data/CCIMSApi";
 import { UserIdChangedMessage } from "./communication/UserIdChangedMessage";
 import { listIconFiles } from "../data/IconProvider";
 import { IconTableMessage } from "./communication/IconTableMessage";
+import { ComplexListIconsChangedMessage } from "./communication/ComplexListIconsChangedMessage";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -84,6 +85,10 @@ export class IssueViewProvider extends IssueViewProviderBase {
 
 		commands.userIdChangedCommand.addListener(() => {
 			this._updateUserId();
+		});
+
+		commands.complexListIconsChangedCommand.addListener(() => {
+			this._updateComplexListItems();
 		})
 	}
 
@@ -295,6 +300,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		this._updateTheme();
 		this._updateUserId();
 		this._updateIconTable();
+		this._updateComplexListItems();
 		vscode.window.onDidChangeActiveColorTheme(() => {
 			this._updateTheme();
 		});
@@ -322,7 +328,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	}
 
 	/**
-	 * Sents an updated icon table to the frontend
+	 * Sends an updated icon table to the frontend
 	 */
 	private _updateIconTable(): void {
 		const icons = listIconFiles();
@@ -333,7 +339,17 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		this.postMessage({
 			type: IssueViewMessageType.ICON_TABLE,
 			icons: iconTable
-		} as IconTableMessage)
+		} as IconTableMessage);
+	}
+
+	/**
+	 * Message to inform the frontend about changed complex list icons
+	 */
+	private _updateComplexListItems(): void {
+		this.postMessage({
+			type: IssueViewMessageType.COMPLEX_LIST_ICONS_CHANGED,
+			complex: isComplexListIcons()
+		} as ComplexListIconsChangedMessage);
 	}
 
 	/**

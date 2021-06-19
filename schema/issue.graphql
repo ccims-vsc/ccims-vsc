@@ -10,6 +10,13 @@ query getIssueInternalSimple($id: ID!) {
         nodes {
           id
           title
+          isOpen
+          category
+        }
+      }
+      linkedByIssues(first:1) {
+        nodes {
+          id
         }
       }
       labels {
@@ -56,6 +63,23 @@ query getIssueInternalComplex($id: ID!) {
         nodes {
           id
           title
+          isOpen
+          category
+          assignees {
+            nodes {
+              id
+            }
+          }
+          linksToIssues(first: 1) {
+            nodes {
+              id
+            }
+          }
+          linkedByIssues(first:1) {
+            nodes {
+              id
+            }
+          }
         }
       }
       linkedByIssues(first:1) {
@@ -236,7 +260,7 @@ mutation removeArtifactFromIssue($issue: ID!, $artifact: ID!) {
   }
 }
 
-query searchIssuesInternal($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+query searchIssuesInternalSimple($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
   node(id: $id) {
     ...on Component {
       issues(first: $maxAmount, filterBy: {
@@ -249,6 +273,40 @@ query searchIssuesInternal($id: ID!, $title: String, $body: String, $maxAmount: 
           body
           isOpen
           category
+        }
+      }
+    }
+  }
+}
+
+query searchIssuesInternalComplex($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Component {
+      issues(first: $maxAmount, filterBy: {
+        title: $title,
+        body: $body,
+      }) {
+        nodes {
+          id
+          title
+          body
+          isOpen
+          category
+          assignees {
+            nodes {
+              id
+            }
+          }
+          linksToIssues(first: 1) {
+            nodes {
+              id
+            }
+          }
+          linkedByIssues(first:1) {
+            nodes {
+              id
+            }
+          }
         }
       }
     }
