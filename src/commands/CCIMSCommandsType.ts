@@ -9,5 +9,7 @@ export enum CCIMSCommandType {
 	SELECT_COMPONENT = "ccims.selectComponent",
 	NEW_ISSUE = "ccims.newIssue",
 	SETUP_EXTENSION = "ccims.setupExtension",
-	LOGIN = "ccims.login"
+	LOGIN = "ccims.login",
+	COMPLEX_LIST_ICONS_CHANGED = "ccims.complexListIconsChanged",
+	USER_ID_CHANGED = "ccims.userIdChanged"
 }

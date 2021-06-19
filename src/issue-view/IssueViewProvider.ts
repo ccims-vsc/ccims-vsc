@@ -23,6 +23,9 @@ import { ArtifactSearch } from "../data/search/ArtifactSearch";
 import { SearchArtifactsMessage } from "./communication/SearchArtifactsMessage";
 import { FoundArtifactsMessage } from "./communication/FoundArtifactsMessage";
 import { CCIMSApi, getCCIMSApi } from "../data/CCIMSApi";
+import { UserIdChangedMessage } from "./communication/UserIdChangedMessage";
+import { listIconFiles } from "../data/IconProvider";
+import { IconTableMessage } from "./communication/IconTableMessage";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -78,6 +81,10 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		commands.newIssueCommand.addListener(() => {
 			this._newIssue();
 		});
+
+		commands.userIdChangedCommand.addListener(() => {
+			this._updateUserId();
+		})
 	}
 
 	/**
@@ -286,6 +293,8 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	 */
 	protected postResolveWebView(): void {
 		this._updateTheme();
+		this._updateUserId();
+		this._updateIconTable();
 		vscode.window.onDidChangeActiveColorTheme(() => {
 			this._updateTheme();
 		});
@@ -300,6 +309,31 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			type: IssueViewMessageType.THEME_CHANGED,
 			theme: theme == vscode.ColorThemeKind.Dark ? "vs-dark" : theme == vscode.ColorThemeKind.Light ? "vs" : "hc-black"
 		} as ThemeChangedMessage)
+	}
+
+	/**
+	 * Message to inform the frontend about a changed user id
+	 */
+	private _updateUserId(): void {
+		this.postMessage({
+			type: IssueViewMessageType.USER_ID_CHANGED,
+			id: this._context.globalState.get("userId")
+		} as UserIdChangedMessage);
+	}
+
+	/**
+	 * Sents an updated icon table to the frontend
+	 */
+	private _updateIconTable(): void {
+		const icons = listIconFiles();
+		const iconTable: { [key: string]: string; } = {};
+		for (const icon of icons) {
+			iconTable[icon] = this.getResourceUri(icon).toString()
+		}
+		this.postMessage({
+			type: IssueViewMessageType.ICON_TABLE,
+			icons: iconTable
+		} as IconTableMessage)
 	}
 
 	/**

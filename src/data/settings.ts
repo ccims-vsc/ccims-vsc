@@ -69,6 +69,13 @@ export async function setComponentId(id: string): Promise<void> {
 }
 
 /**
+ * Gets if complex list icons should be used
+ */
+export function isComplexListIcons(): boolean {
+	return vscode.workspace.getConfiguration("ccims").get("complexListIcons") ?? false;
+}
+
+/**
  * Called on initialization to init all settings listeners
  */
 export function initSettingsListener(): void {
@@ -78,6 +85,9 @@ export function initSettingsListener(): void {
 		}
 		if (e.affectsConfiguration("ccims.url")) {
 			vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
+		}
+		if (e.affectsConfiguration("ccims.complexListIcons")) {
+			vscode.commands.executeCommand(CCIMSCommandType.COMPLEX_LIST_ICONS_CHANGED);
 		}
 	})
 }

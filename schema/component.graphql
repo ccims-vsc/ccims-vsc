@@ -1,4 +1,4 @@
-query getComponentInternal($id: ID!) {
+query getComponentInternalSimple($id: ID!) {
   node(id: $id) {
     ...on Component {
       name
@@ -10,6 +10,39 @@ query getComponentInternal($id: ID!) {
           body
           isOpen
           category
+        }
+      }
+    }
+  }
+}
+
+query getComponentInternalComplex($id: ID!) {
+  node(id: $id) {
+    ...on Component {
+      name
+      description
+      issues {
+        nodes {
+          id
+          title
+          body
+          isOpen
+          category
+          assignees {
+            nodes {
+              id
+            }
+          }
+          linksToIssues(first: 1) {
+            nodes {
+              id
+            }
+          }
+          linkedByIssues(first:1) {
+            nodes {
+              id
+            }
+          }
         }
       }
     }

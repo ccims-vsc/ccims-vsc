@@ -4,7 +4,8 @@ import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { getIssueIcon } from "../data/IconProvider";
 import { Issue } from "../generated/graphql";
-import { getComponentId } from "../data/settings";
+import { getComponentId, isComplexListIcons } from "../data/settings";
+import { getResourceUri } from "../extension";
 
 /**
  * View used to display a tree of all Issues
@@ -35,7 +36,7 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 		return {
 			id: element.id!,
 			label: element.title,
-			iconPath: getIssueIcon(element),
+			iconPath: getResourceUri(getIssueIcon(element, this._context.globalState.get<string>("userId") ?? "", isComplexListIcons())),
 			command: {
 				command: CCIMSCommandType.OPEN_ISSUE,
 				title: "Open issue",

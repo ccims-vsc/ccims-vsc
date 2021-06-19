@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Component, getSdk, Issue, Label, Sdk } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
-import { getApiUrl, getComponentId, getLoginUrl, getPublicApiUrl } from "./settings";
+import { getApiUrl, getComponentId, getLoginUrl, getPublicApiUrl, isComplexListIcons } from "./settings";
 import axios from "axios";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 
@@ -16,8 +16,11 @@ function getSdkWrapper(sdk: Sdk) {
 		 * @param id the id of the Component
 		 */
 		async getComponent(id: string): Promise<Component> {
-			const res = await this.getComponentInternal({ id: id });
-			return res.node as Component;
+			if (isComplexListIcons()) {
+				return (await this.getComponentInternalComplex({ id: id })).node as Component;
+			} else {
+				return (await this.getComponentInternalSimple({ id: id })).node as Component;
+			}
 		},
 		/**
 		 * Gets all Issues of a Component
@@ -32,8 +35,11 @@ function getSdkWrapper(sdk: Sdk) {
 		 * @param id the id of the Issue to load
 		 */
 		async getIssue(id: string): Promise<Issue | undefined> {
-			const res = await this.getIssueInternal({ id: id });
-			return res?.node as Issue | undefined;
+			if (isComplexListIcons()) {
+				return (await this.getIssueInternalSimple({ id: id })).node as Issue | undefined;
+			} else {
+				return (await this.getIssueInternalComplex({ id: id })).node as Issue | undefined;
+			}
 		},
 		/**
 		 * Searches for components
@@ -203,7 +209,7 @@ export async function isComponentAvailable(context: vscode.ExtensionContext): Pr
 	}
 
 	try {
-		return (await api?.getComponentInternal({ id: componentId }))?.node != undefined;
+		return (await api?.getComponentInternalSimple({ id: componentId }))?.node != undefined;
 	} catch {
 		return false;
 	}
@@ -220,7 +226,10 @@ export async function updateApiSecret(username: string, password: string, contex
 			});
 
 			await context.secrets.store("ccims-bearer", response.data.token);
-			vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
+			await vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
+			const api = await getCCIMSApi(context);
+			await context.globalState.update("userId", (await api!.currentUser()).currentUser?.id);
+			await vscode.commands.executeCommand(CCIMSCommandType.USER_ID_CHANGED);
 			return true;
 		} catch {
 			return false;

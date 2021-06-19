@@ -14,5 +14,7 @@ export enum IssueViewMessageType {
 	SEARCH_ARTIFACTS = "searchArtifacts",
 	FOUND_ARTIFACTS = "foundArtifacts",
 	SEARCH_ISSUES = "searchIssues",
-	FOUND_ISSUES = "foundIssues"
+	FOUND_ISSUES = "foundIssues",
+	USER_ID_CHANGED = "userIdChanged",
+	ICON_TABLE = "iconTable"
 }

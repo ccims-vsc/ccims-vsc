@@ -52,6 +52,18 @@ export class CCIMSCommands {
 	public readonly loginCommand: CCIMSCommand;
 
 	/**
+	 * Command called when the list icons mode changes
+	 * expects no parameters
+	 */
+	public readonly complexListIconsChangedCommand: CCIMSCommand;
+
+	/**
+	 * Command executed when the user id changed
+	 * expects no parameters
+	 */
+	public readonly userIdChangedCommand: CCIMSCommand;
+
+	/**
 	 * Creates all ccims extension commands
 	 * Note: only one instance of this class can be created
 	 * @param context the context used to create the commands
@@ -65,5 +77,7 @@ export class CCIMSCommands {
 		this.setupExtensionCommand = new CCIMSCommand(CCIMSCommandType.SETUP_EXTENSION, context);
 		this.loginCommand = new CCIMSCommand(CCIMSCommandType.LOGIN, context);
 		this.apiStatusChangedCommand = new CCIMSCommand(CCIMSCommandType.API_STATUS_CHANGED, context);
+		this.complexListIconsChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPLEX_LIST_ICONS_CHANGED, context);
+		this.userIdChangedCommand = new CCIMSCommand(CCIMSCommandType.USER_ID_CHANGED, context);
 	}
 }

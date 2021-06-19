@@ -5,9 +5,9 @@
             v-if="issue != null"
             class="container"
         >
-            <div 
-                class="codicon codicon-type-hierarchy"
-                style="align-self: center"
+            <img 
+                :src="iconTable[getIssueIcon(issue)]"
+                style="align-self: center; height: 25px"
             />
             <input 
                 id="title-input" 
@@ -196,6 +196,8 @@ import { SearchIssuesMessage } from "../../src/issue-view/communication/SearchIs
 import { FoundIssuesMessage } from "../../src/issue-view/communication/FoundIssuesMessage";
 import { SearchUsersMessage } from "../../src/issue-view/communication/SearchUsersMessage";
 import { FoundUsersMessage } from "../../src/issue-view/communication/FoundUsersMessage";
+import { UserIdChangedMessage } from "../../src/issue-view/communication/UserIdChangedMessage";
+import { IconTableMessage } from "../../src/issue-view/communication/IconTableMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -211,6 +213,7 @@ import TreeViewContainer from "./components/TreeViewContainer.vue";
 import { TreeViewContent } from "./components/TreeViewContent";
 import AddSelect from "./components/AddSelect.vue";
 import { Option } from '@bendera/vscode-webview-elements/dist/vscode-select/includes/types';
+import { getComplexIssueIcon, getSimpleIssueIcon } from "../../src/data/IconProvider";
 
 
 
@@ -239,6 +242,16 @@ export default class App extends Vue {
      * The issue which is currently displayed
      */
     private issue: Partial<Issue> & { body: string, title: string } | null = null;
+
+    /**
+     * The id of the current user, used for complex icons
+     */
+    private userId: string | null = null;
+
+    /**
+     * Table with all icons
+     */
+    private iconTable: { [key: string]: string } = {};
 
     /**
      * The content definition for the TreeView which displays labels, assignees, linkedIssues and artifacts
@@ -358,6 +371,18 @@ export default class App extends Vue {
                     selected: false,
                     node: assignee
                 }));
+                break;
+            }
+            case IssueViewMessageType.USER_ID_CHANGED: {
+                console.log("user id changed");
+                this.userId = (message as UserIdChangedMessage).id ?? null;
+                console.log(this.userId);
+                break;
+            }
+            case IssueViewMessageType.ICON_TABLE: {
+                console.log("icon table");
+                this.iconTable = (message as IconTableMessage).icons;
+                console.log(this.iconTable);
             }
         }
     }
@@ -851,7 +876,26 @@ export default class App extends Vue {
             this.assigneesTreeContent?.subcontents?.shift();
         }
     }
-                
+    
+    /**
+     * Gets the icon for an issue
+     */
+    private getIssueIcon(issue: Issue, complex = true): string {
+        if (complex) {
+            return getComplexIssueIcon(
+                issue.category, 
+                issue.isOpen, 
+                this.linkedIssuesTreeContent?.subcontents?.some(content => content.id != "new") ?? false,
+                ((this.issue?.linkedByIssues?.nodes?.length ?? 0) > 0) || (this.linkedIssuesTreeContent?.subcontents?.some(content => content.id == issue.id) ?? false),
+                this.assigneesTreeContent?.subcontents?.some(content => content.id == (this.userId ?? "")) ?? false
+            );
+        } else {
+            return getSimpleIssueIcon(
+                issue.category,
+                issue.isOpen
+            );
+        }
+    }
 
 }
 

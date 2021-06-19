@@ -68,6 +68,12 @@
 					"default": "",
 					"description": "The id of the component, of which issues should be displayed",
 					"scope": "window"
+				},
+				"ccims.complexListIcons": {
+					"type": "boolean",
+					"default": true,
+					"description": "If true, complex icons are used in issue list views",
+					"scope": "window"
 				}
 			}
 		},

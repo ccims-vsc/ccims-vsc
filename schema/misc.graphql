@@ -1,3 +1,9 @@
 query echo($input: String!) {
 	echo(input: $input)
 }
+
+query currentUser {
+  currentUser {
+    id
+  }
+}

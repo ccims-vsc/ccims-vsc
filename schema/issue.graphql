@@ -1,4 +1,4 @@
-query getIssueInternal($id: ID!) {
+query getIssueInternalSimple($id: ID!) {
   node(id: $id) {
     ...on Issue {
       id
@@ -10,6 +10,57 @@ query getIssueInternal($id: ID!) {
         nodes {
           id
           title
+        }
+      }
+      labels {
+        nodes {
+          id
+          name
+          description
+          color
+        }
+      }
+      artifacts {
+        nodes {
+          id
+          uri
+          lineRangeStart
+          lineRangeEnd
+        }
+      }
+      assignees {
+        nodes {
+          id
+          displayName
+          username
+        }
+      }
+      components {
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}
+
+query getIssueInternalComplex($id: ID!) {
+  node(id: $id) {
+    ...on Issue {
+      id
+      title
+      body
+      isOpen
+      category
+      linksToIssues {
+        nodes {
+          id
+          title
+        }
+      }
+      linkedByIssues(first:1) {
+        nodes {
+          id
         }
       }
       labels {

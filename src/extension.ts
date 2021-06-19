@@ -87,6 +87,10 @@ function _initCommandListeners(commands: CCIMSCommands, context: vscode.Extensio
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 	});
 
+	commands.complexListIconsChangedCommand.addListener(() => {
+		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+	});
+
 	commands.selectComponentCommand.addListener(() => {
 		const input = new CCIMSSettingsInput(context);
 		input.run((stepInput) => input.updateComponent(stepInput));
