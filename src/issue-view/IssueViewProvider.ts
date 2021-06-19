@@ -106,6 +106,14 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			this._updateIssue(updateIssueMessage.diff, updateIssueMessage.id);
 		});
 
+		this.setMessageListener(IssueViewMessageType.OPEN_ISSUE, async message => {
+			const openIssueMessage = message as OpenIssueMessage;
+			const id = openIssueMessage.issue.id;
+			if (id != undefined) {
+				this._openIssue(id);
+			}
+		});
+
 		await this._initSearchListeners();
 	}
 

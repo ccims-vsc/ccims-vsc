@@ -98,7 +98,7 @@
                                 placeholder="Search for labels"
                                 @vsc-search-text="onSearchLabel($event.detail.value)"
                                 @focusout="onLabelLostFocus()"
-                                @vsc-change="onLabelSelected($event.detail.value)"
+                                @vsc-change="onNewLabelSelected($event.detail.value)"
                             />
                         </template>
                     </tree-view-item>
@@ -120,6 +120,7 @@
                         :defaultInput="linkedIssueProps.defaultInput"
                         :commands="[{icon: linkedIssueProps.content.id == 'new' ? 'codicon-close' : 'codicon-trash', command: 'delete'}]"
                         @command="onDeleteLinkedIssue(linkedIssueProps.content.id)"
+                        @selected="onLinkedIssueSelected(linkedIssueProps.content.id)"
                     >
                         <template #icon v-if="linkedIssueProps.content.id != 'new'">  
                             <img
@@ -138,7 +139,7 @@
                                 placeholder="Search for issues"
                                 @vsc-search-text="onSearchLinkedIssue($event.detail.value)"
                                 @focusout="onLinkedIssueLostFocus()"
-                                @vsc-change="onLinkedIssueSelected($event.detail.value)"
+                                @vsc-change="onNewLinkedIssueSelected($event.detail.value)"
                             />
                         </template>
                     </tree-view-item>
@@ -175,7 +176,7 @@
                                 placeholder="Search for users"
                                 @vsc-search-text="onSearchAssignee($event.detail.value)"
                                 @focusout="onAssigneeLostFocus()"
-                                @vsc-change="onAssigneeSelected($event.detail.value)"
+                                @vsc-change="onNewAssigneeSelected($event.detail.value)"
                             />
                         </template>
                     </tree-view-item>
@@ -704,7 +705,7 @@ export default class App extends Vue {
      * Called when a label is selected, 
      * replaces the temporary label element with the real label
      */
-    private onLabelSelected(id: string): void {
+    private onNewLabelSelected(id: string): void {
         const canAdd = !(this.labelsTreeContent?.subcontents?.some(content => content.id == id) ?? true);
         if (canAdd) {
             const newContent = this.labelsTreeContent?.subcontents?.[0] as ColorTreeViewContent;
@@ -790,7 +791,7 @@ export default class App extends Vue {
      * Called when a linkedIssue is selected, 
      * replaces the temporary linkedIssue element with the real linkedIssue
      */
-    private onLinkedIssueSelected(id: string): void {
+    private onNewLinkedIssueSelected(id: string): void {
         const canAdd = !(this.linkedIssuesTreeContent?.subcontents?.some(content => content.id == id) ?? true);
         if (canAdd) {
             const newContent = this.linkedIssuesTreeContent?.subcontents?.[0] as IssueTreeViewContent;
@@ -807,6 +808,22 @@ export default class App extends Vue {
             }
         } else {
             this.linkedIssuesTreeContent?.subcontents?.shift();
+        }
+    }
+
+    /**
+     * Called when a linked issue is selected
+     * Opens the selected issue
+     * @param id the id of the selected issue
+     */
+    private onLinkedIssueSelected(id: string): void {
+        if (id != "new") {
+            this.postMessage({
+                type: IssueViewMessageType.OPEN_ISSUE,
+                issue: {
+                    id: id
+                }
+            } as OpenIssueMessage);
         }
     }
 
@@ -873,7 +890,7 @@ export default class App extends Vue {
      * Called when a assignee is selected, 
      * replaces the temporary assignee element with the real assignee
      */
-    private onAssigneeSelected(id: string): void {
+    private onNewAssigneeSelected(id: string): void {
         const canAdd = !(this.assigneesTreeContent?.subcontents?.some(content => content.id == id) ?? true);
         if (canAdd) {
             const newContent = this.assigneesTreeContent?.subcontents?.[0] as TreeViewContent;
