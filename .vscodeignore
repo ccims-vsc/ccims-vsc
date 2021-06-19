@@ -1,0 +1,12 @@
+src/**
+out/**
+node_modules/**
+schema/**
+tsconfig.json
+.git/**
+**.vsix
+.vscode/**
+package-json.lock
+webpack.config.js
+issue-view/src/**
+issue-view/node_modules/**

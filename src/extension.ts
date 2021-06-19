@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const username = context.globalState.get<string>("username");
 	if (username) {
-		getPassword("ccims", username).then(password => {
+		getPassword("ccims", username).then((password: string | null) => {
 			if (password) {
 				updateApiSecret(username, password, context);
 			}

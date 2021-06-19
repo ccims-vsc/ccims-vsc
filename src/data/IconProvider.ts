@@ -7,7 +7,6 @@ import { Issue, IssueCategory } from "../generated/graphql";
  * @returns the icon
  */
 export function getIssueIcon(issue: Issue, userId: string, complex = false): string {
-	console.log(complex);
 	if (complex) {
 		return getComplexIssueIcon(
 			issue.category, 

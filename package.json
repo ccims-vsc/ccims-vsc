@@ -2,7 +2,7 @@
 	"name": "ccims-vsc",
 	"description": "CCIMS - Cross-Component Issue Management System integration ",
 	"version": "0.0.1",
-	"publisher": "Niklas Krieger",
+	"publisher": "nk-coding",
 	"engines": {
 		"vscode": "^1.50.0"
 	},
@@ -27,7 +27,7 @@
 		"type": "git",
 		"url": "https://github.com/nk-coding/ccims-vsc.git"
 	},
-	"main": "./out/extension.js",
+	"main": "./dist/extension",
 	"contributes": {
 		"viewsContainers": {
 			"activitybar": [
@@ -170,9 +170,8 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run build",
-		"compile": "tsc -p ./",
+		"compile": "webpack --mode production",
 		"lint": "eslint . --ext .ts,.tsx",
-		"watch": "tsc -w -p ./",
 		"init-all": "npm i && cd issue-view && npm i",
 		"build": "cd issue-view && npm run build && cd .. && npm run compile",
 		"graphql-codegen": "graphql-codegen --config codegen.yml"
@@ -190,12 +189,21 @@
 		"@vue/eslint-config-typescript": "^7.0.0",
 		"eslint": "^7.21.0",
 		"eslint-plugin-vue": "^7.10.0",
-		"typescript": "^4.2.2"
+		"ts-loader": "^9.2.3",
+		"typescript": "^4.2.2",
+		"webpack": "^5.39.1",
+		"webpack-cli": "^4.7.2"
 	},
 	"dependencies": {
 		"axios": "^0.21.1",
+		"bufferutil": "^4.0.3",
 		"graphql": "^15.5.0",
 		"graphql-tools": "^7.0.5",
-		"keytar": "^7.7.0"
+		"keytar": "^7.7.0",
+		"utf-8-validate": "^5.0.5"
+	},
+	"optionalDependencies": {
+		"bufferutil": "^4.0.3",
+		"utf-8-validate": "^5.0.5"
 	}
 }
