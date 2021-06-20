@@ -51,12 +51,19 @@ function getSdkWrapper(sdk: Sdk) {
 		 * @param maxAmount the max amount requested form the api
 		 */
 		async searchComponents(text: string, minAmount: number, maxAmount: number): Promise<Component[]> {
-			const components = (await this.searchComponentsInternal({ name: text, maxAmount: maxAmount})).components?.nodes as Component[];
-			if (components.length < minAmount) {
-				const descriptionComponents = (await this.searchComponentsInternal({ description: text, maxAmount: maxAmount - components.length})).components?.nodes as Component[];
-				components.push(...descriptionComponents);
+			const components: Map<string, Component> = new Map();
+			const nameComponents = (await this.searchComponentsInternal({ name: text, maxAmount: maxAmount})).components?.nodes as Component[];
+			for (const component of nameComponents) {
+				components.set(component.id!, component);
 			}
-			return components;
+
+			if (components.size < minAmount) {
+				const descriptionComponents = (await this.searchComponentsInternal({ description: text, maxAmount: maxAmount - components.size})).components?.nodes as Component[];
+				for (const component of descriptionComponents) {
+					components.set(component.id!, component);
+				}
+			}
+			return [...components.values()];
 		},
 		/**
 		 * Searches for labels with the defined name of description on all specified components
