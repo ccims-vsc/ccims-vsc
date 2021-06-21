@@ -4747,6 +4747,12 @@ export type GetComponentInternalSimpleQuery = (
         { __typename?: 'Issue' }
         & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
       )>>> }
+    )>, projects?: Maybe<(
+      { __typename?: 'ProjectPage' }
+      & { nodes?: Maybe<Array<Maybe<(
+        { __typename?: 'Project' }
+        & Pick<Project, 'id'>
+      )>>> }
     )> }
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
 );
@@ -4788,6 +4794,12 @@ export type GetComponentInternalComplexQuery = (
             & Pick<Issue, 'id'>
           )>>> }
         )> }
+      )>>> }
+    )>, projects?: Maybe<(
+      { __typename?: 'ProjectPage' }
+      & { nodes?: Maybe<Array<Maybe<(
+        { __typename?: 'Project' }
+        & Pick<Project, 'id'>
       )>>> }
     )> }
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
@@ -5398,6 +5410,11 @@ export const GetComponentInternalSimpleDocument = gql`
           category
         }
       }
+      projects {
+        nodes {
+          id
+        }
+      }
     }
   }
 }
@@ -5430,6 +5447,11 @@ export const GetComponentInternalComplexDocument = gql`
               id
             }
           }
+        }
+      }
+      projects {
+        nodes {
+          id
         }
       }
     }

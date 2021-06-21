@@ -12,6 +12,11 @@ query getComponentInternalSimple($id: ID!) {
           category
         }
       }
+      projects {
+        nodes {
+          id
+        }
+      }
     }
   }
 }
@@ -43,6 +48,11 @@ query getComponentInternalComplex($id: ID!) {
               id
             }
           }
+        }
+      }
+      projects {
+        nodes {
+          id
         }
       }
     }

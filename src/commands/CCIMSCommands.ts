@@ -64,6 +64,12 @@ export class CCIMSCommands {
 	public readonly userIdChangedCommand: CCIMSCommand;
 
 	/**
+	 * Command executed when the component data changed
+	 * expectes no parameters
+	 */
+	public readonly componentDataChangedCommand: CCIMSCommand;
+
+	/**
 	 * Creates all ccims extension commands
 	 * Note: only one instance of this class can be created
 	 * @param context the context used to create the commands
@@ -79,5 +85,6 @@ export class CCIMSCommands {
 		this.apiStatusChangedCommand = new CCIMSCommand(CCIMSCommandType.API_STATUS_CHANGED, context);
 		this.complexListIconsChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPLEX_LIST_ICONS_CHANGED, context);
 		this.userIdChangedCommand = new CCIMSCommand(CCIMSCommandType.USER_ID_CHANGED, context);
+		this.componentDataChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED, context);
 	}
 }

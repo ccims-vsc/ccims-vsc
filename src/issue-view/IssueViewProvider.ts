@@ -27,6 +27,7 @@ import { UserIdChangedMessage } from "./communication/UserIdChangedMessage";
 import { listIconFiles } from "../data/IconProvider";
 import { IconTableMessage } from "./communication/IconTableMessage";
 import { ComplexListIconsChangedMessage } from "./communication/ComplexListIconsChangedMessage";
+import { ComponentController } from "../data/ComponentController";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -63,10 +64,15 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		return this._issue?.components?.nodes
 			?.map(component => component?.projects?.nodes
 				?.filter(project => project != null)
-				.map(project => project!.id!) ?? [])?.flat() ?? [];
+				.map(project => project!.id!) ?? [])?.flat() ?? this._componentController.projectIds;
 	}
 
-	constructor(extensionUri: vscode.Uri, commands: CCIMSCommands, private readonly _context: vscode.ExtensionContext) {
+	constructor(
+		extensionUri: vscode.Uri, 
+		commands: CCIMSCommands, 
+		private readonly _context: vscode.ExtensionContext,
+		private readonly _componentController: ComponentController
+	) {
 		super(extensionUri);
 
 		this._initCommands(commands);

@@ -6,6 +6,7 @@ import { getIssueIcon } from "../data/IconProvider";
 import { Issue } from "../generated/graphql";
 import { getComponentId, isComplexListIcons } from "../data/settings";
 import { getResourceUri } from "../extension";
+import { ComponentController } from "../data/ComponentController";
 
 /**
  * View used to display a tree of all Issues
@@ -19,7 +20,7 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 	 * Creates a new IssueListProvider
 	 * @param commands commands used to listen for refresh command
 	 */
-	public constructor(private readonly _commands: CCIMSCommands, private readonly _context: vscode.ExtensionContext) {
+	public constructor(private readonly _commands: CCIMSCommands, private readonly _context: vscode.ExtensionContext, private readonly _componentController: ComponentController) {
 		this._commands.reloadIssueListCommand.addListener(() => this.refresh());
 	}
 
@@ -53,7 +54,7 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 			const api = await getCCIMSApi(this._context);
 			const componentId =  getComponentId();
 			if (componentId != null) {
-				return await api?.getIssues(componentId);
+				return this._componentController.issues;
 			} else {
 				return undefined;
 			}

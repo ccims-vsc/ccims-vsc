@@ -9,6 +9,7 @@ import { IssueListProvider } from "./issue-list/IssueListProvider";
 import { IssueViewProvider } from "./issue-view/IssueViewProvider";
 import { CCIMSSettingsInput } from "./settings-input/CCIMSSettingsInput";
 import { getPassword } from "keytar";
+import { ComponentController } from "./data/ComponentController";
 
 /**
  * cached extension uri
@@ -23,11 +24,12 @@ export function activate(context: vscode.ExtensionContext) {
 	_extensionUri = context.extensionUri;
 
 	const commands = new CCIMSCommands(context);
+	const componentController = new ComponentController(context, commands);
 	
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			IssueViewProvider.viewType,
-			new IssueViewProvider(context.extensionUri, commands, context),
+			new IssueViewProvider(context.extensionUri, commands, context, componentController),
 			{
 				webviewOptions: {
 					retainContextWhenHidden: true
@@ -39,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.window.registerTreeDataProvider(
 			"ccims.issueList",
-			new IssueListProvider(commands, context)
+			new IssueListProvider(commands, context, componentController)
 		)
 	);
 
@@ -84,12 +86,15 @@ function _initCommandListeners(commands: CCIMSCommands, context: vscode.Extensio
 
 	commands.apiStatusChangedCommand.addListener(() => {
 		vscode.commands.executeCommand(CCIMSCommandType.CHECK_API_STATUS);
-		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 	});
 
 	commands.complexListIconsChangedCommand.addListener(() => {
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 	});
+
+	commands.componentDataChangedCommand.addListener(() => {
+		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+	})
 
 	commands.selectComponentCommand.addListener(() => {
 		const input = new CCIMSSettingsInput(context);
