@@ -17,5 +17,6 @@ export enum IssueViewMessageType {
 	FOUND_ISSUES = "foundIssues",
 	USER_ID_CHANGED = "userIdChanged",
 	ICON_TABLE = "iconTable",
-	COMPLEX_LIST_ICONS_CHANGED = "complexListIconsChanged"
+	COMPLEX_LIST_ICONS_CHANGED = "complexListIconsChanged",
+	COMPONENT_ID_CHANGED = "componentIdChanged"
 }

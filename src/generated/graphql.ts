@@ -4838,6 +4838,13 @@ export type GetIssueInternalSimpleQuery = (
       & { nodes?: Maybe<Array<Maybe<(
         { __typename?: 'Issue' }
         & Pick<Issue, 'id' | 'title' | 'isOpen' | 'category'>
+        & { components?: Maybe<(
+          { __typename?: 'ComponentPage' }
+          & { nodes?: Maybe<Array<Maybe<(
+            { __typename?: 'Component' }
+            & Pick<Component, 'id' | 'name'>
+          )>>> }
+        )> }
       )>>> }
     )>, linkedByIssues?: Maybe<(
       { __typename?: 'IssuePage' }
@@ -4870,7 +4877,7 @@ export type GetIssueInternalSimpleQuery = (
       { __typename?: 'ComponentPage' }
       & { nodes?: Maybe<Array<Maybe<(
         { __typename?: 'Component' }
-        & Pick<Component, 'id'>
+        & Pick<Component, 'id' | 'name'>
         & { projects?: Maybe<(
           { __typename?: 'ProjectPage' }
           & { nodes?: Maybe<Array<Maybe<(
@@ -4919,6 +4926,12 @@ export type GetIssueInternalComplexQuery = (
             { __typename?: 'Issue' }
             & Pick<Issue, 'id'>
           )>>> }
+        )>, components?: Maybe<(
+          { __typename?: 'ComponentPage' }
+          & { nodes?: Maybe<Array<Maybe<(
+            { __typename?: 'Component' }
+            & Pick<Component, 'id' | 'name'>
+          )>>> }
         )> }
       )>>> }
     )>, linkedByIssues?: Maybe<(
@@ -4952,7 +4965,7 @@ export type GetIssueInternalComplexQuery = (
       { __typename?: 'ComponentPage' }
       & { nodes?: Maybe<Array<Maybe<(
         { __typename?: 'Component' }
-        & Pick<Component, 'id'>
+        & Pick<Component, 'id' | 'name'>
         & { projects?: Maybe<(
           { __typename?: 'ProjectPage' }
           & { nodes?: Maybe<Array<Maybe<(
@@ -5487,6 +5500,12 @@ export const GetIssueInternalSimpleDocument = gql`
           title
           isOpen
           category
+          components {
+            nodes {
+              id
+              name
+            }
+          }
         }
       }
       linkedByIssues(first: 1) {
@@ -5520,6 +5539,7 @@ export const GetIssueInternalSimpleDocument = gql`
       components {
         nodes {
           id
+          name
           projects {
             nodes {
               id
@@ -5561,6 +5581,12 @@ export const GetIssueInternalComplexDocument = gql`
               id
             }
           }
+          components {
+            nodes {
+              id
+              name
+            }
+          }
         }
       }
       linkedByIssues(first: 1) {
@@ -5594,6 +5620,7 @@ export const GetIssueInternalComplexDocument = gql`
       components {
         nodes {
           id
+          name
           projects {
             nodes {
               id

@@ -28,6 +28,7 @@ import { listIconFiles } from "../data/IconProvider";
 import { IconTableMessage } from "./communication/IconTableMessage";
 import { ComplexListIconsChangedMessage } from "./communication/ComplexListIconsChangedMessage";
 import { ComponentController } from "../data/ComponentController";
+import { ComponentIdChangedMessage } from "./communication/ComponentIdChangedMessage";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -106,6 +107,10 @@ export class IssueViewProvider extends IssueViewProviderBase {
 
 		commands.complexListIconsChangedCommand.addListener(() => {
 			this._updateComplexListItems();
+		});
+
+		commands.apiStatusChangedCommand.addListener(() => {
+			this._updateComponentId();
 		})
 	}
 
@@ -326,6 +331,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		this._updateUserId();
 		this._updateIconTable();
 		this._updateComplexListItems();
+		this._updateComponentId();
 		vscode.window.onDidChangeActiveColorTheme(() => {
 			this._updateTheme();
 		});
@@ -350,6 +356,16 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			type: IssueViewMessageType.USER_ID_CHANGED,
 			id: this._context.globalState.get("userId")
 		} as UserIdChangedMessage);
+	}
+
+	/**
+	 * Message to inform the frontedn about a changed component id
+	 */
+	private _updateComponentId(): void {
+		this.postMessage({
+			type: IssueViewMessageType.COMPONENT_ID_CHANGED,
+			componentId: getComponentId()
+		} as ComponentIdChangedMessage);
 	}
 
 	/**

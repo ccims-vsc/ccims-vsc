@@ -12,6 +12,12 @@ query getIssueInternalSimple($id: ID!) {
           title
           isOpen
           category
+          components {
+            nodes {
+              id
+              name
+            }
+          }
         }
       }
       linkedByIssues(first:1) {
@@ -45,6 +51,7 @@ query getIssueInternalSimple($id: ID!) {
       components {
         nodes {
           id
+          name
           projects {
             nodes {
               id
@@ -85,6 +92,12 @@ query getIssueInternalComplex($id: ID!) {
               id
             }
           }
+          components {
+            nodes {
+              id
+              name
+            }
+          }
         }
       }
       linkedByIssues(first:1) {
@@ -118,6 +131,7 @@ query getIssueInternalComplex($id: ID!) {
       components {
         nodes {
           id
+          name
           projects {
             nodes {
               id

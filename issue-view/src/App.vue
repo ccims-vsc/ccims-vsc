@@ -5,23 +5,31 @@
             v-if="issue != null"
             class="container"
         >
-            <img 
-                :src="iconTable[icon(issue)]"
-                style="align-self: center; height: 25px"
-            />
-            <input 
-                id="title-input" 
-                class="flex-grow"
-                v-model="issue.title"
-                :disabled="mode == 'read'"
-                placeholder="Enter Title"
-            />
-            <button 
-                class="codicon"
-                :class="{'codicon-edit': mode == 'read', 'codicon-save': mode != 'read'}"
-                style="width: 42px"
-                @click="updateMode(mode == 'read' ? 'edit' : 'read')"
-            />
+            <div style="display: flex">
+                <img 
+                    :src="iconTable[icon(issue)]"
+                    style="align-self: center; height: 25px"
+                />
+                <input 
+                    id="title-input" 
+                    class="flex-grow"
+                    v-model="issue.title"
+                    :disabled="mode == 'read'"
+                    placeholder="Enter Title"
+                />
+                <button 
+                    class="codicon"
+                    :class="{'codicon-edit': mode == 'read', 'codicon-save': mode != 'read'}"
+                    style="width: 42px"
+                    @click="updateMode(mode == 'read' ? 'edit' : 'read')"
+                />
+            </div>
+            <span 
+                v-if="componentNames != null"
+                style="color: var(--vscode-descriptionForeground);"
+            >
+                {{ componentNames }}
+            </span>
         </div>
         <div 
             id="body-container"
@@ -203,6 +211,7 @@ import { FoundUsersMessage } from "../../src/issue-view/communication/FoundUsers
 import { UserIdChangedMessage } from "../../src/issue-view/communication/UserIdChangedMessage";
 import { IconTableMessage } from "../../src/issue-view/communication/IconTableMessage";
 import { ComplexListIconsChangedMessage } from "../../src/issue-view/communication/ComplexListIconsChangedMessage";
+import { ComponentIdChangedMessage } from "../../src/issue-view/communication/ComponentIdChangedMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -252,6 +261,11 @@ export default class App extends Vue {
      * The id of the current user, used for complex icons
      */
     private userId: string | null = null;
+
+    /**
+     * The id of the current component
+     */
+    private componentId: string | null = null;
 
     /**
      * If true, the complex icons are used
@@ -316,6 +330,17 @@ export default class App extends Vue {
             return this.md.render(this.issue.body);
         } else {
             return null
+        }
+    }
+
+    /**
+     * Gets the text which is displayed to show on which components this issue is
+     */
+    private get componentNames(): string | null {
+        if (this.issue != undefined) {
+            return this.getComponentNames(this.issue);
+        } else {
+            return null;
         }
     }
 
@@ -392,9 +417,12 @@ export default class App extends Vue {
                 break;
             }
             case IssueViewMessageType.COMPLEX_LIST_ICONS_CHANGED: {
-                console.log("complex icons");
                 this.complexIcons = (message as ComplexListIconsChangedMessage).complex;
-                console.log(this.complexIcons);
+                break;
+            }
+            case IssueViewMessageType.COMPONENT_ID_CHANGED: {
+                this.componentId = (message as ComponentIdChangedMessage).componentId ?? null;
+                break;
             }
         }
     }
@@ -732,6 +760,7 @@ export default class App extends Vue {
         return {
             id: linkedIssue.id!,
             label: linkedIssue.title,
+            description: this.getComponentNames(linkedIssue) ?? undefined,
             issue: linkedIssue
         }
     }
@@ -799,6 +828,7 @@ export default class App extends Vue {
             if (newContent != undefined && linkedIssue != undefined) {
                 newContent.id = linkedIssue.id!;
                 newContent.label = linkedIssue.title;
+                newContent.description = this.getComponentNames(linkedIssue) ?? undefined;
                 newContent.issue = linkedIssue;
             }
             if (this.mode != "new") {
@@ -945,7 +975,28 @@ export default class App extends Vue {
         }
     }
 
-}
+    /**
+     * Gets the names of the components of a specific issue
+     */
+    private getComponentNames(issue: Partial<Issue>): string | null {
+        const components = issue?.components?.nodes?.filter(component => component != undefined);
+        if (components != undefined && components.length > 0) {
+            if (components.length === 1) {
+                const component = components[0];
+                if (component?.id !== this.componentId) {
+                    return component?.name ?? null;
+                } else {
+                    return null;
+                }
+            } else {
+                return components?.map(component => component?.name)
+                    ?.filter(name => name != undefined)?.join(", ") ?? null;
+            }
+        } else {
+            return null;
+        }
+    }
+ }
 
 /**
  * TreeViewContent with a color, used for labels
@@ -993,10 +1044,6 @@ interface NodeOption<T> extends Option {
 
     #title-input:disabled {
         background-color: unset;
-    }
-
-    #title-container {
-        display: flex;
     }
 
     #md-editor {

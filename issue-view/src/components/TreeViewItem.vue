@@ -16,6 +16,7 @@
         <dic 
             v-if="arrows"
             class="icon-arrow"
+            style="flex: none;"
             :class="{
                 'codicon': hasSubcontents,
                 'codicon-chevron-right': !open && hasSubcontents,
@@ -24,7 +25,7 @@
         />
         <div 
             class="label-icon-container"
-            style="align-self: center;"
+            style="align-self: center; flex: none;"
         >
             <slot name="icon"/>
         </div>
@@ -34,6 +35,12 @@
                 class="label"
             >
                 {{ content.label }}
+            </span>
+            <span
+                v-if="mode == 'default' && content.description"
+                class="label description"
+            >
+                {{ content.description }}
             </span>
         </slot>
         <div style="margin-left: auto; align-self: center;">
@@ -337,11 +344,20 @@ ul:focus-within .contents.selected {
     display: block;
     line-height: 22px;
     user-select: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 .single .label {
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+}
+.description {
+    font-size: .9em;
+    opacity: .8;
+    margin-left: .5em;
+    line-height: calc(22px - 0.07em);
+    margin-top: 0.07em;
 }
 
 @import url("../../node_modules/vscode-codicons/dist/codicon.css");

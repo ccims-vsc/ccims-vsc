@@ -8,6 +8,10 @@ export interface TreeViewContent<T extends TreeViewContent = any> {
      */
     label: string,
     /**
+     * The description of the content, displayed after the label
+     */
+    description?: string,
+    /**
      * Subcontents
      */
     subcontents?: T[]
