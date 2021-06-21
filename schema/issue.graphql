@@ -45,6 +45,11 @@ query getIssueInternalSimple($id: ID!) {
       components {
         nodes {
           id
+          projects {
+            nodes {
+              id
+            }
+          }
         }
       }
     }
@@ -113,6 +118,11 @@ query getIssueInternalComplex($id: ID!) {
       components {
         nodes {
           id
+          projects {
+            nodes {
+              id
+            }
+          }
         }
       }
     }
@@ -260,54 +270,88 @@ mutation removeArtifactFromIssue($issue: ID!, $artifact: ID!) {
   }
 }
 
-query searchIssuesInternalSimple($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
-  node(id: $id) {
-    ...on Component {
-      issues(first: $maxAmount, filterBy: {
-        title: $title,
-        body: $body,
-      }) {
-        nodes {
-          id
-          title
-          body
-          isOpen
-          category
-        }
+fragment SimpleSearchIssueFields on IssuePage {
+  nodes {
+    id
+    title
+    body
+    isOpen
+    category
+  }
+}
+
+fragment ComplexSearchIssueFields on IssuePage {
+  nodes {
+    id
+    title
+    body
+    isOpen
+    category
+    assignees {
+      nodes {
+        id
+      }
+    }
+    linksToIssues(first: 1) {
+      nodes {
+        id
+      }
+    }
+    linkedByIssues(first:1) {
+      nodes {
+        id
       }
     }
   }
 }
 
-query searchIssuesInternalComplex($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+query searchIssuesInternalSimpleComponent($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
   node(id: $id) {
     ...on Component {
       issues(first: $maxAmount, filterBy: {
         title: $title,
         body: $body,
       }) {
-        nodes {
-          id
-          title
-          body
-          isOpen
-          category
-          assignees {
-            nodes {
-              id
-            }
-          }
-          linksToIssues(first: 1) {
-            nodes {
-              id
-            }
-          }
-          linkedByIssues(first:1) {
-            nodes {
-              id
-            }
-          }
-        }
+        ...SimpleSearchIssueFields
+      }
+    }
+  }
+}
+
+query searchIssuesInternalComplexComponent($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Component {
+      issues(first: $maxAmount, filterBy: {
+        title: $title,
+        body: $body,
+      }) {
+        ...ComplexSearchIssueFields
+      }
+    }
+  }
+}
+
+query searchIssuesInternalSimpleProject($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Project {
+      issues(first: $maxAmount, filterBy: {
+        title: $title,
+        body: $body,
+      }) {
+        ...SimpleSearchIssueFields
+      }
+    }
+  }
+}
+
+query searchIssuesInternalComplexProject($id: ID!, $title: String, $body: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Project {
+      issues(first: $maxAmount, filterBy: {
+        title: $title,
+        body: $body,
+      }) {
+        ...SimpleSearchIssueFields
       }
     }
   }

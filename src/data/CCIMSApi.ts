@@ -105,28 +105,38 @@ function getSdkWrapper(sdk: Sdk) {
 		 * Searches for isses with the defined title of body on all specified components
 		 * It searches per component until enough were found
 		 * First, a component is queried by title, then by body
+		 * @param projects the projects on which to search
 		 * @param components the components on which to search
 		 * @param text the text to search for
 		 * @param minAmount the min amount of Issues to find
 		 * @param maxAmount the max amount of Issues to find
 		 * @returns the found Issues
 		 */
-		 async searchIssues(components: string[], text: string, minAmount: number, maxAmount: number): Promise<Issue[]> {
+		async searchIssues(projects: string[], components: string[], text: string, minAmount: number, maxAmount: number): Promise<Issue[]> {
 			const issues: Map<string, Issue> = new Map();
-			const searchFunction = isComplexListIcons() ? this.searchIssuesInternalComplex : this.searchIssuesInternalSimple;
-			for (const component of components) {
+			let nodes;
+			let searchFunction;
+			if (projects.length > 0) {
+				nodes = projects
+				searchFunction = isComplexListIcons() ? this.searchIssuesInternalComplexProject : this.searchIssuesInternalSimpleProject;
+			} else {
+				nodes = components
+				searchFunction = isComplexListIcons() ? this.searchIssuesInternalComplexComponent : this.searchIssuesInternalSimpleComponent;
+			}
+			
+			for (const node of nodes) {
 				if (issues.size >= minAmount) {
 					break;
 				}
-				const nameComponent = (await searchFunction({id: component, title: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
-				const nameResults = nameComponent?.issues?.nodes as Issue[] | undefined;
+				const nameIssues = (await searchFunction({id: node, title: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const nameResults = nameIssues?.issues?.nodes as Issue[] | undefined;
 				if (nameResults != undefined) {
 					for (const issue of nameResults) {
 						issues.set(issue.id!, issue);
 					}
 				}
-				const descriptionComponent = (await searchFunction({id: component, body: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
-				const descriptionResults = descriptionComponent?.issues?.nodes as Issue[] | undefined;
+				const descriptionIssues = (await searchFunction({id: node, body: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const descriptionResults = descriptionIssues?.issues?.nodes as Issue[] | undefined;
 				if (descriptionResults != undefined) {
 					for (const issue of descriptionResults) {
 						issues.set(issue.id!, issue);

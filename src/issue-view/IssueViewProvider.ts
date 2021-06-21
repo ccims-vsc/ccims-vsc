@@ -55,6 +55,17 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		}
 	}
 
+	/**
+	 * Getter for the project list of the current issue
+	 * if no issue is set, nothing is returned
+	 */
+	private get _projects(): string[] {
+		return this._issue?.components?.nodes
+			?.map(component => component?.projects?.nodes
+				?.filter(project => project != null)
+				.map(project => project!.id!) ?? [])?.flat() ?? [];
+	}
+
 	constructor(extensionUri: vscode.Uri, commands: CCIMSCommands, private readonly _context: vscode.ExtensionContext) {
 		super(extensionUri);
 
@@ -142,7 +153,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			const searchIssuesMessage = message as SearchIssuesMessage;
 			const components = this._components;
 			if (components != null) {
-				issueSearch.search({ components: components, text: searchIssuesMessage.text},
+				issueSearch.search({ projects: this._projects, components: components, text: searchIssuesMessage.text},
 					issues => {
 						this.postMessage({
 							type: IssueViewMessageType.FOUND_ISSUES,
