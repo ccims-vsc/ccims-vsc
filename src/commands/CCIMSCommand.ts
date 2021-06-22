@@ -19,16 +19,32 @@ export class CCIMSCommand {
 	 * @param context the context in which the command is executed, used to create command
 	 */
 	public constructor(public readonly type: CCIMSCommandType, context: vscode.ExtensionContext) {
+		this.registerCommand(context);
+	}
+
+	/**
+	 * Registers the command listener
+	 * @param context context used for subscriptions
+	 */
+	protected registerCommand(context: vscode.ExtensionContext): void {
 		context.subscriptions.push(
 			vscode.commands.registerCommand(
-				type,
+				this.type,
 				(...params: any[]) => {
-					this._listeners.forEach(listener => {
-						listener(params);
-					});
+					this.invokeListeners(...params);
 				}
 			)
 		);
+	}
+
+	/**
+	 * Invokes all command listeners
+	 * @param params the params the listener is invoked with
+	 */
+	protected invokeListeners(...params: any[]): void {
+		this._listeners.forEach(listener => {
+			listener(params);
+		});
 	}
 
 	/**

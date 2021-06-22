@@ -4,9 +4,12 @@ import { listIconFiles } from "../data/IconProvider";
 import { getResourceUri } from "../extension";
 import * as vscode from "vscode";
 import { ComponentController } from "../data/ComponentController";
-import { getArtifactSchemas } from "../data/settings";
+import { getArtifactSchemas, getComponentId } from "../data/settings";
 import { ArtifactConfig } from "./ArtifactConfig";
 import { EditorArtifactManager } from "./EditorArtifactManager";
+import { getCCIMSApi } from "../data/CCIMSApi";
+import { Artifact } from "../generated/graphql";
+import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 
 /**
  * Class for artefacts shown in editors
@@ -29,11 +32,14 @@ export class ArtifactManager {
 		this._context.subscriptions.push(vscode.window.onDidChangeVisibleTextEditors(editors => this._visibleEditorsChanged(editors)));
 		this._context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async event => {
 			await this._textDocumentChanged(event.document.uri);
-		}))
+		}));
 		
 		commands.reloadEditorDecoratorsCommand.addListener(() => {
 			this._reload();
-		})
+		});	
+		commands.createArtifactCommand.addListener(params => {
+			this._createArtifact(params[0] as vscode.TextEditor);
+		});	
 	}
 
 	private async _visibleEditorsChanged(visibleEditors: vscode.TextEditor[]): Promise<void> {
@@ -83,6 +89,27 @@ export class ArtifactManager {
 
 	public getDecoratorType(iconPath: string): TextEditorDecorationType | undefined {
 		return this._artifactDecorations.get(iconPath);
+	}
+
+	/**
+	 * Called to create a new Artifact
+	 * @param editor the editor in which the Artifact should be created
+	 */
+	private async _createArtifact(editor: vscode.TextEditor): Promise<void> {
+		const api = await getCCIMSApi(this._context);
+		const componentId = getComponentId();
+		if (api != undefined && editor != undefined && this._config != undefined && componentId != undefined) {
+			const result = await api.createArtifact({
+				component: componentId,
+				uri: this._config.pathToUrl(vscode.workspace.asRelativePath(editor.document.uri)),
+				lineRangeStart: editor.selection.start.line + 1,
+				lineRangeEnd: editor.selection.end.line + 1
+			});
+			const artifact = result.createArtifact?.artifact as Artifact | undefined;
+			if (artifact != undefined) {
+				await vscode.commands.executeCommand(CCIMSCommandType.ADD_ARTIFACT, artifact);
+			}
+		}
 	}
 
 }

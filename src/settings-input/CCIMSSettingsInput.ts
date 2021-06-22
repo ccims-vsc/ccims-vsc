@@ -32,7 +32,6 @@ export class CCIMSSettingsInput {
 			value: vscode.workspace.getConfiguration("ccims").get("url") ?? ""
 		});
 		await setApiUrl(urlInput);
-		console.log("continue this shit");
 		return (input: MultiStepInput) => this.maybeUpdateUsername(input);
 	}
 
@@ -130,7 +129,6 @@ export class CCIMSSettingsInput {
 			}
 		});
 		const componentId = componentPick.id;
-		console.log(componentId);
 		if (componentId != null) {
 			await setComponentId(componentId);
 		}

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { CCIMSCommand } from "./CCIMSCommand";
 import { CCIMSCommandType } from "./CCIMSCommandsType";
+import { CCIMSEditorCommand } from "./CCIMSEditorCommand";
 
 /**
  * Container with all commands known to the ccims extension
@@ -77,9 +78,21 @@ export class CCIMSCommands {
 
 	/**
 	 * Command executed to inform that an issue was updated
-	 * expectx one parameter: the id of the issue which was updated
+	 * expects one parameter: the id of the issue which was updated
 	 */
 	public readonly issueUpdatedCommand: CCIMSCommand;
+
+	/**
+	 * Command called to add an artifact to the current open issue
+	 * expects one parameter: the current artifact
+	 */
+	public readonly addArtifactCommand: CCIMSCommand;
+
+	/**
+	 * Command executed to create an artifact
+	 * expects one parameter: TextEditor on which the command was executed
+	 */
+	public readonly createArtifactCommand: CCIMSCommand;
 
 	/**
 	 * Creates all ccims extension commands
@@ -100,5 +113,8 @@ export class CCIMSCommands {
 		this.componentDataChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED, context);
 		this.reloadEditorDecoratorsCommand = new CCIMSCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS, context);
 		this.issueUpdatedCommand = new CCIMSCommand(CCIMSCommandType.ISSUE_UPDATED, context);
+		this.addArtifactCommand = new CCIMSCommand(CCIMSCommandType.ADD_ARTIFACT, context);
+
+		this.createArtifactCommand = new CCIMSEditorCommand(CCIMSCommandType.CREATE_ARTIFACT, context);
 	}
 }

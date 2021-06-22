@@ -257,6 +257,7 @@ import { SearchArtifactsMessage } from "../../src/issue-view/communication/Searc
 import { FoundArtifactsMessage } from "../../src/issue-view/communication/FoundArtifactsMessage";
 import { UserIdChangedMessage } from "../../src/issue-view/communication/UserIdChangedMessage";
 import { IconTableMessage } from "../../src/issue-view/communication/IconTableMessage";
+import { AddArtifactMessage } from "../../src/issue-view/communication/AddArtifactMessage";
 import { ComplexListIconsChangedMessage } from "../../src/issue-view/communication/ComplexListIconsChangedMessage";
 import { ComponentChangedMessage } from "../../src/issue-view/communication/ComponentChangedMessage";
 import { OpenUrlMessage } from "../../src/issue-view/communication/OpenUrlMessage";
@@ -474,7 +475,6 @@ export default class App extends Vue {
                 break;
             }
             case IssueViewMessageType.FOUND_ARTIFACTS: {
-                console.log((message as FoundArtifactsMessage).artifacts);
                 this.artifactOptions = (message as FoundArtifactsMessage).artifacts.map(artifact => ({
                     label: this.getArtifactRelativePath(artifact) ?? artifact.uri ?? "",
                     value: artifact.id!,
@@ -502,6 +502,11 @@ export default class App extends Vue {
                 if (componentMessage.repositoryURL != undefined && componentMessage.artifactSchema != undefined) {
                     this.artifactConfig = new ArtifactConfig(componentMessage.artifactSchema, componentMessage.repositoryURL);
                 }
+                break;
+            }
+            case IssueViewMessageType.ADD_ARTIFACT: {
+                const addArtifactMessage = message as AddArtifactMessage;
+                this.addArtifact(addArtifactMessage.artifact);
                 break;
             }
         }
@@ -1108,23 +1113,46 @@ export default class App extends Vue {
         if (canAdd) {
             const newContent = this.artifactsTreeContent?.subcontents?.[0] as ArtifactTreeViewContent;
             const artifact = this.artifactOptions.find(option => option.value == id)?.node;
-            if (newContent != undefined && artifact != undefined) {
-                newContent.id = artifact.id!;
-                newContent.relativePath = this.getArtifactRelativePath(artifact);
-                newContent.label = newContent.relativePath ?? artifact.uri;
-                newContent.artifact = artifact;
-                if (artifact.lineRangeStart != undefined || artifact.lineRangeEnd != undefined) {
-                    newContent.description = `${artifact.lineRangeStart ?? ""} - ${artifact.lineRangeEnd ?? ""}`;
-                }
-            }
-            if (this.mode != "new") {
-                this.sendUpdateDiff({
-                    addedArtifacts: [id]
-                });
-            }
+            this.setToNewArtifact(newContent, artifact);
         } else {
             this.artifactsTreeContent?.subcontents?.shift();
         }
+    }
+
+    /**
+     * Sets an ArtifactTreeViewContent to a new Artifact
+     */
+    private setToNewArtifact(newContent?: ArtifactTreeViewContent, artifact?: Artifact): void {
+        if (newContent != undefined && artifact != undefined) {
+            newContent.id = artifact.id!;
+            newContent.relativePath = this.getArtifactRelativePath(artifact);
+            newContent.label = newContent.relativePath ?? artifact.uri;
+            newContent.artifact = artifact;
+            if (artifact.lineRangeStart != undefined || artifact.lineRangeEnd != undefined) {
+                newContent.description = `${artifact.lineRangeStart ?? ""} - ${artifact.lineRangeEnd ?? ""}`;
+            }
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    addedArtifacts: [artifact?.id!]
+                });
+            }
+        }
+    }
+
+    /**
+     * Adds an artifact to the current Issue
+     */
+    private addArtifact(artifact: Artifact) {
+        if (this.artifactsTreeContent?.subcontents != undefined) {
+            const content = {
+                id: "new",
+                label: "new",
+                artifact: null
+            };
+            this.artifactsTreeContent.subcontents.unshift(content);
+            this.setToNewArtifact(content, artifact);
+        }
+        
     }
 
     /**

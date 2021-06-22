@@ -20,5 +20,6 @@ export enum IssueViewMessageType {
 	COMPLEX_LIST_ICONS_CHANGED = "complexListIconsChanged",
 	COMPONENT_CHANGED = "componentChanged",
 	OPEN_URL = "openUrl",
-	OPEN_FILE = "openFile"
+	OPEN_FILE = "openFile",
+	ADD_ARTIFACT = "addArtifact"
 }

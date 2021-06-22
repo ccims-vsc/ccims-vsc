@@ -280,7 +280,6 @@ export async function isComponentAvailable(context: vscode.ExtensionContext): Pr
 
 export async function updateApiSecret(username: string, password: string, context: vscode.ExtensionContext): Promise<boolean> {
 	const loginUrl = getLoginUrl();
-	console.log(loginUrl);
 	if (loginUrl != undefined) {
 		try {
 			const response = await axios.post(loginUrl, {

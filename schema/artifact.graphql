@@ -14,3 +14,19 @@ query searchArtifactsInternal($id: ID!, $name: String, $maxAmount: Int!) {
     }
   }
 }
+
+mutation createArtifact($component: ID!, $uri: String!, $lineRangeStart: Int, $lineRangeEnd: Int) {
+  createArtifact(input: {
+    component: $component
+    uri: $uri
+    lineRangeStart: $lineRangeStart
+    lineRangeEnd:$lineRangeEnd
+  }) {
+    artifact {
+      id
+      uri
+      lineRangeStart
+      lineRangeEnd
+    }
+  }
+}

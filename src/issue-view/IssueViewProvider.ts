@@ -9,7 +9,7 @@ import { getComponentId, isComplexListIcons } from "../data/settings";
 import { UpdateIssueMessage } from "./communication/UpdateIssueMessage";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 import { IssueDiff } from "./communication/IssueDiff";
-import { Issue } from "../generated/graphql";
+import { Artifact, Issue } from "../generated/graphql";
 import { SearchLabelsMessage } from "./communication/SearchLabelsMessage";
 import { LabelSearch } from "../data/search/LabelSearch";
 import { FoundLabelsMessage } from "./communication/FoundLabelsMessage";
@@ -31,6 +31,7 @@ import { ComponentController } from "../data/ComponentController";
 import { ComponentChangedMessage } from "./communication/ComponentChangedMessage";
 import { OpenFileMessage } from "./communication/OpenFileMessage";
 import { OpenUrlMessage } from "./communication/OpenUrlMessage";
+import { AddArtifactMessage } from "./communication/AddArtifactMessage";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -108,6 +109,13 @@ export class IssueViewProvider extends IssueViewProviderBase {
 
 		commands.componentDataChangedCommand.addListener(() => {
 			this._updateComponent();
+		});
+
+		commands.addArtifactCommand.addListener(params => {
+			if (params.length !== 1) {
+				throw new Error(`open issue called with wrong parameters: ${params}`)
+			}
+			this._addArtifact(params[0] as Artifact);
 		})
 	}
 
@@ -242,7 +250,6 @@ export class IssueViewProvider extends IssueViewProviderBase {
 				artifacts: diff.addedArtifacts,
 			});
 			const id = result?.createIssue?.issue?.id;
-
 			if (id != undefined) {
 				if (diff.addedLinkedIssues != undefined) {
 					for (const linkedIssue of diff.addedLinkedIssues) {
@@ -255,8 +262,8 @@ export class IssueViewProvider extends IssueViewProviderBase {
 					}
 				}
 
-				await vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result?.createIssue?.issue?.id);
-				await vscode.commands.executeCommand(CCIMSCommandType.ISSUE_UPDATED, result?.createIssue?.issue?.id);
+				await vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, id);
+				await vscode.commands.executeCommand(CCIMSCommandType.ISSUE_UPDATED, id);
 			} else {
 				//TODO error handling
 			}
@@ -444,5 +451,15 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		this.postMessage({
 			type: IssueViewMessageType.NEW_ISSUE
 		});
+	}
+
+	/**
+	 * Called to send an addArtifact message to the webview to add an artifact to the current Issue
+	 */
+	private _addArtifact(artifact: Artifact): void {
+		this.postMessage({
+			type: IssueViewMessageType.ADD_ARTIFACT,
+			artifact: artifact
+		} as AddArtifactMessage);
 	}
 }

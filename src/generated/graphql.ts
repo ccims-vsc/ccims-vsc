@@ -4764,6 +4764,25 @@ export type SearchArtifactsInternalQuery = (
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
 );
 
+export type CreateArtifactMutationVariables = Exact<{
+  component: Scalars['ID'];
+  uri: Scalars['String'];
+  lineRangeStart?: Maybe<Scalars['Int']>;
+  lineRangeEnd?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type CreateArtifactMutation = (
+  { __typename?: 'Mutation' }
+  & { createArtifact?: Maybe<(
+    { __typename?: 'CreateArtifactPayload' }
+    & { artifact?: Maybe<(
+      { __typename?: 'Artifact' }
+      & Pick<Artifact, 'id' | 'uri' | 'lineRangeStart' | 'lineRangeEnd'>
+    )> }
+  )> }
+);
+
 export type SimpleIssueFragment = (
   { __typename?: 'Issue' }
   & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
@@ -5553,6 +5572,20 @@ export const SearchArtifactsInternalDocument = gql`
   }
 }
     `;
+export const CreateArtifactDocument = gql`
+    mutation createArtifact($component: ID!, $uri: String!, $lineRangeStart: Int, $lineRangeEnd: Int) {
+  createArtifact(
+    input: {component: $component, uri: $uri, lineRangeStart: $lineRangeStart, lineRangeEnd: $lineRangeEnd}
+  ) {
+    artifact {
+      id
+      uri
+      lineRangeStart
+      lineRangeEnd
+    }
+  }
+}
+    `;
 export const GetComponentInternalSimpleDocument = gql`
     query getComponentInternalSimple($id: ID!) {
   node(id: $id) {
@@ -5998,6 +6031,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     searchArtifactsInternal(variables: SearchArtifactsInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchArtifactsInternalQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<SearchArtifactsInternalQuery>(SearchArtifactsInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchArtifactsInternal');
+    },
+    createArtifact(variables: CreateArtifactMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateArtifactMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CreateArtifactMutation>(CreateArtifactDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createArtifact');
     },
     getComponentInternalSimple(variables: GetComponentInternalSimpleQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetComponentInternalSimpleQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetComponentInternalSimpleQuery>(GetComponentInternalSimpleDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getComponentInternalSimple');

@@ -53,7 +53,6 @@ export class ComponentController {
 				this._issueMap.set(issue.id!, issue);
 			}
 			this.repositoryURL = component.repositoryURL as string | undefined;
-			console.log(this.repositoryURL);
 			this.projectIds = component.projects?.nodes
 				?.filter(project => project != undefined)
 				?.map(project => project!.id!) ?? [];
@@ -75,7 +74,6 @@ export class ComponentController {
 		if (api != undefined) {
 			const issue = await api.refetchIssue(id);
 			this._issueMap.set(issue.id!, issue);
-
 			await vscode.commands.executeCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED);
 		}
 	}

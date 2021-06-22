@@ -21,7 +21,8 @@
 		"onCommand:ccims.selectComponent",
 		"onCommand:ccims.newIssue",
 		"onCommand:ccims.setupExtension",
-		"onCommand:ccims.login"
+		"onCommand:ccims.login",
+		"onCommand:ccims.createArtifact"
 	],
 	"repository": {
 		"type": "git",
@@ -182,7 +183,7 @@
 							"pathToUrl": [
 								{
 									"regexp": "^",
-									"newSubstr": "https://github.com/${name}/main/blob/"
+									"newSubstr": "https://github.com/${name}/blob/main/"
 								}
 							],
 							"pathToUrlFilter": [
@@ -228,6 +229,11 @@
 				"command": "ccims.login",
 				"title": "Login",
 				"category": "CCIMS"
+			},
+			{
+				"command": "ccims.createArtifact",
+				"title": "Create Artifact at current position",
+				"category": "CCIMS"
 			}
 		],
 		"menus": {
@@ -241,6 +247,12 @@
 					"command": "ccims.newIssue",
 					"when": "view == ccims.issueList",
 					"group": "navigation"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "ccims.createArtifact",
+					"group": "CCIMS"
 				}
 			]
 		},
@@ -284,6 +296,12 @@
 				"view": "ccims.issueList",
 				"contents": "There are no issues on the selected component\n[Create issue](command:ccims.newIssue)\n[Select component](command:ccims.selectComponent)",
 				"when": "workbenchState != empty && ccims.apiStatus == 1"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "ccims.createArtifact",
+				"key": "Ctrl+Alt+A"
 			}
 		]
 	},

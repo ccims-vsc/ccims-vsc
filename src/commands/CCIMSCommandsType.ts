@@ -14,5 +14,7 @@ export enum CCIMSCommandType {
 	COMPLEX_LIST_ICONS_CHANGED = "ccims.complexListIconsChanged",
 	USER_ID_CHANGED = "ccims.userIdChanged",
 	RELOAD_EDITOR_DECORATORS = "ccims.reloadEditorDecorators",
-	ISSUE_UPDATED = "ccims.issueUpdated"
+	ISSUE_UPDATED = "ccims.issueUpdated",
+	CREATE_ARTIFACT = "ccims.createArtifact",
+	ADD_ARTIFACT = "ccims.addArtifact"
 }
