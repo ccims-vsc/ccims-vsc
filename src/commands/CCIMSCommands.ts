@@ -65,9 +65,15 @@ export class CCIMSCommands {
 
 	/**
 	 * Command executed when the component data changed
-	 * expectes no parameters
+	 * expects no parameters
 	 */
 	public readonly componentDataChangedCommand: CCIMSCommand;
+
+	/**
+	 * Command executed to reload the text editor decorators
+	 * expects no parameters
+	 */
+	public readonly reloadEditorDecoratorsCommand: CCIMSCommand;
 
 	/**
 	 * Creates all ccims extension commands
@@ -86,5 +92,6 @@ export class CCIMSCommands {
 		this.complexListIconsChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPLEX_LIST_ICONS_CHANGED, context);
 		this.userIdChangedCommand = new CCIMSCommand(CCIMSCommandType.USER_ID_CHANGED, context);
 		this.componentDataChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED, context);
+		this.reloadEditorDecoratorsCommand = new CCIMSCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS, context);
 	}
 }

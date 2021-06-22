@@ -1,4 +1,5 @@
 import { Artifact } from "../../generated/graphql";
+import { getCCIMSApi } from "../CCIMSApi";
 import { ApiSearch } from "./ApiSearch";
 
 /**
@@ -10,7 +11,8 @@ export class ArtifactSearch extends ApiSearch<{components: string[], text: strin
 	 * Queries the api for Artifacts
 	 * @param value defines the components on which to search and the text to search for
 	 */
-	protected query(value: { components: string[]; text: string; }): Promise<Artifact[]> {
-		throw new Error("Method not implemented.");
+	protected async query(value: { components: string[]; text: string; }): Promise<Artifact[]> {
+		const api = await getCCIMSApi(this.context);
+		return (await api?.searchArtifacts(value.components, value.text, this.minAmount, this.maxAmount)) ?? [];
 	}
 }

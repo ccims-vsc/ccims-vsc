@@ -74,6 +74,125 @@
 					"default": true,
 					"description": "If true, complex icons are used in issue list views",
 					"scope": "window"
+				},
+				"ccims.artifactSchemas": {
+					"type": "array",
+					"description": "Configuration for artifacts",
+					"items": {
+						"type": "object",
+						"properties": {
+							"matchesRepositoryUrl": {
+								"type": "string",
+								"description": "The regex used to match the repositoryURL"
+							},
+							"componentName": {
+								"type": "array",
+								"description": "Regexes used for transformation of the componentURL to a componentName\nThe component name can be used in later steps by adding ${name} to a replace string",
+								"items": {
+									"type": "object",
+									"properties": {
+										"regexp": {
+											"type": "string",
+											"description": "see replaceAll parameter regexp"
+										},
+										"newSubstr": {
+											"type": "string",
+											"description": "see replaceAll parameter newSubstr"
+										}
+									}
+								}
+							},
+							"matchesArtifactUrl": {
+								"type": "string",
+								"description": "All recognized artifacts must match this Regex"
+							},
+							"urlToPath": {
+								"type": "array",
+								"description": "Regexes used to transform an artifact URL to a relative path",
+								"items": {
+									"type": "object",
+									"properties": {
+										"regexp": {
+											"type": "string",
+											"description": "see replaceAll parameter regexp"
+										},
+										"newSubstr": {
+											"type": "string",
+											"description": "see replaceAll parameter newSubstr"
+										}
+									}
+								}
+							},
+							"pathToUrl": {
+								"type": "array",
+								"description": "Regexes used to transofrm a relative path to an artifact url",
+								"items": {
+									"type": "object",
+									"properties": {
+										"regexp": {
+											"type": "string",
+											"description": "see replaceAll parameter regexp"
+										},
+										"newSubstr": {
+											"type": "string",
+											"description": "see replaceAll parameter newSubstr"
+										}
+									}
+								}
+							},
+							"pathToUrlFilter": {
+								"type": "array",
+								"description": "Regexes used to transform a relative path to a filter regex which is sent to the api",
+								"items": {
+									"type": "object",
+									"properties": {
+										"regexp": {
+											"type": "string",
+											"description": "see replaceAll parameter regexp"
+										},
+										"newSubstr": {
+											"type": "string",
+											"description": "see replaceAll parameter newSubstr"
+										}
+									}
+								}
+							}
+						}
+					},
+					"default": [
+						{
+							"matchesRepositoryUrl": "github\\.com",
+							"componentName": [
+								{
+									"regexp": "^http(s)?://(www\\.)?github\\.com/",
+									"newSubstr": ""
+								},
+								{
+									"regexp": "/$",
+									"newSubstr": ""
+								}
+							],
+							"matchesArtifactUrl": "^http(s)?://(www\\.)?github\\.com/${name}/blob",
+							"urlToPath": [
+								{
+									"regexp": "^http(s)?://(www\\.)?github\\.com/[^/]+/[^/]+/blob/[^/]+/",
+									"newSubstr": ""
+								}
+							],
+							"pathToUrl": [
+								{
+									"regexp": "^",
+									"newSubstr": "https://github.com/${name}/main/blob/"
+								}
+							],
+							"pathToUrlFilter": [
+								{
+									"regexp": "^",
+									"newSubstr": "http(s)?://(www\\.)?github\\.com/${name}/blob/[^/]+/"
+								}
+							]
+						}
+					]
 				}
 			}
 		},

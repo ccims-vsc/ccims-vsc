@@ -10,6 +10,7 @@ import { IssueViewProvider } from "./issue-view/IssueViewProvider";
 import { CCIMSSettingsInput } from "./settings-input/CCIMSSettingsInput";
 import { getPassword } from "keytar";
 import { ComponentController } from "./data/ComponentController";
+import { ArtifactManager } from "./artifacts/ArtifactManager";
 
 /**
  * cached extension uri
@@ -44,6 +45,8 @@ export function activate(context: vscode.ExtensionContext) {
 			new IssueListProvider(commands, context, componentController)
 		)
 	);
+
+	const artifactManager = new ArtifactManager(commands, context, componentController);
 
 	_initCommandListeners(commands, context);
 
@@ -94,6 +97,7 @@ function _initCommandListeners(commands: CCIMSCommands, context: vscode.Extensio
 
 	commands.componentDataChangedCommand.addListener(() => {
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS);
 	})
 
 	commands.selectComponentCommand.addListener(() => {

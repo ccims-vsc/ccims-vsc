@@ -3,6 +3,7 @@ query getComponentInternalSimple($id: ID!) {
     ...on Component {
       name
       description
+      repositoryURL
       issues {
         nodes {
           id
@@ -26,6 +27,7 @@ query getComponentInternalComplex($id: ID!) {
     ...on Component {
       name
       description
+      repositoryURL
       issues {
         nodes {
           id
@@ -68,6 +70,28 @@ query searchComponentsInternal($name: String, $description: String, $maxAmount: 
       id
       name
       description
+    }
+  }
+}
+
+query artifactsForFileInternal($component: ID!, $artifactFilter: String!) {
+  node(id: $component) {
+    ...on Component {
+      artifacts(filterBy: {
+        uri: $artifactFilter
+      }) {
+        nodes {
+          id
+          uri
+          lineRangeStart
+          lineRangeEnd
+          issues {
+            nodes {
+              id
+            }
+          }
+        }
+      }
     }
   }
 }

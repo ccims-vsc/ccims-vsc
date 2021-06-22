@@ -2,9 +2,10 @@ import { ExtensionContext } from "vscode";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
 import { Issue } from "../generated/graphql";
 import { getCCIMSApi } from "./CCIMSApi";
-import { getComponentId } from "./settings";
+import { getArtifactSchemas, getComponentId } from "./settings";
 import * as vscode from "vscode";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { ArtifactSchema } from "../artifacts/ArtifactConfig";
 
 /**
  * Class which wraps the component and listens for changes
@@ -14,6 +15,12 @@ export class ComponentController {
 	 * List of all issues on the current component
 	 */
 	public issues: Issue[] = [];
+
+	private _issueMap: Map<string, Issue> = new Map();
+
+	public repositoryURL: string | undefined;
+
+	public artifactSchema: ArtifactSchema | undefined;
 
 	/**
 	 * List of all projects the current component is on
@@ -36,10 +43,33 @@ export class ComponentController {
 		if (componentId && api != undefined) {
 			const component = await api.getComponent(componentId);
 			this.issues = (component.issues?.nodes ?? []) as Issue[];
+			this._issueMap.clear();
+			for (const issue of this.issues) {
+				this._issueMap.set(issue.id!, issue);
+			}
+			this.repositoryURL = component.repositoryURL as string | undefined;
+			console.log(this.repositoryURL);
 			this.projectIds = component.projects?.nodes
 				?.filter(project => project != undefined)
 				?.map(project => project!.id!) ?? [];
+
+			if (this.repositoryURL != undefined) {
+				for (const schema of getArtifactSchemas() ?? []) {
+					if (new RegExp(schema.matchesRepositoryUrl).test(this.repositoryURL)) {
+						this.artifactSchema = schema;
+					}
+				}
+			}
+			
 			await vscode.commands.executeCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED);
 		}
+	}
+
+	/**
+	 * Gets an issue by id
+	 * @param id the id of the issue to get
+	 */
+	public issueById(id: string): Issue | undefined {
+		return this._issueMap.get(id);
 	}
 }

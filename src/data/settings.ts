@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { ArtifactSchema } from "../artifacts/ArtifactConfig";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
 
 /**
@@ -76,6 +77,22 @@ export function isComplexListIcons(): boolean {
 }
 
 /**
+ * Gets the artifact schemas
+ */
+ export function getArtifactSchemas(): ArtifactSchema[] | undefined {
+	if (!vscode.workspace.workspaceFolders) {
+		return undefined;
+	}
+
+	const schemas = vscode.workspace.getConfiguration("ccims").get("artifactSchemas") as ArtifactSchema[] | undefined;
+	if (schemas != undefined) {
+		return schemas;
+	} else {
+		return undefined;
+	}
+}
+
+/**
  * Called on initialization to init all settings listeners
  */
 export function initSettingsListener(): void {
@@ -87,7 +104,10 @@ export function initSettingsListener(): void {
 			vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
 		}
 		if (e.affectsConfiguration("ccims.complexListIcons")) {
-			vscode.commands.executeCommand(CCIMSCommandType.COMPLEX_LIST_ICONS_CHANGED);
+			vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
+		}
+		if (e.affectsConfiguration("ccims.artifactSchemas")) {
+			vscode.commands.executeCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS);
 		}
 	})
 }

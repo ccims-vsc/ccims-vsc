@@ -1,0 +1,16 @@
+query searchArtifactsInternal($id: ID!, $name: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Component {
+      artifacts(first: $maxAmount, filterBy: {
+        uri: $name,
+      }) {
+        nodes {
+          id
+          uri
+          lineRangeStart
+          lineRangeEnd
+        }
+      }
+    }
+  }
+}

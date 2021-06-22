@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Component, getSdk, Issue, Label, Sdk } from "../generated/graphql";
+import { Artifact, Component, getSdk, Issue, Label, Sdk } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
 import { getApiUrl, getComponentId, getLoginUrl, getPublicApiUrl, isComplexListIcons } from "./settings";
 import axios from "axios";
@@ -147,6 +147,40 @@ function getSdkWrapper(sdk: Sdk) {
 				}
 			}
 			return [...issues.values()];
+		},
+		/**
+		 * Searches for Artifacts with the defined name (uri)
+		 * It searches per component until enough were found
+		 * @param components the components on which to search
+		 * @param text the text to search for
+		 * @param minAmount the min amount of Artifacts to find
+		 * @param maxAmount the max amount of Artifacts to find
+		 * @returns the found Artifacts
+		 */
+		async searchArtifacts(components: string[], text: string, minAmount: number, maxAmount: number): Promise<Artifact[]> {
+			const artifacts: Map<string, Artifact> = new Map();
+			for (const component of components) {
+				if (artifacts.size >= minAmount) {
+					break;
+				}
+				const nameComponent = (await this.searchArtifactsInternal({id: component, name: text, maxAmount: maxAmount - artifacts.size}))?.node as Component | undefined;
+				const nameResults = nameComponent?.artifacts?.nodes as Artifact[] | undefined;
+				if (nameResults != undefined) {
+					for (const artifact of nameResults) {
+						artifacts.set(artifact.id!, artifact);
+					}
+				}
+			}
+			return [...artifacts.values()];
+		},
+		/**
+		 * Searches for artifacts on a Component
+		 * @param component the component on which to search for artifacts
+		 * @param filter the filter for documents
+		 */
+		async artifactsForFile(component: string, artifactFilter: string): Promise<Artifact[]> {
+			const artifactsResult = await this.artifactsForFileInternal({ component: component, artifactFilter: artifactFilter });
+			return (artifactsResult.node as Component).artifacts?.nodes as Artifact[];
 		}
 	}
 }

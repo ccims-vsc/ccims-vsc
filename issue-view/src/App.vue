@@ -190,13 +190,57 @@
                     </tree-view-item>
                 </template>
             </tree-view-item>
+            <tree-view-item
+                v-if="itemProps.content.id == 'artifacts'"
+                :content="itemProps.content"
+                :defaultInput="itemProps.defaultInput"
+                :commands="[{icon: 'codicon-plus', command: 'new'}]"
+                @command="onAddArtifact()"
+            >
+                <template #icon>
+                    <div class="codicon codicon-file" />
+                </template>
+                <template #subcontent="artifactProps">
+                    <tree-view-item
+                        :content="artifactProps.content"
+                        :defaultInput="artifactProps.defaultInput"
+                        :commands="[{icon: artifactProps.content.id == 'new' ? 'codicon-close' : 'codicon-trash', command: 'delete'}]"
+                        @command="onDeleteArtifact(artifactProps.content.id)"
+                    >
+                        <template #icon v-if="artifactProps.content.id == 'new'">  
+                            <div 
+                                class="codicon codicon-plus"
+                            />
+                        </template>
+                        <template #icon v-else-if="artifactProps.content.relativePath">
+                            <div
+                                class="codicon codicon-file"
+                            />
+                        </template>
+                        <template #icon v-else>
+                            <div
+                                class="codicon codicon-link-external"
+                            />
+                        </template>
+                        <template v-if="artifactProps.content.id == 'new'">
+                            <add-select 
+                                :options="artifactOptions"
+                                placeholder="Search for artifacts"
+                                @vsc-search-text="onSearchArtifact($event.detail.value)"
+                                @focusout="onArtifactLostFocus()"
+                                @vsc-change="onNewArtifactSelected($event.detail.value)"
+                            />
+                        </template>
+                    </tree-view-item>
+                </template>
+            </tree-view-item>
         </tree-view-container>
     </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { Issue, IssueCategory, Label, User } from "../../src/generated/graphql";
+import { Artifact, Issue, IssueCategory, Label, User } from "../../src/generated/graphql";
 import { IssueViewMessage } from "../../src/issue-view/communication/IssueViewMessage";
 import { OpenIssueMessage } from "../../src/issue-view/communication/OpenIssueMessage";
 import { ThemeChangedMessage } from "../../src/issue-view/communication/ThemeChangedMessage";
@@ -208,10 +252,12 @@ import { SearchIssuesMessage } from "../../src/issue-view/communication/SearchIs
 import { FoundIssuesMessage } from "../../src/issue-view/communication/FoundIssuesMessage";
 import { SearchUsersMessage } from "../../src/issue-view/communication/SearchUsersMessage";
 import { FoundUsersMessage } from "../../src/issue-view/communication/FoundUsersMessage";
+import { SearchArtifactsMessage } from "../../src/issue-view/communication/SearchArtifactsMessage";
+import { FoundArtifactsMessage } from "../../src/issue-view/communication/FoundArtifactsMessage";
 import { UserIdChangedMessage } from "../../src/issue-view/communication/UserIdChangedMessage";
 import { IconTableMessage } from "../../src/issue-view/communication/IconTableMessage";
 import { ComplexListIconsChangedMessage } from "../../src/issue-view/communication/ComplexListIconsChangedMessage";
-import { ComponentIdChangedMessage } from "../../src/issue-view/communication/ComponentIdChangedMessage";
+import { ComponentChangedMessage } from "../../src/issue-view/communication/ComponentChangedMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -228,6 +274,7 @@ import { TreeViewContent } from "./components/TreeViewContent";
 import AddSelect from "./components/AddSelect.vue";
 import { Option } from '@bendera/vscode-webview-elements/dist/vscode-select/includes/types';
 import { getComplexIssueIcon, getSimpleIssueIcon } from "../../src/data/IconProvider";
+import { ArtifactConfig } from "../../src/artifacts/ArtifactConfig";
 
 
 
@@ -266,6 +313,11 @@ export default class App extends Vue {
      * The id of the current component
      */
     private componentId: string | null = null;
+
+    /**
+     * Artifact config used for all artifact related things
+     */
+    private artifactConfig: ArtifactConfig | null = null;
 
     /**
      * If true, the complex icons are used
@@ -311,6 +363,16 @@ export default class App extends Vue {
      * The options for the assignee AddSelect
      */
     private assigneeOptions: NodeOption<User>[] = [];
+
+    /**
+     * The content definition for the artifacts
+     */
+    private artifactsTreeContent: TreeViewContent<ArtifactTreeViewContent> | null = null;
+
+    /**
+     * The options for the artifact AddSelect
+     */
+    private artifactOptions: NodeOption<Artifact>[] = [];
 
     /**
      * if true, the viewer is in edit mode
@@ -408,6 +470,17 @@ export default class App extends Vue {
                 }));
                 break;
             }
+            case IssueViewMessageType.FOUND_ARTIFACTS: {
+                console.log((message as FoundArtifactsMessage).artifacts);
+                this.artifactOptions = (message as FoundArtifactsMessage).artifacts.map(artifact => ({
+                    label: this.getArtifactRelativePath(artifact) ?? artifact.uri ?? "",
+                    value: artifact.id!,
+                    description: "",
+                    selected: false,
+                    node: artifact
+                }));
+                break;
+            }
             case IssueViewMessageType.USER_ID_CHANGED: {
                 this.userId = (message as UserIdChangedMessage).id ?? null;
                 break;
@@ -420,8 +493,12 @@ export default class App extends Vue {
                 this.complexIcons = (message as ComplexListIconsChangedMessage).complex;
                 break;
             }
-            case IssueViewMessageType.COMPONENT_ID_CHANGED: {
-                this.componentId = (message as ComponentIdChangedMessage).componentId ?? null;
+            case IssueViewMessageType.COMPONENT_CHANGED: {
+                const componentMessage = message as ComponentChangedMessage;
+                this.componentId = componentMessage.componentId ?? null;
+                if (componentMessage.repositoryURL != undefined && componentMessage.artifactSchema != undefined) {
+                    this.artifactConfig = new ArtifactConfig(componentMessage.artifactSchema, componentMessage.repositoryURL);
+                }
                 break;
             }
         }
@@ -486,7 +563,9 @@ export default class App extends Vue {
                     body: this.issue.body,
                     category: this.issue.category,
                     addedLabels: this.labelsTreeContent?.subcontents?.map(label => label.id),
-                    addedLinkedIssues: this.linkedIssuesTreeContent?.subcontents?.map(issue => issue.id)
+                    addedLinkedIssues: this.linkedIssuesTreeContent?.subcontents?.map(issue => issue.id),
+                    addedAssignees: this.assigneesTreeContent?.subcontents?.map(user => user.id),
+                    addedArtifacts: this.artifactsTreeContent?.subcontents?.map(artifact => artifact.id)
                 }
             } as CreateIssueMessage);
         }
@@ -659,10 +738,19 @@ export default class App extends Vue {
                     .map(assignee => this.mapAssigneeToTreeViewContent(assignee as User))
             }
 
+            this.artifactsTreeContent = {
+                id: "artifacts",
+                label: "Artifacts",
+                subcontents: (issue.artifacts?.nodes ?? [])
+                    .filter(artifact => artifact != null)
+                    .map(artifact => this.mapArtifactToTreeViewContent(artifact as Artifact))
+            }
+
             this.issueTreeContent = [
                 this.labelsTreeContent,
                 this.linkedIssuesTreeContent,
-                this.assigneesTreeContent
+                this.assigneesTreeContent,
+                this.artifactsTreeContent
             ]
         }
     }
@@ -753,7 +841,7 @@ export default class App extends Vue {
         }
     }
 
-        /**
+    /**
      * Maps a linkedIssue to a TreeViewContent
      */
     private mapLinkedIssueToTreeViewContent(linkedIssue: Issue): IssueTreeViewContent {
@@ -938,6 +1026,100 @@ export default class App extends Vue {
             this.assigneesTreeContent?.subcontents?.shift();
         }
     }
+
+    /**
+     * Maps a artifact to a TreeViewContent
+     */
+    private mapArtifactToTreeViewContent(artifact: Artifact): ArtifactTreeViewContent {
+        let description = undefined;
+        if (artifact.lineRangeStart != undefined ||artifact.lineRangeEnd != undefined) {
+            description = `${artifact.lineRangeStart ?? ""} - ${artifact.lineRangeEnd ?? ""}`
+        }
+        const relativePath = this.getArtifactRelativePath(artifact)
+        return {
+            id: artifact.id!,
+            label: relativePath ?? artifact.uri,
+            description: description,
+            relativePath: relativePath
+        }
+    }
+
+    /**
+     * Called when the add artifact button is pressed
+     */
+    private onAddArtifact(): void {
+        if (this.artifactsTreeContent != null && this.artifactsTreeContent.subcontents != undefined) {
+            this.artifactsTreeContent.subcontents.unshift({
+                id: "new",
+                label: "new"
+            });
+            this.onSearchArtifact("");
+        }
+    }
+
+    /**
+     * Called to remove the artifact with the specified index from the current issue
+     */
+    private onDeleteArtifact(id: string): void {
+        const contentIndex = this.artifactsTreeContent?.subcontents?.findIndex(content => content.id == id);
+        if (contentIndex != undefined && contentIndex >= 0) {
+            this.artifactsTreeContent?.subcontents?.splice(contentIndex, 1);
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    removedArtifacts: [id]  
+                });
+            }
+        }
+    }
+
+    /**
+     * Called when a new search text was entered
+     */
+    private onSearchArtifact(text: string): void {
+        this.postMessage({
+            type: IssueViewMessageType.SEARCH_ARTIFACTS,
+            text: text
+        } as SearchArtifactsMessage);
+    }
+
+    /**
+     * Called when the artifact sarch input looses focus,
+     * removes the temporary artifact element
+     */
+    private onArtifactLostFocus(): void {
+        this.$nextTick(() => {
+            if (this.artifactsTreeContent?.subcontents?.[0]?.id == "new") {
+                this.artifactsTreeContent.subcontents.shift();
+            }
+        });
+    }
+
+    /**
+     * Called when a artifact is selected, 
+     * replaces the temporary artifact element with the real artifact
+     */
+    private onNewArtifactSelected(id: string): void {
+        const canAdd = !(this.artifactsTreeContent?.subcontents?.some(content => content.id == id) ?? true);
+        if (canAdd) {
+            const newContent = this.artifactsTreeContent?.subcontents?.[0] as ArtifactTreeViewContent;
+            const artifact = this.artifactOptions.find(option => option.value == id)?.node;
+            if (newContent != undefined && artifact != undefined) {
+                newContent.id = artifact.id!;
+                newContent.relativePath = this.getArtifactRelativePath(artifact);
+                newContent.label = newContent.relativePath ?? artifact.uri;
+                if (artifact.lineRangeStart != undefined || artifact.lineRangeEnd != undefined) {
+                    newContent.description = `${artifact.lineRangeStart ?? ""} - ${artifact.lineRangeEnd ?? ""}`;
+                }
+            }
+            if (this.mode != "new") {
+                this.sendUpdateDiff({
+                    addedArtifacts: [id]
+                });
+            }
+        } else {
+            this.artifactsTreeContent?.subcontents?.shift();
+        }
+    }
     
     /**
      * Gets the icon of the issue
@@ -996,6 +1178,21 @@ export default class App extends Vue {
             return null;
         }
     }
+
+    /**
+     * Gets the relative path for an artifact if possible
+     */
+    private getArtifactRelativePath(artifact: Artifact): string | undefined {
+        if (this.artifactConfig != undefined) {
+            if (this.artifactConfig.matchesArtifactUrl(artifact.uri)) {
+                return this.artifactConfig.urlToPath(artifact.uri);
+            } else {
+                return undefined;
+            }
+        } else {
+            return undefined;
+        }
+    }
  }
 
 /**
@@ -1010,6 +1207,14 @@ interface ColorTreeViewContent extends TreeViewContent {
  */
 interface IssueTreeViewContent extends TreeViewContent {
     issue: Issue | null
+}
+
+/**
+ * TreeViewContend for an Artifact
+ * if relativePath is set, the artifact represents a file in the repository
+ */
+interface ArtifactTreeViewContent extends TreeViewContent {
+    relativePath?: string
 }
 
 /**

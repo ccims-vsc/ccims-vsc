@@ -28,7 +28,7 @@ import { listIconFiles } from "../data/IconProvider";
 import { IconTableMessage } from "./communication/IconTableMessage";
 import { ComplexListIconsChangedMessage } from "./communication/ComplexListIconsChangedMessage";
 import { ComponentController } from "../data/ComponentController";
-import { ComponentIdChangedMessage } from "./communication/ComponentIdChangedMessage";
+import { ComponentChangedMessage } from "./communication/ComponentChangedMessage";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -78,11 +78,6 @@ export class IssueViewProvider extends IssueViewProviderBase {
 
 		this._initCommands(commands);
 		this._initListeners();
-		commands.reloadIssueListCommand.addListener(() => {
-			if (this._issue != undefined) {
-				this._openIssue(this._issue.id ?? "");
-			}
-		});
 	}
 
 	/**
@@ -109,8 +104,8 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			this._updateComplexListItems();
 		});
 
-		commands.apiStatusChangedCommand.addListener(() => {
-			this._updateComponentId();
+		commands.componentDataChangedCommand.addListener(() => {
+			this._updateComponent();
 		})
 	}
 
@@ -318,6 +313,16 @@ export class IssueViewProvider extends IssueViewProviderBase {
 					await api?.removeAssignee({ issue: id, assignee: assignee });
 				}
 			}
+			if (diff.addedArtifacts != undefined) {
+				for (const artifact of diff.addedArtifacts) {
+					await api?.addArtifactToIssue({ issue: id, artifact: artifact });
+				}
+			}
+			if (diff.removedArtifacts != undefined) {
+				for (const artifact of diff.removedArtifacts) {
+					await api?.removeArtifactFromIssue({ issue: id, artifact: artifact });
+				}
+			}
 	
 			vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 		}
@@ -331,7 +336,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		this._updateUserId();
 		this._updateIconTable();
 		this._updateComplexListItems();
-		this._updateComponentId();
+		this._updateComponent();
 		vscode.window.onDidChangeActiveColorTheme(() => {
 			this._updateTheme();
 		});
@@ -361,11 +366,13 @@ export class IssueViewProvider extends IssueViewProviderBase {
 	/**
 	 * Message to inform the frontedn about a changed component id
 	 */
-	private _updateComponentId(): void {
+	private _updateComponent(): void {
 		this.postMessage({
-			type: IssueViewMessageType.COMPONENT_ID_CHANGED,
-			componentId: getComponentId()
-		} as ComponentIdChangedMessage);
+			type: IssueViewMessageType.COMPONENT_CHANGED,
+			componentId: getComponentId(),
+			repositoryURL: this._componentController.repositoryURL,
+			artifactSchema: this._componentController.artifactSchema
+		} as ComponentChangedMessage);
 	}
 
 	/**
