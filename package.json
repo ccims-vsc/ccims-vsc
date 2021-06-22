@@ -1,7 +1,7 @@
 {
 	"name": "ccims-vsc",
 	"description": "CCIMS - Cross-Component Issue Management System integration ",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"publisher": "nk-coding",
 	"engines": {
 		"vscode": "^1.50.0"
