@@ -76,6 +76,12 @@ export class CCIMSCommands {
 	public readonly reloadEditorDecoratorsCommand: CCIMSCommand;
 
 	/**
+	 * Command executed to inform that an issue was updated
+	 * expectx one parameter: the id of the issue which was updated
+	 */
+	public readonly issueUpdatedCommand: CCIMSCommand;
+
+	/**
 	 * Creates all ccims extension commands
 	 * Note: only one instance of this class can be created
 	 * @param context the context used to create the commands
@@ -93,5 +99,6 @@ export class CCIMSCommands {
 		this.userIdChangedCommand = new CCIMSCommand(CCIMSCommandType.USER_ID_CHANGED, context);
 		this.componentDataChangedCommand = new CCIMSCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED, context);
 		this.reloadEditorDecoratorsCommand = new CCIMSCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS, context);
+		this.issueUpdatedCommand = new CCIMSCommand(CCIMSCommandType.ISSUE_UPDATED, context);
 	}
 }

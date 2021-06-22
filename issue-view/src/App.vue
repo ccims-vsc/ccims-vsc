@@ -206,6 +206,7 @@
                         :defaultInput="artifactProps.defaultInput"
                         :commands="[{icon: artifactProps.content.id == 'new' ? 'codicon-close' : 'codicon-trash', command: 'delete'}]"
                         @command="onDeleteArtifact(artifactProps.content.id)"
+                        @selected="onArtifactSelected(artifactProps.content.artifact, artifactProps.content.relativePath)"
                     >
                         <template #icon v-if="artifactProps.content.id == 'new'">  
                             <div 
@@ -258,6 +259,8 @@ import { UserIdChangedMessage } from "../../src/issue-view/communication/UserIdC
 import { IconTableMessage } from "../../src/issue-view/communication/IconTableMessage";
 import { ComplexListIconsChangedMessage } from "../../src/issue-view/communication/ComplexListIconsChangedMessage";
 import { ComponentChangedMessage } from "../../src/issue-view/communication/ComponentChangedMessage";
+import { OpenUrlMessage } from "../../src/issue-view/communication/OpenUrlMessage";
+import { OpenFileMessage } from "../../src/issue-view/communication/OpenFileMessage";
 import { IssueViewMessageType } from "../../src/issue-view/communication/IssueViewMessageType";
 import markdownIt from 'markdown-it'
 import emoji from 'markdown-it-emoji'
@@ -945,7 +948,7 @@ export default class App extends Vue {
         }
     }
 
-        /**
+    /**
      * Maps a assignee to a TreeViewContent
      */
     private mapAssigneeToTreeViewContent(assignee: User): TreeViewContent {
@@ -1040,7 +1043,8 @@ export default class App extends Vue {
             id: artifact.id!,
             label: relativePath ?? artifact.uri,
             description: description,
-            relativePath: relativePath
+            relativePath: relativePath,
+            artifact: artifact
         }
     }
 
@@ -1051,7 +1055,8 @@ export default class App extends Vue {
         if (this.artifactsTreeContent != null && this.artifactsTreeContent.subcontents != undefined) {
             this.artifactsTreeContent.subcontents.unshift({
                 id: "new",
-                label: "new"
+                label: "new",
+                artifact: null
             });
             this.onSearchArtifact("");
         }
@@ -1107,6 +1112,7 @@ export default class App extends Vue {
                 newContent.id = artifact.id!;
                 newContent.relativePath = this.getArtifactRelativePath(artifact);
                 newContent.label = newContent.relativePath ?? artifact.uri;
+                newContent.artifact = artifact;
                 if (artifact.lineRangeStart != undefined || artifact.lineRangeEnd != undefined) {
                     newContent.description = `${artifact.lineRangeStart ?? ""} - ${artifact.lineRangeEnd ?? ""}`;
                 }
@@ -1118,6 +1124,30 @@ export default class App extends Vue {
             }
         } else {
             this.artifactsTreeContent?.subcontents?.shift();
+        }
+    }
+
+    /**
+     * Called when an artifact is selected
+     * Opens the selected artifact
+     * @param artifact the selected Artifact
+     * @param relativePath the relativePath of the Artifact
+     */
+    private onArtifactSelected(artifact: Artifact | null, relativePath?: string): void {
+        if (artifact != null) {
+            if (relativePath != undefined) {
+                this.postMessage({
+                    type: IssueViewMessageType.OPEN_FILE,
+                    file: relativePath,
+                    lineRangeStart: (artifact.lineRangeStart ?? artifact.lineRangeEnd ?? 1) - 1,
+                    lineRangeEnd: (artifact.lineRangeEnd ?? artifact.lineRangeStart ?? 1) - 1
+                } as OpenFileMessage);
+            } else {
+                this.postMessage({
+                    type: IssueViewMessageType.OPEN_URL,
+                    url: artifact.uri
+                } as OpenUrlMessage);
+            }
         }
     }
     
@@ -1214,6 +1244,7 @@ interface IssueTreeViewContent extends TreeViewContent {
  * if relativePath is set, the artifact represents a file in the repository
  */
 interface ArtifactTreeViewContent extends TreeViewContent {
+    artifact: Artifact | null,
     relativePath?: string
 }
 

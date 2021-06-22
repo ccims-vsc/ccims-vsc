@@ -23,6 +23,17 @@ function getSdkWrapper(sdk: Sdk) {
 			}
 		},
 		/**
+		 * Gets a Component based on its id
+		 * @param id the id of the Component
+		 */
+		async refetchIssue(id: string): Promise<Issue> {
+			if (isComplexListIcons()) {
+				return (await this.refetchIssueComplex({ id: id })).node as Issue;
+			} else {
+				return (await this.refetchIssueSimple({ id: id })).node as Issue;
+			}
+		},
+		/**
 		 * Gets all Issues of a Component
 		 * @param componentId the id of the Component
 		 */

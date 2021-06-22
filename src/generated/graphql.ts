@@ -4764,6 +4764,38 @@ export type SearchArtifactsInternalQuery = (
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
 );
 
+export type SimpleIssueFragment = (
+  { __typename?: 'Issue' }
+  & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
+);
+
+export type ComplexIssueFragment = (
+  { __typename?: 'Issue' }
+  & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
+  & { assignees?: Maybe<(
+    { __typename?: 'UserPage' }
+    & { nodes?: Maybe<Array<Maybe<(
+      { __typename?: 'CCIMSUser' }
+      & Pick<CcimsUser, 'id'>
+    ) | (
+      { __typename?: 'IMSUser' }
+      & Pick<ImsUser, 'id'>
+    )>>> }
+  )>, linksToIssues?: Maybe<(
+    { __typename?: 'IssuePage' }
+    & { nodes?: Maybe<Array<Maybe<(
+      { __typename?: 'Issue' }
+      & Pick<Issue, 'id'>
+    )>>> }
+  )>, linkedByIssues?: Maybe<(
+    { __typename?: 'IssuePage' }
+    & { nodes?: Maybe<Array<Maybe<(
+      { __typename?: 'Issue' }
+      & Pick<Issue, 'id'>
+    )>>> }
+  )> }
+);
+
 export type GetComponentInternalSimpleQueryVariables = Exact<{
   id: Scalars['ID'];
 }>;
@@ -4778,7 +4810,7 @@ export type GetComponentInternalSimpleQuery = (
       { __typename?: 'IssuePage' }
       & { nodes?: Maybe<Array<Maybe<(
         { __typename?: 'Issue' }
-        & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
+        & SimpleIssueFragment
       )>>> }
     )>, projects?: Maybe<(
       { __typename?: 'ProjectPage' }
@@ -4804,29 +4836,7 @@ export type GetComponentInternalComplexQuery = (
       { __typename?: 'IssuePage' }
       & { nodes?: Maybe<Array<Maybe<(
         { __typename?: 'Issue' }
-        & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
-        & { assignees?: Maybe<(
-          { __typename?: 'UserPage' }
-          & { nodes?: Maybe<Array<Maybe<(
-            { __typename?: 'CCIMSUser' }
-            & Pick<CcimsUser, 'id'>
-          ) | (
-            { __typename?: 'IMSUser' }
-            & Pick<ImsUser, 'id'>
-          )>>> }
-        )>, linksToIssues?: Maybe<(
-          { __typename?: 'IssuePage' }
-          & { nodes?: Maybe<Array<Maybe<(
-            { __typename?: 'Issue' }
-            & Pick<Issue, 'id'>
-          )>>> }
-        )>, linkedByIssues?: Maybe<(
-          { __typename?: 'IssuePage' }
-          & { nodes?: Maybe<Array<Maybe<(
-            { __typename?: 'Issue' }
-            & Pick<Issue, 'id'>
-          )>>> }
-        )> }
+        & ComplexIssueFragment
       )>>> }
     )>, projects?: Maybe<(
       { __typename?: 'ProjectPage' }
@@ -4836,6 +4846,32 @@ export type GetComponentInternalComplexQuery = (
       )>>> }
     )> }
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
+);
+
+export type RefetchIssueSimpleQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type RefetchIssueSimpleQuery = (
+  { __typename?: 'Query' }
+  & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | { __typename?: 'Component' } | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | (
+    { __typename?: 'Issue' }
+    & SimpleIssueFragment
+  ) | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
+);
+
+export type RefetchIssueComplexQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type RefetchIssueComplexQuery = (
+  { __typename?: 'Query' }
+  & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | { __typename?: 'Component' } | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | (
+    { __typename?: 'Issue' }
+    & ComplexIssueFragment
+  ) | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
 );
 
 export type SearchComponentsInternalQueryVariables = Exact<{
@@ -5431,6 +5467,39 @@ export type SearchUsersQuery = (
   )> }
 );
 
+export const SimpleIssueFragmentDoc = gql`
+    fragment SimpleIssue on Issue {
+  id
+  title
+  body
+  isOpen
+  category
+}
+    `;
+export const ComplexIssueFragmentDoc = gql`
+    fragment ComplexIssue on Issue {
+  id
+  title
+  body
+  isOpen
+  category
+  assignees {
+    nodes {
+      id
+    }
+  }
+  linksToIssues(first: 1) {
+    nodes {
+      id
+    }
+  }
+  linkedByIssues(first: 1) {
+    nodes {
+      id
+    }
+  }
+}
+    `;
 export const SimpleSearchIssueFieldsFragmentDoc = gql`
     fragment SimpleSearchIssueFields on IssuePage {
   nodes {
@@ -5493,11 +5562,7 @@ export const GetComponentInternalSimpleDocument = gql`
       repositoryURL
       issues {
         nodes {
-          id
-          title
-          body
-          isOpen
-          category
+          ...SimpleIssue
         }
       }
       projects {
@@ -5508,7 +5573,7 @@ export const GetComponentInternalSimpleDocument = gql`
     }
   }
 }
-    `;
+    ${SimpleIssueFragmentDoc}`;
 export const GetComponentInternalComplexDocument = gql`
     query getComponentInternalComplex($id: ID!) {
   node(id: $id) {
@@ -5518,26 +5583,7 @@ export const GetComponentInternalComplexDocument = gql`
       repositoryURL
       issues {
         nodes {
-          id
-          title
-          body
-          isOpen
-          category
-          assignees {
-            nodes {
-              id
-            }
-          }
-          linksToIssues(first: 1) {
-            nodes {
-              id
-            }
-          }
-          linkedByIssues(first: 1) {
-            nodes {
-              id
-            }
-          }
+          ...ComplexIssue
         }
       }
       projects {
@@ -5548,7 +5594,25 @@ export const GetComponentInternalComplexDocument = gql`
     }
   }
 }
-    `;
+    ${ComplexIssueFragmentDoc}`;
+export const RefetchIssueSimpleDocument = gql`
+    query refetchIssueSimple($id: ID!) {
+  node(id: $id) {
+    ... on Issue {
+      ...SimpleIssue
+    }
+  }
+}
+    ${SimpleIssueFragmentDoc}`;
+export const RefetchIssueComplexDocument = gql`
+    query refetchIssueComplex($id: ID!) {
+  node(id: $id) {
+    ... on Issue {
+      ...ComplexIssue
+    }
+  }
+}
+    ${ComplexIssueFragmentDoc}`;
 export const SearchComponentsInternalDocument = gql`
     query searchComponentsInternal($name: String, $description: String, $maxAmount: Int!) {
   components(
@@ -5940,6 +6004,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getComponentInternalComplex(variables: GetComponentInternalComplexQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetComponentInternalComplexQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetComponentInternalComplexQuery>(GetComponentInternalComplexDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getComponentInternalComplex');
+    },
+    refetchIssueSimple(variables: RefetchIssueSimpleQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RefetchIssueSimpleQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RefetchIssueSimpleQuery>(RefetchIssueSimpleDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'refetchIssueSimple');
+    },
+    refetchIssueComplex(variables: RefetchIssueComplexQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RefetchIssueComplexQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RefetchIssueComplexQuery>(RefetchIssueComplexDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'refetchIssueComplex');
     },
     searchComponentsInternal(variables: SearchComponentsInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchComponentsInternalQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<SearchComponentsInternalQuery>(SearchComponentsInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchComponentsInternal');

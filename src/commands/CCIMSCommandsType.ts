@@ -13,5 +13,6 @@ export enum CCIMSCommandType {
 	LOGIN = "ccims.login",
 	COMPLEX_LIST_ICONS_CHANGED = "ccims.complexListIconsChanged",
 	USER_ID_CHANGED = "ccims.userIdChanged",
-	RELOAD_EDITOR_DECORATORS = "ccims.reloadEditorDecorators"
+	RELOAD_EDITOR_DECORATORS = "ccims.reloadEditorDecorators",
+	ISSUE_UPDATED = "ccims.issueUpdated"
 }

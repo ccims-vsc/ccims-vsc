@@ -14,7 +14,9 @@ export class ComponentController {
 	/**
 	 * List of all issues on the current component
 	 */
-	public issues: Issue[] = [];
+	public get issues(): Issue[] {
+		return [...this._issueMap.values()];
+	}
 
 	private _issueMap: Map<string, Issue> = new Map();
 
@@ -31,6 +33,9 @@ export class ComponentController {
 		commands.apiStatusChangedCommand.addListener(() => {
 			this.updateData();
 		});
+		commands.issueUpdatedCommand.addListener(id => {
+			this.refetchIssue(id[0]);
+		})
 		this.updateData();
 	}
 
@@ -42,9 +47,9 @@ export class ComponentController {
 		const api = await getCCIMSApi(this._context);
 		if (componentId && api != undefined) {
 			const component = await api.getComponent(componentId);
-			this.issues = (component.issues?.nodes ?? []) as Issue[];
+			const issues = (component.issues?.nodes ?? []) as Issue[];
 			this._issueMap.clear();
-			for (const issue of this.issues) {
+			for (const issue of issues) {
 				this._issueMap.set(issue.id!, issue);
 			}
 			this.repositoryURL = component.repositoryURL as string | undefined;
@@ -61,6 +66,16 @@ export class ComponentController {
 				}
 			}
 			
+			await vscode.commands.executeCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED);
+		}
+	}
+
+	private async refetchIssue(id: string): Promise<void> {
+		const api = await getCCIMSApi(this._context);
+		if (api != undefined) {
+			const issue = await api.refetchIssue(id);
+			this._issueMap.set(issue.id!, issue);
+
 			await vscode.commands.executeCommand(CCIMSCommandType.COMPONENT_DATA_CHANGED);
 		}
 	}

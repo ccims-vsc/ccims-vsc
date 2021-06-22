@@ -29,6 +29,8 @@ import { IconTableMessage } from "./communication/IconTableMessage";
 import { ComplexListIconsChangedMessage } from "./communication/ComplexListIconsChangedMessage";
 import { ComponentController } from "../data/ComponentController";
 import { ComponentChangedMessage } from "./communication/ComponentChangedMessage";
+import { OpenFileMessage } from "./communication/OpenFileMessage";
+import { OpenUrlMessage } from "./communication/OpenUrlMessage";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
@@ -129,6 +131,25 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			if (id != undefined) {
 				this._openIssue(id);
 			}
+		});
+
+		this.setMessageListener(IssueViewMessageType.OPEN_FILE, async message => {
+			const openFileMessage = message as OpenFileMessage;
+			const uri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders?.[0]?.uri!, openFileMessage.file);
+
+			const doc = await vscode.workspace.openTextDocument(uri);
+			const editor = await vscode.window.showTextDocument(doc);
+
+			const startPos = new vscode.Position(openFileMessage.lineRangeStart, 0);
+			const endPos = new vscode.Position(openFileMessage.lineRangeEnd, 0);
+
+			editor.selections = [new vscode.Selection(startPos, endPos)];
+			editor.revealRange(new vscode.Range(startPos, endPos));
+		});
+
+		this.setMessageListener(IssueViewMessageType.OPEN_URL, async message => {
+			const openUrlMessage = message as OpenUrlMessage;
+			await vscode.env.openExternal(vscode.Uri.parse(openUrlMessage.url));
 		});
 
 		await this._initSearchListeners();
@@ -234,8 +255,8 @@ export class IssueViewProvider extends IssueViewProviderBase {
 					}
 				}
 
-				vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result?.createIssue?.issue?.id);
-				vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+				await vscode.commands.executeCommand(CCIMSCommandType.OPEN_ISSUE, result?.createIssue?.issue?.id);
+				await vscode.commands.executeCommand(CCIMSCommandType.ISSUE_UPDATED, result?.createIssue?.issue?.id);
 			} else {
 				//TODO error handling
 			}
@@ -324,7 +345,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 				}
 			}
 	
-			vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
+			await vscode.commands.executeCommand(CCIMSCommandType.ISSUE_UPDATED, id);
 		}
 	}
 

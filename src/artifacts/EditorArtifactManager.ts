@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { Artifact, Issue } from "../generated/graphql";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { getComponentId, isComplexListIcons } from "../data/settings";
-import { getIssueIcon } from "../data/IconProvider";
+import { getIssueIcon, listIconFiles } from "../data/IconProvider";
 import { ComponentController } from "../data/ComponentController";
 
 /**
@@ -17,8 +17,11 @@ export class EditorArtifactManager {
 
 	private readonly _relativePath: string;
 
+	private readonly _decorationsTypes: string[];
+
 	private constructor(private readonly uri: Uri, private readonly _context: ExtensionContext, private readonly _artifactManager: ArtifactManager, private readonly _componentController: ComponentController) {
 		this._relativePath = vscode.workspace.asRelativePath(uri);
+		this._decorationsTypes = listIconFiles();
 	}
 
 	public static async create(uri: Uri,  _context: ExtensionContext, _artifactManager: ArtifactManager, _componentController: ComponentController): Promise<EditorArtifactManager> {
@@ -45,6 +48,9 @@ export class EditorArtifactManager {
 
 	public updateDecorations(editor: TextEditor): void {
 		const decoratorTypes: Map<string, [Artifact, Issue][]> = new Map();
+		for (const decorationType of this._decorationsTypes) {
+			decoratorTypes.set(decorationType, []);
+		}
 
 		for (const [line, artifacts] of this._artifacts) {
 			if (artifacts.length > 0 && artifacts) {
@@ -52,9 +58,6 @@ export class EditorArtifactManager {
 				if (artifact?.issues?.nodes != undefined && artifact.issues.nodes.length > 0) {
 					const issue = this._componentController.issueById(artifact.issues.nodes[0]?.id!)!;
 					const iconPath = getIssueIcon(issue, this._context.globalState.get<string>("userId") ?? "", isComplexListIcons());
-					if (!decoratorTypes.has(iconPath)) {
-						decoratorTypes.set(iconPath, []);
-					}
 					decoratorTypes.get(iconPath)?.push([artifact, issue]);
 				}
 			}
