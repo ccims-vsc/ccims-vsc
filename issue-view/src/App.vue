@@ -8,7 +8,7 @@
             <div style="display: flex">
                 <img 
                     :src="iconTable[icon(issue)]"
-                    style="align-self: center; height: 25px"
+                    style="align-self: center; height: 25px; flex: none"
                 />
                 <input 
                     id="title-input" 
@@ -21,7 +21,7 @@
                     class="codicon"
                     :class="{'codicon-edit': mode == 'read', 'codicon-save': mode != 'read'}"
                     :disabled="mode != 'read' && (!issue.title || !issue.body)"
-                    style="width: 42px"
+                    style="width: 35.3px; flex: none"
                     @click="updateMode(mode == 'read' ? 'edit' : 'read')"
                 />
             </div>
@@ -598,7 +598,7 @@ export default class App extends Vue {
             language: "markdown",
             lineNumbers: "off",
             lineNumbersMinChars: 0,
-            lineDecorationsWidth: 0,
+            lineDecorationsWidth: 5,
             folding: false,
             glyphMargin: false,
             minimap: {
@@ -610,7 +610,12 @@ export default class App extends Vue {
             wrappingStrategy: "advanced",
             scrollbar: {
                 alwaysConsumeMouseWheel: false
-            }
+            },
+            padding: {
+                top: 5,
+                bottom: 5
+            },
+            renderLineHighlightOnlyWhenFocus: true
         });
 
         let ignoreEvent = false;
@@ -1317,6 +1322,7 @@ interface NodeOption<T> extends Option {
         font-size: large;
         margin-left: 10px;
         margin-right: 10px;
+        text-overflow: ellipsis;
     }
 
     #title-input:disabled {
@@ -1325,6 +1331,12 @@ interface NodeOption<T> extends Option {
 
     #md-editor {
         width: 100%;
+        outline: 1px solid transparent;
+        outline-offset: 1px;
+    }
+
+    #md-editor:focus-within {
+        outline-color: var(--vscode-focusBorder);
     }
 
     .collapsed {
