@@ -1,6 +1,6 @@
 {
-	"name": "ccims-vsc",
-	"description": "CCIMS - Cross-Component Issue Management System integration ",
+	"name": "gropius-vsc",
+	"description": "Gropius - Cross-Component Issue Management System integration ",
 	"version": "0.1.0",
 	"publisher": "nk-coding",
 	"engines": {
@@ -34,7 +34,7 @@
 			"activitybar": [
 				{
 					"id": "issue-explorer",
-					"title": "CCIMS explorer",
+					"title": "Gropius explorer",
 					"icon": "$(type-hierarchy)"
 				}
 			]
@@ -62,12 +62,12 @@
 			]
 		},
 		"configuration": {
-			"title": "CCIMS",
+			"title": "Gropius",
 			"properties": {
 				"ccims.url": {
 					"type": "string",
 					"default": "http://localhost:8080",
-					"description": "The endpoint of the used CCIMS instance",
+					"description": "The endpoint of the used Gropius instance",
 					"scope": "window"
 				},
 				"ccims.componentId": {
@@ -207,92 +207,92 @@
 			{
 				"command": "ccims.reloadIssueList",
 				"title": "Reload Issue list",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(refresh)"
 			},
 			{
 				"command": "ccims.checkApiStatus",
 				"title": "Check api status",
-				"category": "CCIMS"
+				"category": "Gropius"
 			},
 			{
 				"command": "ccims.selectComponent",
 				"title": "Select component",
-				"category": "CCIMS"
+				"category": "Gropius"
 			},
 			{
 				"command": "ccims.newIssue",
 				"title": "Create new issue",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(add)"
 			},
 			{
 				"command": "ccims.setupExtension",
 				"title": "Setup extension",
-				"category": "CCIMS"
+				"category": "Gropius"
 			},
 			{
 				"command": "ccims.login",
 				"title": "Login",
-				"category": "CCIMS"
+				"category": "Gropius"
 			},
 			{
 				"command": "ccims.createArtifact",
 				"title": "Create Artifact at current position",
-				"category": "CCIMS"
+				"category": "Gropius"
 			},
 			{
 				"command": "ccims.activateFileFilter",
 				"title": "  Filter for issues in file",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(issues)"
 			},
 			{
 				"command": "ccims.deactivateFileFilter",
 				"title": "Don't filter for file",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(file)"
 			},
 			{
 				"command": "ccims.toggleFilterUnclassified",
 				"title": "Toggle if unclassified issues are shown",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(issues)"
 			},
 			{
 				"command": "ccims.toggleFilterBugs",
 				"title": "Toggle if bugs are shown",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(bug)"
 			},
 			{
 				"command": "ccims.toggleFilterFeatureRequests",
 				"title": "Toggle if feature requests are shown",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(lightbulb)"
 			},
 			{
 				"command": "ccims.toggleFilterOpen",
 				"title": "Toggle if open issues are shown",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(issues)"
 			},
 			{
 				"command": "ccims.toggleFilterClosed",
 				"title": "Toggle if closed issues are shown",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(pass)"
 			},
 			{
 				"command": "ccims.toggleFilterSelfAssigned",
 				"title": "Toggle if only self-assigned issues are shown",
-				"category": "CCIMS",
+				"category": "Gropius",
 				"icon": "$(star)"
 			},
 			{
 				"command": "ccims.clearFilters",
 				"title": "Clear all issue filters",
-				"category": "CCIMS"
+				"category": "Gropius"
 			}
 		],
 		"menus": {
@@ -311,7 +311,7 @@
 			"editor/context": [
 				{
 					"command": "ccims.createArtifact",
-					"group": "CCIMS"
+					"group": "Gropius"
 				}
 			],
 			"editor/title": [
