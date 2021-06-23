@@ -30,5 +30,6 @@ export function getContext(context: CCIMSContext): any {
  */
 export enum CCIMSContext {
 	API_STATUS = "ccims.apiStatus",
-	FILTER_SELF_ASSIGNED = "ccims.filterSelfAssigned"
+	FILTER_SELF_ASSIGNED = "ccims.filterSelfAssigned",
+	FILTER_OPEN = "ccims.filterOpen"
 }

@@ -35,6 +35,19 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 			setContext(CCIMSContext.FILTER_SELF_ASSIGNED, false);
 			this.refresh();
 		});
+
+		this._commands.setOpenFilterToOpenCommand.addListener(() => {
+			setContext(CCIMSContext.FILTER_OPEN, 1);
+			this.refresh();
+		});
+		this._commands.setOpenFilterToClosedCommand.addListener(() => {
+			setContext(CCIMSContext.FILTER_OPEN, 2);
+			this.refresh();
+		});
+		this._commands.deactivateOpenFilterCommand.addListener(() => {
+			setContext(CCIMSContext.FILTER_OPEN, 0);
+			this.refresh();
+		});
 	}
 
 	public onDidChangeTreeData?: vscode.Event<void | Issue | null | undefined> | undefined = this._onDidChangeTreeData.event;
@@ -71,6 +84,13 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 				const userId = this._context.globalState.get<string>("userId");
 				if (getContext(CCIMSContext.FILTER_SELF_ASSIGNED) && userId) {
 					issues = issues.filter(issue => issue.assignees?.nodes?.some(user => user?.id === userId) ?? false);
+				}
+				if (getContext(CCIMSContext.FILTER_OPEN)) {
+					if (getContext(CCIMSContext.FILTER_OPEN) === 1) {
+						issues = issues.filter(issue => issue.isOpen);
+					} else {
+						issues = issues.filter(issue => !issue.isOpen);
+					}
 				}
 				return issues;
 			} else {

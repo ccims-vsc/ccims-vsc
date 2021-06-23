@@ -98,6 +98,12 @@ export class CCIMSCommands {
 
 	public readonly deactivateFilterSelfAssignedCommand: CCIMSCommand;
 
+	public readonly setOpenFilterToOpenCommand: CCIMSCommand;
+
+	public readonly setOpenFilterToClosedCommand: CCIMSCommand;
+
+	public readonly deactivateOpenFilterCommand: CCIMSCommand;
+
 	/**
 	 * Creates all ccims extension commands
 	 * Note: only one instance of this class can be created
@@ -120,6 +126,9 @@ export class CCIMSCommands {
 		this.addArtifactCommand = new CCIMSCommand(CCIMSCommandType.ADD_ARTIFACT, context);
 		this.activateFilterSelfAssignedCommand = new CCIMSCommand(CCIMSCommandType.ACTIVATE_FILTER_SELF_ASSIGNED, context);
 		this.deactivateFilterSelfAssignedCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_FILTER_SELF_ASSIGNED, context);
+		this.setOpenFilterToClosedCommand = new CCIMSCommand(CCIMSCommandType.SET_OPEN_FILTER_TO_CLOSED, context);
+		this.setOpenFilterToOpenCommand = new CCIMSCommand(CCIMSCommandType.SET_OPEN_FILTER_TO_OPEN, context);
+		this.deactivateOpenFilterCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_OPEN_FILTER, context);
 
 		this.createArtifactCommand = new CCIMSEditorCommand(CCIMSCommandType.CREATE_ARTIFACT, context);
 	}

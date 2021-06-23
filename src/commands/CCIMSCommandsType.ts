@@ -18,5 +18,8 @@ export enum CCIMSCommandType {
 	CREATE_ARTIFACT = "ccims.createArtifact",
 	ADD_ARTIFACT = "ccims.addArtifact",
 	ACTIVATE_FILTER_SELF_ASSIGNED = "ccims.activateFilterSelfAssigned",
-	DEACTIVATE_FILTER_SELF_ASSIGNED = "ccims.deactivateFilterSelfAssigned"
+	DEACTIVATE_FILTER_SELF_ASSIGNED = "ccims.deactivateFilterSelfAssigned",
+	SET_OPEN_FILTER_TO_OPEN = "ccims.setOpenFilterToOpen",
+	SET_OPEN_FILTER_TO_CLOSED = "ccims.setOpenFilterToClosed",
+	DEACTIVATE_OPEN_FILTER = "ccims.deactivateOpenFilter"
 }
