@@ -104,7 +104,7 @@ export function initSettingsListener(): void {
 			vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
 		}
 		if (e.affectsConfiguration("ccims.complexListIcons")) {
-			vscode.commands.executeCommand(CCIMSCommandType.API_STATUS_CHANGED);
+			vscode.commands.executeCommand(CCIMSCommandType.COMPLEX_LIST_ICONS_CHANGED);
 		}
 		if (e.affectsConfiguration("ccims.artifactSchemas")) {
 			vscode.commands.executeCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS);

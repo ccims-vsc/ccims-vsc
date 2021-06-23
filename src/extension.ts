@@ -91,10 +91,6 @@ function _initCommandListeners(commands: CCIMSCommands, context: vscode.Extensio
 		vscode.commands.executeCommand(CCIMSCommandType.CHECK_API_STATUS);
 	});
 
-	commands.complexListIconsChangedCommand.addListener(() => {
-		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
-	});
-
 	commands.componentDataChangedCommand.addListener(() => {
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS);

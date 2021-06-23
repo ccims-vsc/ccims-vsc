@@ -33,9 +33,12 @@ export class ComponentController {
 		commands.apiStatusChangedCommand.addListener(() => {
 			this.updateData();
 		});
+		commands.complexListIconsChangedCommand.addListener(() => {
+			this.updateData();
+		});
 		commands.issueUpdatedCommand.addListener(id => {
 			this.refetchIssue(id[0]);
-		})
+		});
 		this.updateData();
 	}
 
