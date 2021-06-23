@@ -20,6 +20,7 @@
                 <button 
                     class="codicon"
                     :class="{'codicon-edit': mode == 'read', 'codicon-save': mode != 'read'}"
+                    :disabled="mode != 'read' && (!issue.title || !issue.body)"
                     style="width: 42px"
                     @click="updateMode(mode == 'read' ? 'edit' : 'read')"
                 />
@@ -529,8 +530,8 @@ export default class App extends Vue {
             }
             this.mdEditor?.setValue(this.issue?.body ?? "");
         } else {
-            if (this.mode != "read" && this.issue != null && this.mdEditor != undefined) {
-                this.issue.body = this.mdEditor.getValue();
+            if (this.mode != "read") {
+                this.updateIssueBodyFromEditor();
             }
             if (this.issue != null && save) {
                 if (this.mode == "new") {
@@ -544,6 +545,15 @@ export default class App extends Vue {
             }
         }
         this.mode = newMode;
+    }
+
+    /**
+     * Updates the body of the issue based on the value of the mdEditor if possible
+     */
+    private updateIssueBodyFromEditor(): void {
+        if (this.mdEditor != undefined && this.issue != null) {
+            this.issue.body = this.mdEditor.getValue();
+        }
     }
 
     /**
@@ -610,6 +620,9 @@ export default class App extends Vue {
                 this.layoutMonaco();
                 ignoreEvent = false;
             }
+        });
+        this.mdEditor.onDidChangeModelContent(contentChangedEvent => {
+            this.updateIssueBodyFromEditor();
         });
         window.addEventListener("resize", this.layoutMonaco);
         this.layoutMonaco();

@@ -55,7 +55,7 @@ button {
 	background: var(--vscode-button-background);
 }
 
-button:hover {
+button:hover:not(:disabled) {
 	cursor: pointer;
 	background: var(--vscode-button-hoverBackground);
 }
@@ -64,12 +64,13 @@ button:focus {
 	outline-color: var(--vscode-focusBorder);
 }
 
+button:disabled,
 button.secondary {
 	color: var(--vscode-button-secondaryForeground);
 	background: var(--vscode-button-secondaryBackground);
 }
 
-button.secondary:hover {
+button.secondary:hover(:disabled) {
 	background: var(--vscode-button-secondaryHoverBackground);
 }
 
