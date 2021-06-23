@@ -94,6 +94,10 @@ export class CCIMSCommands {
 	 */
 	public readonly createArtifactCommand: CCIMSCommand;
 
+	public readonly activateFilterSelfAssignedCommand: CCIMSCommand;
+
+	public readonly deactivateFilterSelfAssignedCommand: CCIMSCommand;
+
 	/**
 	 * Creates all ccims extension commands
 	 * Note: only one instance of this class can be created
@@ -114,6 +118,8 @@ export class CCIMSCommands {
 		this.reloadEditorDecoratorsCommand = new CCIMSCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS, context);
 		this.issueUpdatedCommand = new CCIMSCommand(CCIMSCommandType.ISSUE_UPDATED, context);
 		this.addArtifactCommand = new CCIMSCommand(CCIMSCommandType.ADD_ARTIFACT, context);
+		this.activateFilterSelfAssignedCommand = new CCIMSCommand(CCIMSCommandType.ACTIVATE_FILTER_SELF_ASSIGNED, context);
+		this.deactivateFilterSelfAssignedCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_FILTER_SELF_ASSIGNED, context);
 
 		this.createArtifactCommand = new CCIMSEditorCommand(CCIMSCommandType.CREATE_ARTIFACT, context);
 	}

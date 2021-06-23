@@ -16,5 +16,7 @@ export enum CCIMSCommandType {
 	RELOAD_EDITOR_DECORATORS = "ccims.reloadEditorDecorators",
 	ISSUE_UPDATED = "ccims.issueUpdated",
 	CREATE_ARTIFACT = "ccims.createArtifact",
-	ADD_ARTIFACT = "ccims.addArtifact"
+	ADD_ARTIFACT = "ccims.addArtifact",
+	ACTIVATE_FILTER_SELF_ASSIGNED = "ccims.activateFilterSelfAssigned",
+	DEACTIVATE_FILTER_SELF_ASSIGNED = "ccims.deactivateFilterSelfAssigned"
 }

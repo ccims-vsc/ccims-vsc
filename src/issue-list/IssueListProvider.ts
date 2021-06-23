@@ -7,6 +7,7 @@ import { Issue } from "../generated/graphql";
 import { getComponentId, isComplexListIcons } from "../data/settings";
 import { getResourceUri } from "../extension";
 import { ComponentController } from "../data/ComponentController";
+import { CCIMSContext, getContext, setContext } from "../data/context";
 
 /**
  * View used to display a tree of all Issues
@@ -22,6 +23,18 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 	 */
 	public constructor(private readonly _commands: CCIMSCommands, private readonly _context: vscode.ExtensionContext, private readonly _componentController: ComponentController) {
 		this._commands.reloadIssueListCommand.addListener(() => this.refresh());
+		this._initFilterCommands();
+	}
+
+	private _initFilterCommands(): void {
+		this._commands.activateFilterSelfAssignedCommand.addListener(() => {
+			setContext(CCIMSContext.FILTER_SELF_ASSIGNED, true);
+			this.refresh();
+		});
+		this._commands.deactivateFilterSelfAssignedCommand.addListener(() => {
+			setContext(CCIMSContext.FILTER_SELF_ASSIGNED, false);
+			this.refresh();
+		});
 	}
 
 	public onDidChangeTreeData?: vscode.Event<void | Issue | null | undefined> | undefined = this._onDidChangeTreeData.event;
@@ -54,7 +67,12 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 			const api = await getCCIMSApi(this._context);
 			const componentId =  getComponentId();
 			if (componentId != null) {
-				return this._componentController.issues;
+				let issues = this._componentController.issues;
+				const userId = this._context.globalState.get<string>("userId");
+				if (getContext(CCIMSContext.FILTER_SELF_ASSIGNED) && userId) {
+					issues = issues.filter(issue => issue.assignees?.nodes?.some(user => user?.id === userId) ?? false);
+				}
+				return issues;
 			} else {
 				return undefined;
 			}

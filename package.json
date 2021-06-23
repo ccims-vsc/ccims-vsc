@@ -234,6 +234,18 @@
 				"command": "ccims.createArtifact",
 				"title": "Create Artifact at current position",
 				"category": "CCIMS"
+			},
+			{
+				"command": "ccims.activateFilterSelfAssigned",
+				"title": " Filter for self assigned issues",
+				"category": "CCIMS",
+				"icon": "$(star-empty)"
+			},
+			{
+				"command": "ccims.deactivateFilterSelfAssigned",
+				"title": " Remove filter for self assigned issues",
+				"category": "CCIMS",
+				"icon": "$(star-full)"
 			}
 		],
 		"menus": {
@@ -246,6 +258,16 @@
 				{
 					"command": "ccims.newIssue",
 					"when": "view == ccims.issueList",
+					"group": "navigation"
+				},
+				{
+					"command": "ccims.activateFilterSelfAssigned",
+					"when": "view == ccims.issueList && !ccims.filterSelfAssigned",
+					"group": "navigation"
+				},
+				{
+					"command": "ccims.deactivateFilterSelfAssigned",
+					"when": "view == ccims.issueList && ccims.filterSelfAssigned",
 					"group": "navigation"
 				}
 			],
