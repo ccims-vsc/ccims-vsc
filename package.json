@@ -267,9 +267,9 @@
 			},
 			{
 				"command": "ccims.activateFileFilter",
-				"title": "Filter for issues in file",
+				"title": "  Filter for issues in file",
 				"category": "CCIMS",
-				"icon": "$(issue)"
+				"icon": "$(issues)"
 			},
 			{
 				"command": "ccims.deactivateFileFilter",
@@ -329,7 +329,8 @@
 			],
 			"editor/title": [
 				{
-					"command": "ccims.activateFileFilter"
+					"command": "ccims.activateFileFilter",
+					"group": "navigation"
 				}
 			]
 		},

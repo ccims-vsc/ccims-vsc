@@ -127,8 +127,7 @@ export class ArtifactManager {
 	 */
 	private async _updateFileFilter(editor: vscode.TextEditor): Promise<void> {
 		if (this._config != undefined) {
-			const uri = this._config.pathToUrl(vscode.workspace.asRelativePath(editor.document.uri));
-			const filter = this._config.pathToUrlFilter(uri);
+			const filter = this._config.pathToUrlFilter(vscode.workspace.asRelativePath(editor.document.uri));
 			await vscode.commands.executeCommand(CCIMSCommandType.UPDATE_FILE_FILTER, filter);
 		}
 	}
