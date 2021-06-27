@@ -15,11 +15,9 @@ export type Scalars = {
   Float: number;
   /**
    * A scalar type representing a colour in RGB colour space.
-   * The scalar must be a string in CSS Colour Hex format:
-   *
-   * `#rrggbb` where `rr`, `gg`, `bb` are the hex values between _0_ and _ff_
-   *
-   * Example: `#ffff00` (would be a _beautiful_ yellow)
+   * Please note: alpha channel is not supported and will be dropped
+   * All common CSS formats are supported
+   * For a detailed list of supported values, see https://www.npmjs.com/package/color-string
    */
   Color: any;
   /**
@@ -4786,6 +4784,13 @@ export type CreateArtifactMutation = (
 export type SimpleIssueFragment = (
   { __typename?: 'Issue' }
   & Pick<Issue, 'id' | 'title' | 'body' | 'isOpen' | 'category'>
+  & { artifacts?: Maybe<(
+    { __typename?: 'ArtifactPage' }
+    & { nodes?: Maybe<Array<Maybe<(
+      { __typename?: 'Artifact' }
+      & Pick<Artifact, 'uri'>
+    )>>> }
+  )> }
 );
 
 export type ComplexIssueFragment = (
@@ -4811,6 +4816,12 @@ export type ComplexIssueFragment = (
     & { nodes?: Maybe<Array<Maybe<(
       { __typename?: 'Issue' }
       & Pick<Issue, 'id'>
+    )>>> }
+  )>, artifacts?: Maybe<(
+    { __typename?: 'ArtifactPage' }
+    & { nodes?: Maybe<Array<Maybe<(
+      { __typename?: 'Artifact' }
+      & Pick<Artifact, 'uri'>
     )>>> }
   )> }
 );
@@ -5493,6 +5504,11 @@ export const SimpleIssueFragmentDoc = gql`
   body
   isOpen
   category
+  artifacts {
+    nodes {
+      uri
+    }
+  }
 }
     `;
 export const ComplexIssueFragmentDoc = gql`
@@ -5515,6 +5531,11 @@ export const ComplexIssueFragmentDoc = gql`
   linkedByIssues(first: 1) {
     nodes {
       id
+    }
+  }
+  artifacts {
+    nodes {
+      uri
     }
   }
 }
