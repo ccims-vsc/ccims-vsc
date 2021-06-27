@@ -10,6 +10,7 @@ import { EditorArtifactManager } from "./EditorArtifactManager";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { Artifact } from "../generated/graphql";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { setContext } from "../data/context";
 
 /**
  * Class for artefacts shown in editors
@@ -34,12 +35,20 @@ export class ArtifactManager {
 			await this._textDocumentChanged(event.document.uri);
 		}));
 		
+		this._initCommands(commands);
+	}
+
+	private _initCommands(commands: CCIMSCommands): void {
 		commands.reloadEditorDecoratorsCommand.addListener(() => {
 			this._reload();
 		});	
 		commands.createArtifactCommand.addListener(params => {
 			this._createArtifact(params[0] as vscode.TextEditor);
 		});	
+		
+		commands.activateFileFilterCommand.addListener(params => {
+			this._updateFileFilter(params[0] as vscode.TextEditor);
+		});
 	}
 
 	private async _visibleEditorsChanged(visibleEditors: vscode.TextEditor[]): Promise<void> {
@@ -109,6 +118,18 @@ export class ArtifactManager {
 			if (artifact != undefined) {
 				await vscode.commands.executeCommand(CCIMSCommandType.ADD_ARTIFACT, artifact);
 			}
+		}
+	}
+
+	/**
+	 * Called to filter for issues in the specified file
+	 * @param editor the editor which has the file in for which to filter issues
+	 */
+	private async _updateFileFilter(editor: vscode.TextEditor): Promise<void> {
+		if (this._config != undefined) {
+			const uri = this._config.pathToUrl(vscode.workspace.asRelativePath(editor.document.uri));
+			const filter = this._config.pathToUrlFilter(uri);
+			await vscode.commands.executeCommand(CCIMSCommandType.UPDATE_FILE_FILTER, filter);
 		}
 	}
 

@@ -15,7 +15,7 @@ import { ArtifactManager } from "./artifacts/ArtifactManager";
 /**
  * cached extension uri
  */
-let _extensionUri: vscode.Uri
+let _extensionUri: vscode.Uri;
 
 /**
  * Called when the extension is activated
@@ -94,7 +94,7 @@ function _initCommandListeners(commands: CCIMSCommands, context: vscode.Extensio
 	commands.componentDataChangedCommand.addListener(() => {
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_ISSUE_LIST);
 		vscode.commands.executeCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS);
-	})
+	});
 
 	commands.selectComponentCommand.addListener(() => {
 		const input = new CCIMSSettingsInput(context);

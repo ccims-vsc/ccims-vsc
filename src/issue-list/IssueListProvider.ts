@@ -48,6 +48,15 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 			setContext(CCIMSContext.FILTER_OPEN, 0);
 			this.refresh();
 		});
+
+		this._commands.updateFileFilterCommand.addListener(params => {
+			setContext(CCIMSContext.FILTER_FILE, params[0]);
+			this.refresh();
+		});
+		this._commands.deactivateFileFilterCommand.addListener(() => {
+			setContext(CCIMSContext.FILTER_FILE, null);
+			this.refresh();
+		});
 	}
 
 	public onDidChangeTreeData?: vscode.Event<void | Issue | null | undefined> | undefined = this._onDidChangeTreeData.event;
@@ -56,7 +65,7 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 	 * Can be called to refresh the list
 	 */
 	private refresh(): void {
-	  	this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire();
 	}
 
 	public getTreeItem(element: Issue): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -69,7 +78,7 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 				title: "Open issue",
 				arguments: [element.id]
 			}
-		}
+		};
 	}
 
 	public async getChildren(element?: Issue): Promise<undefined | Issue[]> {
@@ -91,6 +100,18 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 					} else {
 						issues = issues.filter(issue => !issue.isOpen);
 					}
+				}
+				if (getContext(CCIMSContext.FILTER_FILE)) {
+					const filter = RegExp(getContext(CCIMSContext.FILTER_FILE));
+
+					issues = issues.filter(issue => (issue.artifacts?.nodes ?? []).some(artifact => {
+						const artifactUri = artifact?.uri;
+						if (artifactUri != undefined) {
+							return filter.test(artifactUri);
+						} else {
+							return false;
+						}
+					}));
 				}
 				return issues;
 			} else {

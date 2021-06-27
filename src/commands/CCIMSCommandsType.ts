@@ -21,5 +21,8 @@ export enum CCIMSCommandType {
 	DEACTIVATE_FILTER_SELF_ASSIGNED = "ccims.deactivateFilterSelfAssigned",
 	SET_OPEN_FILTER_TO_OPEN = "ccims.setOpenFilterToOpen",
 	SET_OPEN_FILTER_TO_CLOSED = "ccims.setOpenFilterToClosed",
-	DEACTIVATE_OPEN_FILTER = "ccims.deactivateOpenFilter"
+	DEACTIVATE_OPEN_FILTER = "ccims.deactivateOpenFilter",
+	ACTIVATE_FILE_FILTER = "ccims.activateFileFilter",
+	DEACTIVATE_FILE_FILTER = "ccims.deactivateFileFilter",
+	UPDATE_FILE_FILTER = "ccims.updateFileFilter"
 }

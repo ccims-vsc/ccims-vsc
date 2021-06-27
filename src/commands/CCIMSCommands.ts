@@ -94,15 +94,53 @@ export class CCIMSCommands {
 	 */
 	public readonly createArtifactCommand: CCIMSCommand;
 
+	/**
+	 * Command executed to activate a filter so that only self-assigned issues are shown
+	 * expects no parameters
+	 */
 	public readonly activateFilterSelfAssignedCommand: CCIMSCommand;
 
+	/**
+	 * Command exeuted to deacitvate the filter so that also non-self-assigned issues are shown
+	 * expects no parameters
+	 */
 	public readonly deactivateFilterSelfAssignedCommand: CCIMSCommand;
 
+	/**
+	 * Command executed so that only open issues are shown
+	 * expects no parametes
+	 */
 	public readonly setOpenFilterToOpenCommand: CCIMSCommand;
 
+	/**
+	 * Command executed so that only closed issues are shown
+	 * expects no parameters
+	 */
 	public readonly setOpenFilterToClosedCommand: CCIMSCommand;
 
+	/**
+	 * Command executed so that both open and closed issues are shown
+	 * expects no paramters
+	 */
 	public readonly deactivateOpenFilterCommand: CCIMSCommand;
+
+	/**
+	 * Command executed to only show issues regarding a specific file
+	 * expects one parameter: TextEditor on which the command was executed
+	 */
+	public readonly activateFileFilterCommand: CCIMSCommand;
+
+	/**
+	 * Command executed to remove the file filter
+	 * expects no parameters 
+	 */
+	public readonly deactivateFileFilterCommand: CCIMSCommand;
+
+	/**
+	 * Command executed to update the file filter
+	 * expects one parameter: the new filter string
+	 */
+	public readonly updateFileFilterCommand: CCIMSCommand;
 
 	/**
 	 * Creates all ccims extension commands
@@ -129,7 +167,10 @@ export class CCIMSCommands {
 		this.setOpenFilterToClosedCommand = new CCIMSCommand(CCIMSCommandType.SET_OPEN_FILTER_TO_CLOSED, context);
 		this.setOpenFilterToOpenCommand = new CCIMSCommand(CCIMSCommandType.SET_OPEN_FILTER_TO_OPEN, context);
 		this.deactivateOpenFilterCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_OPEN_FILTER, context);
+		this.deactivateFileFilterCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_FILE_FILTER, context);
+		this.updateFileFilterCommand = new CCIMSCommand(CCIMSCommandType.UPDATE_FILE_FILTER, context);
 
 		this.createArtifactCommand = new CCIMSEditorCommand(CCIMSCommandType.CREATE_ARTIFACT, context);
+		this.activateFileFilterCommand = new CCIMSEditorCommand(CCIMSCommandType.ACTIVATE_FILE_FILTER, context);
 	}
 }

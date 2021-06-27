@@ -264,6 +264,18 @@
 				"title": "  Remove the issue closed filter",
 				"category": "CCIMS",
 				"icon": "res/img/simple/issue_closed.svg"
+			},
+			{
+				"command": "ccims.activateFileFilter",
+				"title": "Filter for issues in file",
+				"category": "CCIMS",
+				"icon": "$(issue)"
+			},
+			{
+				"command": "ccims.deactivateFileFilter",
+				"title": "Don't filter for file",
+				"category": "CCIMS",
+				"icon": "$(file)"
 			}
 		],
 		"menus": {
@@ -302,12 +314,22 @@
 					"command": "ccims.deactivateOpenFilter",
 					"when": "view == ccims.issueList && ccims.filterOpen == 2",
 					"group": "navigation"
+				},
+				{
+					"command": "ccims.deactivateFileFilter",
+					"when": "view == ccims.issueList && ccims.filterFile",
+					"group": "navigation"
 				}
 			],
 			"editor/context": [
 				{
 					"command": "ccims.createArtifact",
 					"group": "CCIMS"
+				}
+			],
+			"editor/title": [
+				{
+					"command": "ccims.activateFileFilter"
 				}
 			]
 		},
