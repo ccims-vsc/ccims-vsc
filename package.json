@@ -387,8 +387,10 @@
 		"vscode:prepublish": "npm run build",
 		"compile": "webpack --mode production",
 		"lint": "eslint . --ext .ts,.tsx",
-		"init-all": "npm i && cd issue-view && npm i",
-		"build": "cd issue-view && npm run build && cd .. && npm run compile",
+		"init-all": "npm i && cd issue-view && npm i && cd .. && cd component-view && npm i",
+		"build": "npm run build-issue-view && npm run build-component-view && npm run compile",
+		"build-issue-view": "cd issue-view && npm run build",
+		"build-component-view": "cd component-view && npm run build",
 		"graphql-codegen": "graphql-codegen --config codegen.yml"
 	},
 	"devDependencies": {

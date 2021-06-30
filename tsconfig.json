@@ -10,5 +10,5 @@
 		"experimentalDecorators": true,
 		"moduleResolution": "node"
 	},
-	"exclude": ["node_modules", ".vscode-test", "issue-view"]
+	"exclude": ["node_modules", ".vscode-test", "issue-view", "component-view"]
 }

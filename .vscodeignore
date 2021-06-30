@@ -10,3 +10,5 @@ package-json.lock
 webpack.config.js
 issue-view/src/**
 issue-view/node_modules/**
+component-view/src/**
+component-view/node_modules/**
