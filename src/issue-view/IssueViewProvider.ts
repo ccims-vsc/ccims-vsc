@@ -220,7 +220,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 			const searchArtifactsMessage = message as SearchArtifactsMessage;
 			const components = this._components;
 			if (components != null) {
-				artifactSearch.search({ components: components, text: searchArtifactsMessage.text},
+				artifactSearch.search({ projects: this._projects, components: components, text: searchArtifactsMessage.text},
 					artifacts => {
 						this.postMessage({
 							type: IssueViewMessageType.FOUND_ARTIFACTS,
