@@ -4741,14 +4741,14 @@ export type WasUnlinkedEvent = IssueTimelineItem & Node & {
   unlinkedBy?: Maybe<Issue>;
 };
 
-export type SearchArtifactsInternalQueryVariables = Exact<{
+export type SearchArtifactsInternalComponentQueryVariables = Exact<{
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
   maxAmount: Scalars['Int'];
 }>;
 
 
-export type SearchArtifactsInternalQuery = (
+export type SearchArtifactsInternalComponentQuery = (
   { __typename?: 'Query' }
   & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | (
     { __typename?: 'Component' }
@@ -4760,6 +4760,27 @@ export type SearchArtifactsInternalQuery = (
       )>>> }
     )> }
   ) | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | { __typename?: 'Project' } | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
+);
+
+export type SearchArtifactsInternalProjectQueryVariables = Exact<{
+  id: Scalars['ID'];
+  name?: Maybe<Scalars['String']>;
+  maxAmount: Scalars['Int'];
+}>;
+
+
+export type SearchArtifactsInternalProjectQuery = (
+  { __typename?: 'Query' }
+  & { node?: Maybe<{ __typename?: 'AddedArtifactEvent' } | { __typename?: 'AddedNonFunctionalConstraintEvent' } | { __typename?: 'AddedToComponentEvent' } | { __typename?: 'AddedToLocationEvent' } | { __typename?: 'Artifact' } | { __typename?: 'AssignedEvent' } | { __typename?: 'CCIMSUser' } | { __typename?: 'CategoryChangedEvent' } | { __typename?: 'ClosedEvent' } | { __typename?: 'Component' } | { __typename?: 'ComponentInterface' } | { __typename?: 'DeletedIssueComment' } | { __typename?: 'DueDateChangedEvent' } | { __typename?: 'EstimatedTimeChangedEvent' } | { __typename?: 'IMS' } | { __typename?: 'IMSComponent' } | { __typename?: 'IMSUser' } | { __typename?: 'Issue' } | { __typename?: 'IssueComment' } | { __typename?: 'Label' } | { __typename?: 'LabelledEvent' } | { __typename?: 'LinkEvent' } | { __typename?: 'MarkedAsDuplicateEvent' } | { __typename?: 'NonFunctionalConstraint' } | { __typename?: 'PinnedEvent' } | { __typename?: 'PriorityChangedEvent' } | (
+    { __typename?: 'Project' }
+    & { artifacts?: Maybe<(
+      { __typename?: 'ArtifactPage' }
+      & { nodes?: Maybe<Array<Maybe<(
+        { __typename?: 'Artifact' }
+        & Pick<Artifact, 'id' | 'uri' | 'lineRangeStart' | 'lineRangeEnd'>
+      )>>> }
+    )> }
+  ) | { __typename?: 'ReactionGroup' } | { __typename?: 'ReferencedByIssueEvent' } | { __typename?: 'ReferencedByOtherEvent' } | { __typename?: 'RemovedArtifactEvent' } | { __typename?: 'RemovedFromComponentEvent' } | { __typename?: 'RemovedFromLocationEvent' } | { __typename?: 'RemovedNonFunctionalConstraintEvent' } | { __typename?: 'RenamedTitleEvent' } | { __typename?: 'ReopenedEvent' } | { __typename?: 'StartDateChangedEvent' } | { __typename?: 'UnassignedEvent' } | { __typename?: 'UnlabelledEvent' } | { __typename?: 'UnlinkEvent' } | { __typename?: 'UnmarkedAsDuplicateEvent' } | { __typename?: 'UnpinnedEvent' } | { __typename?: 'WasLinkedEvent' } | { __typename?: 'WasUnlinkedEvent' }> }
 );
 
 export type CreateArtifactMutationVariables = Exact<{
@@ -5577,10 +5598,26 @@ export const ComplexSearchIssueFieldsFragmentDoc = gql`
   }
 }
     `;
-export const SearchArtifactsInternalDocument = gql`
-    query searchArtifactsInternal($id: ID!, $name: String, $maxAmount: Int!) {
+export const SearchArtifactsInternalComponentDocument = gql`
+    query searchArtifactsInternalComponent($id: ID!, $name: String, $maxAmount: Int!) {
   node(id: $id) {
     ... on Component {
+      artifacts(first: $maxAmount, filterBy: {uri: $name}) {
+        nodes {
+          id
+          uri
+          lineRangeStart
+          lineRangeEnd
+        }
+      }
+    }
+  }
+}
+    `;
+export const SearchArtifactsInternalProjectDocument = gql`
+    query searchArtifactsInternalProject($id: ID!, $name: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ... on Project {
       artifacts(first: $maxAmount, filterBy: {uri: $name}) {
         nodes {
           id
@@ -6050,8 +6087,11 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    searchArtifactsInternal(variables: SearchArtifactsInternalQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchArtifactsInternalQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SearchArtifactsInternalQuery>(SearchArtifactsInternalDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchArtifactsInternal');
+    searchArtifactsInternalComponent(variables: SearchArtifactsInternalComponentQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchArtifactsInternalComponentQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchArtifactsInternalComponentQuery>(SearchArtifactsInternalComponentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchArtifactsInternalComponent');
+    },
+    searchArtifactsInternalProject(variables: SearchArtifactsInternalProjectQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SearchArtifactsInternalProjectQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SearchArtifactsInternalProjectQuery>(SearchArtifactsInternalProjectDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'searchArtifactsInternalProject');
     },
     createArtifact(variables: CreateArtifactMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateArtifactMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateArtifactMutation>(CreateArtifactDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'createArtifact');

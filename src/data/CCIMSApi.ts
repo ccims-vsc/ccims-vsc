@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Artifact, Component, getSdk, Issue, Label, Sdk } from "../generated/graphql";
+import { Artifact, Component, getSdk, Issue, Label, Project, Sdk } from "../generated/graphql";
 import { GraphQLClient } from 'graphql-request';
 import { getApiUrl, getComponentId, getLoginUrl, getPublicApiUrl, isComplexListIcons } from "./settings";
 import axios from "axios";
@@ -139,14 +139,14 @@ function getSdkWrapper(sdk: Sdk) {
 				if (issues.size >= minAmount) {
 					break;
 				}
-				const nameIssues = (await searchFunction({id: node, title: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const nameIssues = (await searchFunction({id: node, title: text, maxAmount: maxAmount - issues.size}))?.node as Component | Project | undefined;
 				const nameResults = nameIssues?.issues?.nodes as Issue[] | undefined;
 				if (nameResults != undefined) {
 					for (const issue of nameResults) {
 						issues.set(issue.id!, issue);
 					}
 				}
-				const descriptionIssues = (await searchFunction({id: node, body: text, maxAmount: maxAmount - issues.size}))?.node as Component | undefined;
+				const descriptionIssues = (await searchFunction({id: node, body: text, maxAmount: maxAmount - issues.size}))?.node as Component | Project | undefined;
 				const descriptionResults = descriptionIssues?.issues?.nodes as Issue[] | undefined;
 				if (descriptionResults != undefined) {
 					for (const issue of descriptionResults) {
@@ -168,13 +168,23 @@ function getSdkWrapper(sdk: Sdk) {
 		 * @param maxAmount the max amount of Artifacts to find
 		 * @returns the found Artifacts
 		 */
-		async searchArtifacts(components: string[], text: string, minAmount: number, maxAmount: number): Promise<Artifact[]> {
+		async searchArtifacts(projects: string[], components: string[], text: string, minAmount: number, maxAmount: number): Promise<Artifact[]> {
 			const artifacts: Map<string, Artifact> = new Map();
-			for (const component of components) {
+			let nodes;
+			let searchFunction;
+			if (projects.length > 0) {
+				nodes = projects
+				searchFunction = this.searchArtifactsInternalProject;
+			} else {
+				nodes = components
+				searchFunction = this.searchArtifactsInternalComponent;
+			}
+
+			for (const node of nodes) {
 				if (artifacts.size >= minAmount) {
 					break;
 				}
-				const nameComponent = (await this.searchArtifactsInternal({id: component, name: text, maxAmount: maxAmount - artifacts.size}))?.node as Component | undefined;
+				const nameComponent = (await searchFunction({ id: node, name: text, maxAmount: maxAmount - artifacts.size }))?.node as Component | Project | undefined;
 				const nameResults = nameComponent?.artifacts?.nodes as Artifact[] | undefined;
 				if (nameResults != undefined) {
 					for (const artifact of nameResults) {

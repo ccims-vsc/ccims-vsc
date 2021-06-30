@@ -1,15 +1,32 @@
-query searchArtifactsInternal($id: ID!, $name: String, $maxAmount: Int!) {
+query searchArtifactsInternalComponent($id: ID!, $name: String, $maxAmount: Int!) {
   node(id: $id) {
     ...on Component {
       artifacts(first: $maxAmount, filterBy: {
-        uri: $name,
+        uri: $name
       }) {
         nodes {
           id
           uri
           lineRangeStart
           lineRangeEnd
-        }
+		    }
+      }
+    }
+  }
+}
+
+query searchArtifactsInternalProject($id: ID!, $name: String, $maxAmount: Int!) {
+  node(id: $id) {
+    ...on Project {
+      artifacts(first: $maxAmount, filterBy: {
+        uri: $name
+      }) {
+        nodes {
+          id
+          uri
+          lineRangeStart
+          lineRangeEnd
+		    }
       }
     }
   }
