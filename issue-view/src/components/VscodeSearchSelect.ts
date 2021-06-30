@@ -375,7 +375,7 @@ export class VscodeSearchSelect extends LitElement {
         const { description } = this._options[this._activeIndex];
 
         return description
-            ? html`<div class="description">${description}</div>`
+            ? html`<div class="description" style="border-color: var(--vscode-panel-border)">${description}</div>`
             : nothing;
     }
 

@@ -294,12 +294,12 @@
 			"view/title": [
 				{
 					"command": "ccims.reloadIssueList",
-					"when": "view == ccims.issueList",
+					"when": "view == ccims.issueList || view == ccims.componentView",
 					"group": "navigation"
 				},
 				{
 					"command": "ccims.newIssue",
-					"when": "view == ccims.issueList",
+					"when": "view == ccims.issueList || view == ccims.componentView",
 					"group": "navigation"
 				}
 			],
