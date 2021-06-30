@@ -1,26 +1,18 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { IssueViewMessage } from "./communication/IssueViewMessage";
-import { IssueViewMessageType } from "./communication/IssueViewMessageType";
 
-/**
- * Type for the MessageListener
- */
-type MessageListener = (message: IssueViewMessage) => void;
-
-export abstract class IssueViewProviderBase implements vscode.WebviewViewProvider {
-
-	public static readonly viewType = "ccims.issueView";
+export abstract class IssueViewProviderBase<TMessage, TMessageType> implements vscode.WebviewViewProvider {
 
 	protected view?: vscode.WebviewView;
 
 	/**
 	 * map of message listeners
 	 */
-	private readonly _messageListeners: Map<IssueViewMessageType, MessageListener> = new Map();
+	private readonly _messageListeners: Map<TMessageType, (message: TMessage) => void> = new Map();
 
 	protected constructor(
-		private readonly _extensionUri: vscode.Uri
+		private readonly _extensionUri: vscode.Uri,
+		private readonly path: string
 	) { }
 
 	public resolveWebviewView(
@@ -62,10 +54,10 @@ export abstract class IssueViewProviderBase implements vscode.WebviewViewProvide
 	 * @returns the transformed HTML
 	 */
 	private _getHtmlForWebview(webview: vscode.Webview) {
-		const htmlPath: vscode.Uri = vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "index.html");
+		const htmlPath: vscode.Uri = vscode.Uri.joinPath(this._extensionUri, this.path, "dist", "index.html");
 		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 		//replace js file path
-		html = html.replaceAll("/js/app.js", webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "issue-view", "dist", "js", "app.js")).toString());
+		html = html.replaceAll("/js/app.js", webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, this.path, "dist", "js", "app.js")).toString());
 		return html;
 	}
 
@@ -85,7 +77,7 @@ export abstract class IssueViewProviderBase implements vscode.WebviewViewProvide
 	 * Sends a message to the issue web view
 	 * @param message the message to send to the web view
 	 */
-	protected postMessage(message: IssueViewMessage): void {
+	protected postMessage(message: TMessage): void {
 		this.view?.webview?.postMessage(message);
 	}
 
@@ -96,7 +88,7 @@ export abstract class IssueViewProviderBase implements vscode.WebviewViewProvide
 	 * @param listener the listener which is called when a message of the specified type is received
 	 * @throws if a second listener is registered for the same message type
 	 */
-	protected setMessageListener(type: IssueViewMessageType, listener: MessageListener): void {
+	protected setMessageListener(type: TMessageType, listener: (message: TMessage) => void): void {
 		if (this._messageListeners.has(type)) {
 			throw new Error("There is already a listener for this type");
 		}

@@ -1,4 +1,4 @@
-import { IssueViewProviderBase } from "./IssueViewProviderBase";
+import { IssueViewProviderBase } from "../webview/WebviewProviderBase";
 import * as vscode from "vscode";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
 import { IssueViewMessageType } from "./communication/IssueViewMessageType";
@@ -22,7 +22,7 @@ import { SearchUsersMessage } from "./communication/SearchUsersMessage";
 import { ArtifactSearch } from "../data/search/ArtifactSearch";
 import { SearchArtifactsMessage } from "./communication/SearchArtifactsMessage";
 import { FoundArtifactsMessage } from "./communication/FoundArtifactsMessage";
-import { CCIMSApi, getCCIMSApi } from "../data/CCIMSApi";
+import { getCCIMSApi } from "../data/CCIMSApi";
 import { UserIdChangedMessage } from "./communication/UserIdChangedMessage";
 import { listIconFiles } from "../data/IconProvider";
 import { IconTableMessage } from "./communication/IconTableMessage";
@@ -32,11 +32,12 @@ import { ComponentChangedMessage } from "./communication/ComponentChangedMessage
 import { OpenFileMessage } from "./communication/OpenFileMessage";
 import { OpenUrlMessage } from "./communication/OpenUrlMessage";
 import { AddArtifactMessage } from "./communication/AddArtifactMessage";
+import { IssueViewMessage } from "./communication/IssueViewMessage";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
 
-export class IssueViewProvider extends IssueViewProviderBase {
+export class IssueViewProvider extends IssueViewProviderBase<IssueViewMessage, IssueViewMessageType> {
 	/**
 	 * The current issue, undefined if none selected yet or new in creation
 	 */
@@ -77,7 +78,7 @@ export class IssueViewProvider extends IssueViewProviderBase {
 		private readonly _context: vscode.ExtensionContext,
 		private readonly _componentController: ComponentController
 	) {
-		super(extensionUri);
+		super(extensionUri, "issue-view");
 
 		this._initCommands(commands);
 		this._initListeners();

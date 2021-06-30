@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
-			IssueViewProvider.viewType,
+			"ccims.issueView",
 			new IssueViewProvider(context.extensionUri, commands, context, componentController),
 			{
 				webviewOptions: {

@@ -1309,7 +1309,7 @@ interface NodeOption<T> extends Option {
     @import url("../node_modules/vscode-codicons/dist/codicon.css");
     @font-face {
         font-family: "codicon";
-        src: url("../node_modules/vscode-codicons/dist/codicon.ttf") format("font-truetype");
+        src: url("./fonts/codicon.ttf") format("font-truetype");
     }
 
     body {
