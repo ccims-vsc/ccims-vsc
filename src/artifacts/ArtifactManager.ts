@@ -10,7 +10,7 @@ import { EditorArtifactManager } from "./EditorArtifactManager";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { Artifact } from "../generated/graphql";
 import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
-import { setContext } from "../data/context";
+import { setContext } from "../data/CCIMSContext";
 
 /**
  * Class for artefacts shown in editors

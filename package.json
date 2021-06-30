@@ -42,6 +42,12 @@
 		"views": {
 			"issue-explorer": [
 				{
+					"type": "webview",
+					"id": "ccims.componentView",
+					"name": "Component",
+					"visibility": "visible"
+				},
+				{
 					"type": "tree",
 					"id": "ccims.issueList",
 					"name": "Issues",
@@ -236,36 +242,6 @@
 				"category": "CCIMS"
 			},
 			{
-				"command": "ccims.activateFilterSelfAssigned",
-				"title": " Filter for self assigned issues",
-				"category": "CCIMS",
-				"icon": "$(star-empty)"
-			},
-			{
-				"command": "ccims.deactivateFilterSelfAssigned",
-				"title": " Remove filter for self assigned issues",
-				"category": "CCIMS",
-				"icon": "$(star-full)"
-			},
-			{
-				"command": "ccims.setOpenFilterToOpen",
-				"title": "  Filters for open issues",
-				"category": "CCIMS",
-				"icon": "$(circle-large-outline)"
-			},
-			{
-				"command": "ccims.setOpenFilterToClosed",
-				"title": "  Filters for closed issues",
-				"category": "CCIMS",
-				"icon": "res/img/simple/issue.svg"
-			},
-			{
-				"command": "ccims.deactivateOpenFilter",
-				"title": "  Remove the issue closed filter",
-				"category": "CCIMS",
-				"icon": "res/img/simple/issue_closed.svg"
-			},
-			{
 				"command": "ccims.activateFileFilter",
 				"title": "  Filter for issues in file",
 				"category": "CCIMS",
@@ -276,6 +252,42 @@
 				"title": "Don't filter for file",
 				"category": "CCIMS",
 				"icon": "$(file)"
+			},
+			{
+				"command": "ccims.toggleFilterUnclassified",
+				"title": "Toggle if unclassified issues are shown",
+				"category": "CCIMS",
+				"icon": "$(issues)"
+			},
+			{
+				"command": "ccims.toggleFilterBugs",
+				"title": "Toggle if bugs are shown",
+				"category": "CCIMS",
+				"icon": "$(bug)"
+			},
+			{
+				"command": "ccims.toggleFilterFeatureRequests",
+				"title": "Toggle if feature requests are shown",
+				"category": "CCIMS",
+				"icon": "$(lightbulb)"
+			},
+			{
+				"command": "ccims.toggleFilterOpen",
+				"title": "Toggle if open issues are shown",
+				"category": "CCIMS",
+				"icon": "$(issues)"
+			},
+			{
+				"command": "ccims.toggleFilterClosed",
+				"title": "Toggle if closed issues are shown",
+				"category": "CCIMS",
+				"icon": "$(pass)"
+			},
+			{
+				"command": "ccims.toggleFilterSelfAssigned",
+				"title": "Toggle if only self-assigned issues are shown",
+				"category": "CCIMS",
+				"icon": "$(star)"
 			}
 		],
 		"menus": {
@@ -288,36 +300,6 @@
 				{
 					"command": "ccims.newIssue",
 					"when": "view == ccims.issueList",
-					"group": "navigation"
-				},
-				{
-					"command": "ccims.activateFilterSelfAssigned",
-					"when": "view == ccims.issueList && !ccims.filterSelfAssigned",
-					"group": "navigation"
-				},
-				{
-					"command": "ccims.deactivateFilterSelfAssigned",
-					"when": "view == ccims.issueList && ccims.filterSelfAssigned",
-					"group": "navigation"
-				},
-				{
-					"command": "ccims.setOpenFilterToOpen",
-					"when": "view == ccims.issueList && !ccims.filterOpen",
-					"group": "navigation"
-				},
-				{
-					"command": "ccims.setOpenFilterToClosed",
-					"when": "view == ccims.issueList && ccims.filterOpen == 1",
-					"group": "navigation"
-				},
-				{
-					"command": "ccims.deactivateOpenFilter",
-					"when": "view == ccims.issueList && ccims.filterOpen == 2",
-					"group": "navigation"
-				},
-				{
-					"command": "ccims.deactivateFileFilter",
-					"when": "view == ccims.issueList && ccims.filterFile",
 					"group": "navigation"
 				}
 			],

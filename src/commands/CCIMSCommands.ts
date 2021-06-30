@@ -94,35 +94,23 @@ export class CCIMSCommands {
 	 */
 	public readonly createArtifactCommand: CCIMSCommand;
 
-	/**
-	 * Command executed to activate a filter so that only self-assigned issues are shown
-	 * expects no parameters
-	 */
-	public readonly activateFilterSelfAssignedCommand: CCIMSCommand;
+	public readonly toggleFilterUnclassified: CCIMSCommand;
+
+	public readonly toggleFilterBugs: CCIMSCommand;
+
+	public readonly toggleFilterFeatureRequests: CCIMSCommand;
+
+	public readonly toggleFilterOpen: CCIMSCommand;
+
+	public readonly toggleFilterClosed: CCIMSCommand;
+
+	public readonly toggleFilterSelfAssigned: CCIMSCommand;
 
 	/**
-	 * Command exeuted to deacitvate the filter so that also non-self-assigned issues are shown
-	 * expects no parameters
+	 * Command executed when the issue filter changes
+	 * expects one parameter: the new filter
 	 */
-	public readonly deactivateFilterSelfAssignedCommand: CCIMSCommand;
-
-	/**
-	 * Command executed so that only open issues are shown
-	 * expects no parametes
-	 */
-	public readonly setOpenFilterToOpenCommand: CCIMSCommand;
-
-	/**
-	 * Command executed so that only closed issues are shown
-	 * expects no parameters
-	 */
-	public readonly setOpenFilterToClosedCommand: CCIMSCommand;
-
-	/**
-	 * Command executed so that both open and closed issues are shown
-	 * expects no paramters
-	 */
-	public readonly deactivateOpenFilterCommand: CCIMSCommand;
+	public readonly filterChangedCommand: CCIMSCommand;
 
 	/**
 	 * Command executed to only show issues regarding a specific file
@@ -162,13 +150,15 @@ export class CCIMSCommands {
 		this.reloadEditorDecoratorsCommand = new CCIMSCommand(CCIMSCommandType.RELOAD_EDITOR_DECORATORS, context);
 		this.issueUpdatedCommand = new CCIMSCommand(CCIMSCommandType.ISSUE_UPDATED, context);
 		this.addArtifactCommand = new CCIMSCommand(CCIMSCommandType.ADD_ARTIFACT, context);
-		this.activateFilterSelfAssignedCommand = new CCIMSCommand(CCIMSCommandType.ACTIVATE_FILTER_SELF_ASSIGNED, context);
-		this.deactivateFilterSelfAssignedCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_FILTER_SELF_ASSIGNED, context);
-		this.setOpenFilterToClosedCommand = new CCIMSCommand(CCIMSCommandType.SET_OPEN_FILTER_TO_CLOSED, context);
-		this.setOpenFilterToOpenCommand = new CCIMSCommand(CCIMSCommandType.SET_OPEN_FILTER_TO_OPEN, context);
-		this.deactivateOpenFilterCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_OPEN_FILTER, context);
 		this.deactivateFileFilterCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_FILE_FILTER, context);
 		this.updateFileFilterCommand = new CCIMSCommand(CCIMSCommandType.UPDATE_FILE_FILTER, context);
+		this.toggleFilterUnclassified = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_UNCLASSIFIED, context);
+		this.toggleFilterBugs = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_BUGS, context);
+		this.toggleFilterFeatureRequests = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_FEATURE_REQUESTS, context);
+		this.toggleFilterOpen = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_OPEN, context);
+		this.toggleFilterClosed = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_CLOSED, context);
+		this.toggleFilterSelfAssigned = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_SELF_ASSIGNED, context);
+		this.filterChangedCommand = new CCIMSCommand(CCIMSCommandType.FILTER_CHANGED, context);
 
 		this.createArtifactCommand = new CCIMSEditorCommand(CCIMSCommandType.CREATE_ARTIFACT, context);
 		this.activateFileFilterCommand = new CCIMSEditorCommand(CCIMSCommandType.ACTIVATE_FILE_FILTER, context);

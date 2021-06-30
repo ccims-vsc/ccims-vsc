@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 
-export abstract class IssueViewProviderBase<TMessage, TMessageType> implements vscode.WebviewViewProvider {
+export abstract class WebviewProviderBase<TMessage, TMessageType> implements vscode.WebviewViewProvider {
 
 	protected view?: vscode.WebviewView;
 

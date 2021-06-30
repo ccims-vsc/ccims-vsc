@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { CCIMSCommands } from "./commands/CCIMSCommands";
 import { CCIMSCommandType } from "./commands/CCIMSCommandsType";
 import { isApiAvailable, isComponentAvailable, updateApiSecret } from "./data/CCIMSApi";
-import { CCIMSContext, getContext, setContext } from "./data/context";
+import { CCIMSContext, getContext, setContext } from "./data/CCIMSContext";
 import { initSettingsListener } from "./data/settings";
 import { ApiStatus, updateApiStatus } from "./data/status";
 import { IssueListProvider } from "./issue-list/IssueListProvider";
@@ -11,6 +11,7 @@ import { CCIMSSettingsInput } from "./settings-input/CCIMSSettingsInput";
 import { getPassword } from "keytar";
 import { ComponentController } from "./data/ComponentController";
 import { ArtifactManager } from "./artifacts/ArtifactManager";
+import { ComponentViewProvider } from "./component-view/ComponentViewProvider";
 
 /**
  * cached extension uri
@@ -31,6 +32,18 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.registerWebviewViewProvider(
 			"ccims.issueView",
 			new IssueViewProvider(context.extensionUri, commands, context, componentController),
+			{
+				webviewOptions: {
+					retainContextWhenHidden: true
+				}
+			}
+		)
+	);
+
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+			"ccims.componentView",
+			new ComponentViewProvider(context.extensionUri, commands, context, componentController),
 			{
 				webviewOptions: {
 					retainContextWhenHidden: true

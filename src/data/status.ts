@@ -1,6 +1,6 @@
 import { ExtensionContext } from "vscode";
 import { isApiAvailable, isApiReachable, isComponentAvailable } from "./CCIMSApi";
-import { CCIMSContext, setContext } from "./context";
+import { CCIMSContext, setContext } from "./CCIMSContext";
 import { getApiUrl, getComponentId } from "./settings";
 
 /**

@@ -17,12 +17,14 @@ export enum CCIMSCommandType {
 	ISSUE_UPDATED = "ccims.issueUpdated",
 	CREATE_ARTIFACT = "ccims.createArtifact",
 	ADD_ARTIFACT = "ccims.addArtifact",
-	ACTIVATE_FILTER_SELF_ASSIGNED = "ccims.activateFilterSelfAssigned",
-	DEACTIVATE_FILTER_SELF_ASSIGNED = "ccims.deactivateFilterSelfAssigned",
-	SET_OPEN_FILTER_TO_OPEN = "ccims.setOpenFilterToOpen",
-	SET_OPEN_FILTER_TO_CLOSED = "ccims.setOpenFilterToClosed",
-	DEACTIVATE_OPEN_FILTER = "ccims.deactivateOpenFilter",
 	ACTIVATE_FILE_FILTER = "ccims.activateFileFilter",
 	DEACTIVATE_FILE_FILTER = "ccims.deactivateFileFilter",
-	UPDATE_FILE_FILTER = "ccims.updateFileFilter"
+	UPDATE_FILE_FILTER = "ccims.updateFileFilter",
+	TOGGLE_FILTER_UNCLASSIFIED = "ccims.toggleFilterUnclassified",
+	TOGGLE_FILTER_BUGS = "ccims.toggleFilterBugs",
+	TOGGLE_FILTER_FEATURE_REQUESTS = "ccims.toggleFilterFeatureRequests",
+	TOGGLE_FILTER_OPEN = "ccims.toggleFilterOpen",
+	TOGGLE_FILTER_CLOSED = "ccims.toggleFilterClosed",
+	TOGGLE_FILTER_SELF_ASSIGNED = "ccims.toggleFilterSelfAssigned",
+	FILTER_CHANGED = "ccims.filterChanged"
 }

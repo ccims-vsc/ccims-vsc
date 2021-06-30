@@ -1,4 +1,3 @@
-import { IssueViewProviderBase } from "../webview/WebviewProviderBase";
 import * as vscode from "vscode";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
 import { IssueViewMessageType } from "./communication/IssueViewMessageType";
@@ -33,11 +32,12 @@ import { OpenFileMessage } from "./communication/OpenFileMessage";
 import { OpenUrlMessage } from "./communication/OpenUrlMessage";
 import { AddArtifactMessage } from "./communication/AddArtifactMessage";
 import { IssueViewMessage } from "./communication/IssueViewMessage";
+import { WebviewProviderBase } from "../webview/WebviewProviderBase";
 
 const MIN_SEARCH_AMOUNT = 10;
 const MAX_SEARCH_AMOUNT = 100;
 
-export class IssueViewProvider extends IssueViewProviderBase<IssueViewMessage, IssueViewMessageType> {
+export class IssueViewProvider extends WebviewProviderBase<IssueViewMessage, IssueViewMessageType> {
 	/**
 	 * The current issue, undefined if none selected yet or new in creation
 	 */

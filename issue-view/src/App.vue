@@ -4,8 +4,9 @@
             id="title-container" 
             v-if="issue != null"
             class="container"
+            style="margin-bottom: 5px"
         >
-            <div style="display: flex">
+            <div style="display: flex; align-items: center">
                 <img 
                     :src="iconTable[icon(issue)]"
                     style="align-self: center; height: 25px; flex: none"
@@ -17,13 +18,16 @@
                     :disabled="mode == 'read'"
                     placeholder="Enter Title"
                 />
-                <button 
-                    class="codicon"
-                    :class="{'codicon-edit': mode == 'read', 'codicon-save': mode != 'read'}"
+                <div 
                     :disabled="mode != 'read' && (!issue.title || !issue.body)"
-                    style="width: 35.3px; flex: none"
                     @click="updateMode(mode == 'read' ? 'edit' : 'read')"
-                />
+                    class="icon-button"
+                >
+                    <div 
+                        class="codicon"
+                        :class="{'codicon-edit': mode == 'read', 'codicon-save': mode != 'read'}"
+                    /> 
+                </div>
             </div>
             <span 
                 v-if="componentNames != null"
@@ -35,6 +39,7 @@
         <div 
             id="body-container"
             class="container"
+            style="margin-bottom: 18px"
         >
             <div 
                 v-html="compiledBody"
@@ -1358,5 +1363,18 @@ interface NodeOption<T> extends Option {
         padding-left: 8px;
         padding-right: 8px;
         margin-bottom: 10px;
+    }
+
+    .icon-button {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        border-radius: 5px;
+    }
+    .icon-button:hover {
+        background-color: var(--vscode-toolbar-hoverBackground);
     }
 </style>

@@ -7,19 +7,13 @@ let buffer = fs.readFileSync("node_modules/vscode-codicons/dist/codicon.ttf");
 let font = Font.create(buffer, {
   type: "ttf",
   subset: [
-	  0xea73, // edit
-	  0xeb4b, // save
-	  0xeaa60, // plus
-	  0xeb9d, // output
-	  0xea76, // close
-	  0xea81, // trash
-	  0xea71, // circle-filled
-	  0xea7d, // reply
-	  0xeb99, // account
 	  0xea7b, // file
-	  0xeb14, // link-external
-	  0xeab6, // chevron-right
-	  0xeab4, // chevron-down
+	  0xeb0c, // issues
+	  0xea61, // lightbulb
+	  0xeaaf, // bug
+	  0xeba4, // pass
+	  0xea6a, // star
+	  0xeb59, // star-full
 	],
   hinting: true,
   inflate: null,
