@@ -78,7 +78,7 @@
                     <div class="icon-button-container">
                         <div 
                             class="icon-button"
-                            :style="!issueFilter.showOpen ? 'opacity: 0.8' : 'color: #ff0000'"
+                            :style="!issueFilter.showOpen ? 'opacity: 0.8' : 'color: #00b700'"
                             @click="issueFilter.showOpen = !issueFilter.showOpen"
                             :title="issueFilter.showOpen ? 'Hide open issues' : 'Show open issues'"
                         >
@@ -94,9 +94,9 @@
                     <div class="icon-button-container">
                         <div 
                             class="icon-button"
-                            :style="!issueFilter.showClosed ? 'opacity: 0.8' : 'color: #00b700'"
+                            :style="!issueFilter.showClosed ? 'opacity: 0.8' : 'color: #ff0000'"
                             @click="issueFilter.showClosed = !issueFilter.showClosed"
-                            :title="issueFilter.showClosed ? 'Hide open issues' : 'Show open issues'"
+                            :title="issueFilter.showClosed ? 'Hide closed issues' : 'Show closed issues'"
                         >
                             <div
                                 class="codicon codicon-pass"
