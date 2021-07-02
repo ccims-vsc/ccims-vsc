@@ -55,10 +55,13 @@ export class EditorArtifactManager {
 		for (const [line, artifacts] of this._artifacts) {
 			if (artifacts.length > 0 && artifacts) {
 				const artifact = artifacts[0];
-				if (artifact?.issues?.nodes != undefined && artifact.issues.nodes.length > 0) {
-					const issue = this._componentController.issueById(artifact.issues.nodes[0]?.id!)!;
-					const iconPath = getIssueIcon(issue, this._context.globalState.get<string>("userId") ?? "", isComplexListIcons());
-					decoratorTypes.get(iconPath)?.push([artifact, issue]);
+				if (artifact?.issues?.nodes != undefined) {
+					const openIssues = artifact.issues.nodes.filter(issue => issue?.isOpen)
+					if (openIssues.length > 0) {
+						const issue = this._componentController.issueById(openIssues[0]?.id!)!;
+						const iconPath = getIssueIcon(issue, this._context.globalState.get<string>("userId") ?? "", isComplexListIcons());
+						decoratorTypes.get(iconPath)?.push([artifact, issue]);
+					}
 				}
 			}
 		}

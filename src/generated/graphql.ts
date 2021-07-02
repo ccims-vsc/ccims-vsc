@@ -4962,7 +4962,7 @@ export type ArtifactsForFileInternalQuery = (
           { __typename?: 'IssuePage' }
           & { nodes?: Maybe<Array<Maybe<(
             { __typename?: 'Issue' }
-            & Pick<Issue, 'id'>
+            & Pick<Issue, 'id' | 'isOpen'>
           )>>> }
         )> }
       )>>> }
@@ -5731,6 +5731,7 @@ export const ArtifactsForFileInternalDocument = gql`
           issues {
             nodes {
               id
+              isOpen
             }
           }
         }

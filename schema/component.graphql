@@ -122,6 +122,7 @@ query artifactsForFileInternal($component: ID!, $artifactFilter: String!) {
           issues {
             nodes {
               id
+              isOpen
             }
           }
         }
