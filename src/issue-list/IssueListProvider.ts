@@ -72,10 +72,10 @@ export class IssueListProvider implements vscode.TreeDataProvider<Issue> {
 						issues = issues.filter(issue => issue.assignees?.nodes?.some(user => user?.id === userId) ?? false);
 					}
 					if (!filter.showOpen) {
-						issues = issues.filter(issue => issue.isOpen);
+						issues = issues.filter(issue => !issue.isOpen);
 					}
 					if (!filter.showClosed) {
-						issues = issues.filter(issue => !issue.isOpen);
+						issues = issues.filter(issue => issue.isOpen);
 					}
 					if (filter.showOnlyIssuesRegardingFile) {
 						const filterRegex = RegExp(filter.showOnlyIssuesRegardingFile);

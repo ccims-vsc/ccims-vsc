@@ -47,24 +47,24 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 		});
 
 		commands.toggleFilterUnclassified.addListener(() => {
-			this._issueFilter.showUnclassified = this._issueFilter.showUnclassified;
+			this._issueFilter.showUnclassified = !this._issueFilter.showUnclassified;
 			this._updateIssueFilter();
 		});
 		commands.toggleFilterBugs.addListener(() => {
-			this._issueFilter.showBugs = this._issueFilter.showBugs;
+			this._issueFilter.showBugs = !this._issueFilter.showBugs;
 			this._updateIssueFilter();
 		});
 		commands.toggleFilterFeatureRequests.addListener(() => {
-			this._issueFilter.showFeatureRequests = this._issueFilter.showFeatureRequests;
+			this._issueFilter.showFeatureRequests = !this._issueFilter.showFeatureRequests;
 			this._updateIssueFilter();
 		});
 
 		commands.toggleFilterOpen.addListener(() => {
-			this._issueFilter.showOpen = this._issueFilter.showOpen;
+			this._issueFilter.showOpen = !this._issueFilter.showOpen;
 			this._updateIssueFilter();
 		});
 		commands.toggleFilterClosed.addListener(() => {
-			this._issueFilter.showClosed = this._issueFilter.showClosed;
+			this._issueFilter.showClosed = !this._issueFilter.showClosed;
 			this._updateIssueFilter();
 		});
 
