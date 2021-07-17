@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ArtifactSchema } from "../artifacts/ArtifactConfig";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 
 /**
  * Gets the api url

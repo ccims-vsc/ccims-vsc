@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import { CCIMSCommands } from "./commands/CCIMSCommands";
-import { CCIMSCommandType } from "./commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "./commands/CCIMSCommandType";
 import { isApiAvailable, isComponentAvailable, updateApiSecret } from "./data/CCIMSApi";
 import { CCIMSContext, getContext, setContext } from "./data/CCIMSContext";
 import { initSettingsListener } from "./data/settings";
-import { ApiStatus, updateApiStatus } from "./data/status";
+import { updateApiStatus } from "./data/status";
 import { IssueListProvider } from "./issue-list/IssueListProvider";
 import { IssueViewProvider } from "./issue-view/IssueViewProvider";
 import { CCIMSSettingsInput } from "./settings-input/CCIMSSettingsInput";
@@ -12,6 +12,8 @@ import { getPassword } from "keytar";
 import { ComponentController } from "./data/ComponentController";
 import { ArtifactManager } from "./artifacts/ArtifactManager";
 import { ComponentViewProvider } from "./component-view/ComponentViewProvider";
+import { ApiStatus } from "./data/ApiStatus";
+import { IssueFilter } from "./data/IssueFilter";
 
 /**
  * cached extension uri
@@ -122,6 +124,20 @@ function _initCommandListeners(commands: CCIMSCommands, context: vscode.Extensio
 	commands.loginCommand.addListener(() => {
 		const input = new CCIMSSettingsInput(context);
 		input.run((stepInput) => input.updateUsername(stepInput, false));
+	});
+
+	commands.filterChangedCommand.addListener(params => {
+		const filter: IssueFilter = params[0];
+		setContext(CCIMSContext.HAS_FILTER, 
+			!filter.showBugs 
+			|| !filter.showUnclassified
+			|| !filter.showFeatureRequests
+			|| !filter.showOpen
+			|| !filter.showClosed
+			|| filter.showOnlySelfAssigned
+			|| !!filter.filter
+			|| !!filter.showOnlyIssuesRegardingFile
+		)
 	});
 }
 

@@ -4,7 +4,7 @@ import { getCCIMSApi, isApiAvailable, isApiReachable, isComponentAvailable, upda
 import { ComponentSearch } from "../data/search/ComponentSearch";
 import { InputFlowAction, MultiStepInput, QuickPickParameters } from "./MultiStepInput";
 import { getApiUrl, getComponentId, setApiUrl, setComponentId } from "../data/settings";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 import { getPassword, setPassword } from "keytar"
 
 /**

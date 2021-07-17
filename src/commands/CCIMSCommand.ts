@@ -1,4 +1,4 @@
-import { CCIMSCommandType } from "./CCIMSCommandsType";
+import { CCIMSCommandType } from "./CCIMSCommandType";
 import * as vscode from "vscode";
 
 /**

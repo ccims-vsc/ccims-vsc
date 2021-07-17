@@ -150,6 +150,20 @@
             </div>
         </div>
     </div>
+    <div v-else-if="currentStatusMessage != undefined" class="message-container">
+        {{
+            currentStatusMessage.text
+        }}
+        <button 
+            class="message-button"
+            v-for="(buttonData, idx) in currentStatusMessage.buttons" :key="idx"
+            @click="postExecuteCommand(buttonData.command)"
+        >
+            {{
+                buttonData.text
+            }}
+        </button>
+    </div>
 </template>
 
 <script lang="ts">
@@ -159,6 +173,10 @@ import { IssueFilter } from "../../src/data/IssueFilter";
 import { ComponentViewMessageType } from "../../src/component-view/communication/ComponentViewMessageType";
 import { UpdateComponentMessage } from "../../src/component-view/communication/UpdateComponentMessage";
 import { UpdateIssueFilterMessage } from "../../src/component-view/communication/UpdateIssueFilterMessage";
+import { UpdateApiStatusMessage } from "../../src/component-view/communication/UpdateApiStatusMessage";
+import { ExecuteCommandMessage } from "../../src/component-view/communication/ExecuteCommandMessage";
+import { CCIMSCommandType } from "../../src/commands/CCIMSCommandType";
+import { ApiStatus } from "../../src/data/ApiStatus"
 import { Component } from "../../src/generated/graphql";
 import { vscode } from "./main";
 
@@ -167,6 +185,23 @@ import { vscode } from "./main";
     
 })
 export default class App extends Vue {
+
+    /**
+     * Lookup for API Status messages
+     */
+    private apiStatusMessages: Map<ApiStatus, MessageData> = new Map();
+
+    /**
+     * Current api status
+     */
+    private currentApiStatus = ApiStatus.NOMINAL;
+
+    /**
+     * Gets the message for the current status
+     */
+    private get currentStatusMessage(): MessageData | undefined {
+        return this.apiStatusMessages.get(this.currentApiStatus);
+    }
 
     /**
      * The issue which is currently displayed
@@ -197,6 +232,7 @@ export default class App extends Vue {
             const message = event.data;
             this.onMessage(message);
         });
+        this.initStatusMessages();
     }
 
     /**
@@ -205,6 +241,92 @@ export default class App extends Vue {
     mounted(): void {
         this.postMessage({
             type: ComponentViewMessageType.NOTIFY_INITIALIZED
+        });
+    }
+
+    private initStatusMessages(): void {
+        this.apiStatusMessages.set(ApiStatus.NO_URL, {
+            text: "The api URL is currently not set",
+            buttons: [
+                {
+                    text: "Setup extension",
+                    command: CCIMSCommandType.SETUP_EXTENSION
+                },
+                {
+                    text: "Open Settings",
+                    command: "workbench.action.openSettings2"
+                }
+            ]
+        });
+        this.apiStatusMessages.set(ApiStatus.NOT_REACHABLE, {
+            text: "The api is currently not available.",
+            buttons: [
+                {
+                    text: "Setup extension",
+                    command: CCIMSCommandType.SETUP_EXTENSION
+                },
+                {
+                    text: "Check again",
+                    command: CCIMSCommandType.CHECK_API_STATUS
+                },
+                {
+                    text: "Open Settings",
+                    command: "workbench.action.openSettings2"
+                }
+            ]
+        });
+        this.apiStatusMessages.set(ApiStatus.NO_LOGIN, {
+            text: "You are currently not logged in.",
+            buttons: [
+                {
+                    text: "Login",
+                    command: CCIMSCommandType.LOGIN
+                }
+            ]
+        });
+        this.apiStatusMessages.set(ApiStatus.NOT_AVAILABLE, {
+            text: "Your login data is invalid.",
+            buttons: [
+                {
+                    text: "Login",
+                    command: CCIMSCommandType.LOGIN
+                }
+            ]
+        });
+        this.apiStatusMessages.set(ApiStatus.NO_COMPONENT, {
+            text: "There is no component configured.",
+            buttons: [
+                {
+                    text: "Select component",
+                    command: CCIMSCommandType.SELECT_COMPONENT
+                },
+                {
+                    text: "Open Settings",
+                    command: "workbench.action.openSettings2"
+                }
+            ]
+        });
+        this.apiStatusMessages.set(ApiStatus.COMPONENT_NOT_AVAILABLE, {
+            text: "The currently configured component does not exist or is not accessible.",
+            buttons: [
+                {
+                    text: "Select component",
+                    command: CCIMSCommandType.SELECT_COMPONENT
+                },
+                {
+                    text: "Open Settings",
+                    command: "workbench.action.openSettings2"
+                }
+            ]
+        });
+        this.apiStatusMessages.set(ApiStatus.NO_FOLDER, {
+            text: "In order to use CCIMS features, please open a folder.",
+            buttons: [
+                {
+                    text: "Open Folder",
+                    command: "vscode.openFolder"
+                }
+            ]
         });
     }
 
@@ -221,6 +343,11 @@ export default class App extends Vue {
             case ComponentViewMessageType.UPDATE_ISSUE_FILTER: {
                 const updateFilterMessage = message as UpdateIssueFilterMessage;
                 this.issueFilter = updateFilterMessage.filter;
+                break;
+            }
+            case ComponentViewMessageType.UPDATE_API_STATUS:{
+                const updateApiStatusMessage = message as UpdateApiStatusMessage;
+                this.currentApiStatus = updateApiStatusMessage.apiStatus;
                 break;
             }
         }
@@ -252,11 +379,37 @@ export default class App extends Vue {
         } as UpdateIssueFilterMessage);
     }
 
+    /**
+     * Sends a message to execute a command
+     */
+    private postExecuteCommand(command: CCIMSCommandType | string): void {
+        this.postMessage({
+            type: ComponentViewMessageType.EXECUTE_COMMAND,
+            command: command
+        } as ExecuteCommandMessage);
+    }
+
     @Watch("issueFilter", { deep: true })
     private issueFilterUpdated(): void {
         this.postUpdateFilter();
     }
 
+}
+
+/**
+ * Defines the data for a message button
+ */
+interface MessageButtonData {
+    text: string,
+    command: CCIMSCommandType | string
+}
+
+/**
+ * Defines the data for a message
+ */
+interface MessageData {
+    text: string,
+    buttons: MessageButtonData[]
 }
 
 </script>
@@ -330,5 +483,16 @@ export default class App extends Vue {
     .horizontal-align {
         display: flex;
         align-items: center; 
+    }
+
+    .message-container {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .message-button {
+        margin-block-start: 1em;
+        margin-left: 6px;
+        width: calc(100% - 12px);
     }
 </style>

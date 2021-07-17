@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { CCIMSCommand } from "./CCIMSCommand";
-import { CCIMSCommandType } from "./CCIMSCommandsType";
+import { CCIMSCommandType } from "./CCIMSCommandType";
 import { CCIMSEditorCommand } from "./CCIMSEditorCommand";
 
 /**
@@ -94,17 +94,47 @@ export class CCIMSCommands {
 	 */
 	public readonly createArtifactCommand: CCIMSCommand;
 
-	public readonly toggleFilterUnclassified: CCIMSCommand;
+	/**
+	 * Command to toggle the unclassified issues filter
+	 * expects no parameters
+	 */
+	public readonly toggleFilterUnclassifiedCommand: CCIMSCommand;
 
-	public readonly toggleFilterBugs: CCIMSCommand;
+	/**
+	 * Command to toggle the bugs filter
+	 * expects no parametes
+	 */
+	public readonly toggleFilterBugsCommand: CCIMSCommand;
 
-	public readonly toggleFilterFeatureRequests: CCIMSCommand;
+	/**
+	 * Command to toggle the feature requests filter
+	 * expects no parameters
+	 */
+	public readonly toggleFilterFeatureRequestsCommand: CCIMSCommand;
 
-	public readonly toggleFilterOpen: CCIMSCommand;
+	/**
+	 * Command to toggle the open issues filter
+	 * expects no parametes
+	 */
+	public readonly toggleFilterOpenCommand: CCIMSCommand;
 
-	public readonly toggleFilterClosed: CCIMSCommand;
+	/**
+	 * Command to toggle the closed issues filter
+	 * expects no parameters
+	 */
+	public readonly toggleFilterClosedCommand: CCIMSCommand;
 
-	public readonly toggleFilterSelfAssigned: CCIMSCommand;
+	/**
+	 * Command to toggle the only self-assigned filter
+	 * expects no parameters
+	 */
+	public readonly toggleFilterSelfAssignedCommand: CCIMSCommand;
+
+	/**
+	 * Command to reset all issue filters
+	 * expects no parameters
+	 */
+	public readonly clearFiltersCommand: CCIMSCommand;
 
 	/**
 	 * Command executed when the issue filter changes
@@ -131,6 +161,12 @@ export class CCIMSCommands {
 	public readonly updateFileFilterCommand: CCIMSCommand;
 
 	/**
+	 * Command executed when the ApiStatus context is changed
+	 * expects no parameter
+	 */
+	public readonly apiStatusUpdatedCommand: CCIMSCommand;
+
+	/**
 	 * Creates all ccims extension commands
 	 * Note: only one instance of this class can be created
 	 * @param context the context used to create the commands
@@ -152,13 +188,15 @@ export class CCIMSCommands {
 		this.addArtifactCommand = new CCIMSCommand(CCIMSCommandType.ADD_ARTIFACT, context);
 		this.deactivateFileFilterCommand = new CCIMSCommand(CCIMSCommandType.DEACTIVATE_FILE_FILTER, context);
 		this.updateFileFilterCommand = new CCIMSCommand(CCIMSCommandType.UPDATE_FILE_FILTER, context);
-		this.toggleFilterUnclassified = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_UNCLASSIFIED, context);
-		this.toggleFilterBugs = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_BUGS, context);
-		this.toggleFilterFeatureRequests = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_FEATURE_REQUESTS, context);
-		this.toggleFilterOpen = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_OPEN, context);
-		this.toggleFilterClosed = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_CLOSED, context);
-		this.toggleFilterSelfAssigned = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_SELF_ASSIGNED, context);
+		this.toggleFilterUnclassifiedCommand = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_UNCLASSIFIED, context);
+		this.toggleFilterBugsCommand = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_BUGS, context);
+		this.toggleFilterFeatureRequestsCommand = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_FEATURE_REQUESTS, context);
+		this.toggleFilterOpenCommand = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_OPEN, context);
+		this.toggleFilterClosedCommand = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_CLOSED, context);
+		this.toggleFilterSelfAssignedCommand = new CCIMSCommand(CCIMSCommandType.TOGGLE_FILTER_SELF_ASSIGNED, context);
 		this.filterChangedCommand = new CCIMSCommand(CCIMSCommandType.FILTER_CHANGED, context);
+		this.apiStatusUpdatedCommand = new CCIMSCommand(CCIMSCommandType.API_STATUS_UPDATED, context);
+		this.clearFiltersCommand = new CCIMSCommand(CCIMSCommandType.CLEAR_FILTERS, context);
 
 		this.createArtifactCommand = new CCIMSEditorCommand(CCIMSCommandType.CREATE_ARTIFACT, context);
 		this.activateFileFilterCommand = new CCIMSEditorCommand(CCIMSCommandType.ACTIVATE_FILE_FILTER, context);

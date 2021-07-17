@@ -288,6 +288,11 @@
 				"title": "Toggle if only self-assigned issues are shown",
 				"category": "CCIMS",
 				"icon": "$(star)"
+			},
+			{
+				"command": "ccims.clearFilters",
+				"title": "Clear all issue filters",
+				"category": "CCIMS"
 			}
 		],
 		"menus": {
@@ -319,43 +324,13 @@
 		"viewsWelcome": [
 			{
 				"view": "ccims.issueList",
-				"contents": "In order to use CCIMS features, please open a folder.\n[Open Folder](command:vscode.openFolder)",
-				"when": "workbenchState == empty"
-			},
-			{
-				"view": "ccims.issueList",
-				"contents": "The api URL is currently not set\n[Setup extension](command:ccims.setupExtension)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "workbenchState != empty && ccims.apiStatus == 2"
-			},
-			{
-				"view": "ccims.issueList",
-				"contents": "The api is currently not available.\n[Setup extension](command:ccims.setupExtension)\n[Check again](command:ccims.checkApiStatus)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "workbenchState != empty && ccims.apiStatus == 3"
-			},
-			{
-				"view": "ccims.issueList",
-				"contents": "You are currently not logged in.\n[Login](command:ccims.login)",
-				"when": "workbenchState != empty && ccims.apiStatus == 4"
-			},
-			{
-				"view": "ccims.issueList",
-				"contents": "Your login data is invalid.\n[Login](command:ccims.login)",
-				"when": "workbenchState != empty && ccims.apiStatus == 5"
-			},
-			{
-				"view": "ccims.issueList",
-				"contents": "There is no component configured\n[Select component](command:ccims.selectComponent)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "workbenchState != empty && ccims.apiStatus == 6"
-			},
-			{
-				"view": "ccims.issueList",
-				"contents": "The currently configured component does not exist or is not accessible\n[Select component](command:ccims.selectComponent)\n[Open Settings](command:workbench.action.openSettings2)",
-				"when": "workbenchState != empty && ccims.apiStatus == 7"
-			},
-			{
-				"view": "ccims.issueList",
 				"contents": "There are no issues on the selected component\n[Create issue](command:ccims.newIssue)\n[Select component](command:ccims.selectComponent)",
-				"when": "workbenchState != empty && ccims.apiStatus == 1"
+				"when": "workbenchState != empty && ccims.apiStatus == 1 && !ccims.hasFilter"
+			},
+			{
+				"view": "ccims.issueList",
+				"contents": "No issues match current filter.\n[Clear filters](command:ccims.clearFilters)",
+				"when": "workbenchState != empty && ccims.apiStatus == 1 && ccims.hasFilter"
 			}
 		],
 		"keybindings": [

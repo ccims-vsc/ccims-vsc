@@ -26,5 +26,7 @@ export enum CCIMSCommandType {
 	TOGGLE_FILTER_OPEN = "ccims.toggleFilterOpen",
 	TOGGLE_FILTER_CLOSED = "ccims.toggleFilterClosed",
 	TOGGLE_FILTER_SELF_ASSIGNED = "ccims.toggleFilterSelfAssigned",
-	FILTER_CHANGED = "ccims.filterChanged"
+	FILTER_CHANGED = "ccims.filterChanged",
+	CLEAR_FILTERS = "ccims.clearFilters",
+	API_STATUS_UPDATED = "ccims.apiStatusUpdated"
 }

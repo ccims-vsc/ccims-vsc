@@ -9,7 +9,7 @@ import { ArtifactConfig } from "./ArtifactConfig";
 import { EditorArtifactManager } from "./EditorArtifactManager";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { Artifact } from "../generated/graphql";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 import { setContext } from "../data/CCIMSContext";
 
 /**

@@ -6,7 +6,7 @@ import { ThemeChangedMessage } from "./communication/ThemeChangedMessage";
 import { CreateIssueMessage } from "./communication/CreateIssueMessage";
 import { getComponentId, isComplexListIcons } from "../data/settings";
 import { UpdateIssueMessage } from "./communication/UpdateIssueMessage";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 import { IssueDiff } from "./communication/IssueDiff";
 import { Artifact, Issue } from "../generated/graphql";
 import { SearchLabelsMessage } from "./communication/SearchLabelsMessage";

@@ -1,13 +1,12 @@
 import * as vscode from "vscode";
 import { CCIMSCommands } from "../commands/CCIMSCommands";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 import { getCCIMSApi } from "../data/CCIMSApi";
 import { getIssueIcon } from "../data/IconProvider";
 import { Issue, IssueCategory } from "../generated/graphql";
 import { getComponentId, isComplexListIcons } from "../data/settings";
 import { getResourceUri } from "../extension";
 import { ComponentController } from "../data/ComponentController";
-import { CCIMSContext, getContext, setContext } from "../data/CCIMSContext";
 import { IssueFilter } from "../data/IssueFilter";
 
 /**

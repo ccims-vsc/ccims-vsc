@@ -4,7 +4,7 @@ import { Component, Issue } from "../generated/graphql";
 import { getCCIMSApi } from "./CCIMSApi";
 import { getArtifactSchemas, getComponentId } from "./settings";
 import * as vscode from "vscode";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 import { ArtifactSchema } from "../artifacts/ArtifactConfig";
 import { IssueFilter } from "./IssueFilter";
 

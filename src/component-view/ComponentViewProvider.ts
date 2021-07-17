@@ -7,7 +7,10 @@ import { ComponentViewMessageType } from "./communication/ComponentViewMessageTy
 import { UpdateComponentMessage } from "./communication/UpdateComponentMessage";
 import { IssueFilter } from "../data/IssueFilter";
 import { UpdateIssueFilterMessage } from "./communication/UpdateIssueFilterMessage";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
+import { UpdateApiStatusMessage } from "./communication/UpdateApiStatusMessage";
+import { CCIMSContext, getContext } from "../data/CCIMSContext";
+import { ExecuteCommandMessage } from "./communication/ExecuteCommandMessage";
 
 export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMessage, ComponentViewMessageType> {
 
@@ -46,29 +49,29 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 			this._updateComponent();
 		});
 
-		commands.toggleFilterUnclassified.addListener(() => {
+		commands.toggleFilterUnclassifiedCommand.addListener(() => {
 			this._issueFilter.showUnclassified = !this._issueFilter.showUnclassified;
 			this._updateIssueFilter();
 		});
-		commands.toggleFilterBugs.addListener(() => {
+		commands.toggleFilterBugsCommand.addListener(() => {
 			this._issueFilter.showBugs = !this._issueFilter.showBugs;
 			this._updateIssueFilter();
 		});
-		commands.toggleFilterFeatureRequests.addListener(() => {
+		commands.toggleFilterFeatureRequestsCommand.addListener(() => {
 			this._issueFilter.showFeatureRequests = !this._issueFilter.showFeatureRequests;
 			this._updateIssueFilter();
 		});
 
-		commands.toggleFilterOpen.addListener(() => {
+		commands.toggleFilterOpenCommand.addListener(() => {
 			this._issueFilter.showOpen = !this._issueFilter.showOpen;
 			this._updateIssueFilter();
 		});
-		commands.toggleFilterClosed.addListener(() => {
+		commands.toggleFilterClosedCommand.addListener(() => {
 			this._issueFilter.showClosed = !this._issueFilter.showClosed;
 			this._updateIssueFilter();
 		});
 
-		commands.toggleFilterSelfAssigned.addListener(() => {
+		commands.toggleFilterSelfAssignedCommand.addListener(() => {
 			this._issueFilter.showOnlySelfAssigned = !this._issueFilter.showOnlySelfAssigned;
 			this._updateIssueFilter();
 		});
@@ -80,6 +83,23 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 		commands.deactivateFileFilterCommand.addListener(() => {
 			this._issueFilter.showOnlyIssuesRegardingFile = null;
 			this._updateIssueFilter();
+		});
+		commands.clearFiltersCommand.addListener(() => {
+			this._issueFilter = {
+				filter: "",
+				showUnclassified: true,
+				showBugs: true,
+				showFeatureRequests: true,
+				showOpen: true,
+				showClosed: true,
+				showOnlySelfAssigned: false,
+				showOnlyIssuesRegardingFile: null
+			};
+			this._updateIssueFilter();
+		});
+
+		commands.apiStatusUpdatedCommand.addListener(() => {
+			this._updateApiStatus();
 		});
 	}
 
@@ -97,6 +117,10 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 			this._init();
 		});
 
+		this.setMessageListener(ComponentViewMessageType.EXECUTE_COMMAND, message => {
+			const executeCommandMessage = message as ExecuteCommandMessage;
+			vscode.commands.executeCommand(executeCommandMessage.command);
+		});
 	}
 
 	/**
@@ -107,14 +131,15 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 	}
 
 
-		/**
+	/**
 	 * Inits the WebView
 	 * Called after start, and also after webview init
 	 */
-		 private _init(): void {
-			this._updateComponent();
-			this._updateIssueFilter();
-		}
+	private _init(): void {
+		this._updateComponent();
+		this._updateIssueFilter();
+		this._updateApiStatus();
+	}
 
 	
 
@@ -134,5 +159,12 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 			filter: this._issueFilter
 		} as UpdateIssueFilterMessage);
 		vscode.commands.executeCommand(CCIMSCommandType.FILTER_CHANGED, this._issueFilter);
+	}
+
+	private _updateApiStatus(): void {
+		this.postMessage({
+			type: ComponentViewMessageType.UPDATE_API_STATUS,
+			apiStatus: getContext(CCIMSContext.API_STATUS)
+		} as UpdateApiStatusMessage);
 	}
 }

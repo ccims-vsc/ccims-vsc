@@ -3,7 +3,7 @@ import { Artifact, Component, getSdk, Issue, Label, Project, Sdk } from "../gene
 import { GraphQLClient } from 'graphql-request';
 import { getApiUrl, getComponentId, getLoginUrl, getPublicApiUrl, isComplexListIcons } from "./settings";
 import axios from "axios";
-import { CCIMSCommandType } from "../commands/CCIMSCommandsType";
+import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 
 /**
  * The type of the CCIMSApi used for all requests
