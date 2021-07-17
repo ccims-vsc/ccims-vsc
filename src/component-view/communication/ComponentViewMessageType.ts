@@ -3,5 +3,6 @@
  */
 export enum ComponentViewMessageType {
 	UPDATE_ISSUE_FILTER = "updateIssueFilter",
-	UPDATE_COMPONENT = "updateComponent"
+	UPDATE_COMPONENT = "updateComponent",
+	NOTIFY_INITIALIZED = "notifyInitialized"
 }

@@ -161,6 +161,10 @@ export class IssueViewProvider extends WebviewProviderBase<IssueViewMessage, Iss
 			await vscode.env.openExternal(vscode.Uri.parse(openUrlMessage.url));
 		});
 
+		this.setMessageListener(IssueViewMessageType.NOTIFY_INITIALIZED, message => {
+			this._init();
+		});
+
 		await this._initSearchListeners();
 	}
 
@@ -361,14 +365,22 @@ export class IssueViewProvider extends WebviewProviderBase<IssueViewMessage, Iss
 	 * Called after the WebView has been resolved
 	 */
 	protected postResolveWebView(): void {
+		this._init()
+		vscode.window.onDidChangeActiveColorTheme(() => {
+			this._updateTheme();
+		});
+	}
+
+	/**
+	 * Inits the WebView
+	 * Called after start, and also after webview init
+	 */
+	private _init(): void {
 		this._updateTheme();
 		this._updateUserId();
 		this._updateIconTable();
 		this._updateComplexListItems();
 		this._updateComponent();
-		vscode.window.onDidChangeActiveColorTheme(() => {
-			this._updateTheme();
-		});
 	}
 
 	/**

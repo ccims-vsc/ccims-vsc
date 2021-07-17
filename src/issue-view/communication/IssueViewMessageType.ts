@@ -21,5 +21,6 @@ export enum IssueViewMessageType {
 	COMPONENT_CHANGED = "componentChanged",
 	OPEN_URL = "openUrl",
 	OPEN_FILE = "openFile",
-	ADD_ARTIFACT = "addArtifact"
+	ADD_ARTIFACT = "addArtifact",
+	NOTIFY_INITIALIZED = "notifyInitialized"
 }

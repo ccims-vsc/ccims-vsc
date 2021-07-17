@@ -92,15 +92,29 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 			this._issueFilter = filterMessage.filter;
 			vscode.commands.executeCommand(CCIMSCommandType.FILTER_CHANGED, this._issueFilter);
 		});
+
+		this.setMessageListener(ComponentViewMessageType.NOTIFY_INITIALIZED, message => {
+			this._init();
+		});
+
 	}
 
 	/**
 	 * Called after the WebView has been resolved
 	 */
 	protected postResolveWebView(): void {
-		this._updateComponent();
-		this._updateIssueFilter();
+		this._init();
 	}
+
+
+		/**
+	 * Inits the WebView
+	 * Called after start, and also after webview init
+	 */
+		 private _init(): void {
+			this._updateComponent();
+			this._updateIssueFilter();
+		}
 
 	
 

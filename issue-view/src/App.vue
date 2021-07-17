@@ -427,6 +427,15 @@ export default class App extends Vue {
     }
 
     /**
+     * Called when initialized, used to notify initialized
+     */
+    mounted(): void {
+        this.postMessage({
+            type: IssueViewMessageType.NOTIFY_INITIALIZED
+        });
+    }
+
+    /**
      * Called with a received message
      */
     private onMessage(message: IssueViewMessage): void {
