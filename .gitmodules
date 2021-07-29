@@ -1,0 +1,3 @@
+[submodule "res/img"]
+	path = res/img
+	url = https://github.com/ccims/gropius-icons
