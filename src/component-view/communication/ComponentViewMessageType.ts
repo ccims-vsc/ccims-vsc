@@ -6,5 +6,6 @@ export enum ComponentViewMessageType {
 	UPDATE_COMPONENT = "updateComponent",
 	NOTIFY_INITIALIZED = "notifyInitialized",
 	EXECUTE_COMMAND = "executeCommand",
-	UPDATE_API_STATUS = "updateApiStatus"
+	UPDATE_API_STATUS = "updateApiStatus",
+	ICON_TABLE = "iconTable"
 }

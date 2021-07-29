@@ -30,7 +30,8 @@
                             :title="issueFilter.showUnclassified ? 'Hide unclassified issues' : 'Show unclassified issues'"
                         >
                             <div
-                                class="codicon codicon-issues"
+                                class="svg-mask-icon"
+                                :style="unclassifiedIssueIconMask" 
                             />
                             <div
                                 v-if="!issueFilter.showUnclassified"
@@ -46,7 +47,8 @@
                             :title="issueFilter.showBugs ? 'Hide bugs' : 'Show bugs'"
                         >
                             <div
-                                class="codicon codicon-bug"
+                                class="svg-mask-icon"
+                                :style="bugIconMask" 
                             />
                             <div
                                 v-if="!issueFilter.showBugs"
@@ -62,7 +64,8 @@
                             :title="issueFilter.showFeatureRequests ? 'Hide feature requests' : 'Show feature requests'"
                         >
                             <div
-                                class="codicon codicon-lightbulb"
+                                class="svg-mask-icon"
+                                :style="featureRequestIconMask" 
                             />
                             <div
                                 v-if="!issueFilter.showFeatureRequests"
@@ -82,8 +85,13 @@
                             @click="issueFilter.showOpen = !issueFilter.showOpen"
                             :title="issueFilter.showOpen ? 'Hide open issues' : 'Show open issues'"
                         >
-                            <div
-                                class="codicon codicon-issues"
+                            <img v-if="issueFilter.showOpen"
+                                class="svg-icon"
+                                :src="openUnclassifiedIssueIcon"
+                            />
+                            <div v-if="!issueFilter.showOpen"
+                                class="svg-mask-icon"
+                                :style="openIssueIconMask"
                             />
                             <div
                                 v-if="!issueFilter.showOpen"
@@ -98,8 +106,13 @@
                             @click="issueFilter.showClosed = !issueFilter.showClosed"
                             :title="issueFilter.showClosed ? 'Hide closed issues' : 'Show closed issues'"
                         >
-                            <div
-                                class="codicon codicon-pass"
+                            <img v-if="issueFilter.showClosed"
+                                class="svg-icon"
+                                :src="closedUnclassifiedIssueIcon"
+                            />
+                            <div v-if="!issueFilter.showClosed"
+                                class="svg-mask-icon"
+                                :style="closedIssueIconMask"
                             />
                             <div
                                 v-if="!issueFilter.showClosed"
@@ -175,10 +188,13 @@ import { UpdateComponentMessage } from "../../src/component-view/communication/U
 import { UpdateIssueFilterMessage } from "../../src/component-view/communication/UpdateIssueFilterMessage";
 import { UpdateApiStatusMessage } from "../../src/component-view/communication/UpdateApiStatusMessage";
 import { ExecuteCommandMessage } from "../../src/component-view/communication/ExecuteCommandMessage";
+import { IconTableMessage } from "../../src/component-view/communication/IconTableMessage";
 import { CCIMSCommandType } from "../../src/commands/CCIMSCommandType";
 import { ApiStatus } from "../../src/data/ApiStatus"
-import { Component } from "../../src/generated/graphql";
+import { Component, IssueCategory } from "../../src/generated/graphql";
 import { vscode } from "./main";
+import { getSimpleIssueIcon } from "../../src/data/IconProvider";
+
 
 
 @Options({
@@ -208,6 +224,11 @@ export default class App extends Vue {
      */
     private component: Component | null = null;
 
+    /**
+     * Table with all icons
+     */
+    private iconTable: { [key: string]: string } = {};
+
     private issueFilter: IssueFilter = {
 		filter: "",
 		showUnclassified: true,
@@ -219,10 +240,33 @@ export default class App extends Vue {
 		showOnlyIssuesRegardingFile: null
 	}
 
-    /**
-     * Table with all icons
-     */
-    private iconTable: { [key: string]: string } = {};
+    private get openUnclassifiedIssueIcon(): string {
+        return this.iconTable[getSimpleIssueIcon(IssueCategory.Unclassified, true)]
+    }
+
+    private get closedUnclassifiedIssueIcon(): string {
+        return this.iconTable[getSimpleIssueIcon(IssueCategory.Unclassified, false)]
+    }
+
+    private get unclassifiedIssueIconMask(): string {
+        return this.maskString(this.openUnclassifiedIssueIcon);
+    }
+
+    private get bugIconMask(): string {
+        return this.maskString(this.iconTable[getSimpleIssueIcon(IssueCategory.Bug, true)]);
+    }
+
+    private get featureRequestIconMask(): string {
+        return this.maskString(this.iconTable[getSimpleIssueIcon(IssueCategory.FeatureRequest, true)]);
+    }
+
+    private get openIssueIconMask(): string {
+        return this.maskString(this.openUnclassifiedIssueIcon);
+    }
+
+    private get closedIssueIconMask(): string {
+        return this.maskString(this.closedUnclassifiedIssueIcon);
+    }
 
     /**
      * Called on create, adds event listeners
@@ -350,6 +394,10 @@ export default class App extends Vue {
                 this.currentApiStatus = updateApiStatusMessage.apiStatus;
                 break;
             }
+            case ComponentViewMessageType.ICON_TABLE: {
+                this.iconTable = (message as IconTableMessage).icons;
+                break;
+            }
         }
     }
 
@@ -392,6 +440,10 @@ export default class App extends Vue {
     @Watch("issueFilter", { deep: true })
     private issueFilterUpdated(): void {
         this.postUpdateFilter();
+    }
+
+    private maskString(value: string): string {
+        return `-webkit-mask: url(${value}) 0 0 / 19px 19px`;
     }
 
 }
@@ -494,5 +546,17 @@ interface MessageData {
         margin-block-start: 1em;
         margin-left: 6px;
         width: calc(100% - 12px);
+    }
+
+
+    .svg-icon,
+    .svg-mask-icon {
+        width: 19px;
+        height: 19px;
+        user-select: none;
+    }
+
+    .svg-mask-icon {
+        background-color: var(--vscode-foreground);
     }
 </style>

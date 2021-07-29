@@ -44,21 +44,21 @@ export function listIconFiles(): string[] {
 }
 
 export function getComplexIssueIcon(category: IssueCategory, isOpen: boolean, links: boolean, isLinked: boolean, star: boolean): string {
-	let path = "img/complex/" + getFileStart(category, isOpen);
+	let path = "img/icons-md/" + (star ? "assigned/" : "normal/") + getFileStart(category, isOpen);
 	if (isLinked) {
-		path += "_UL_incomingArrow";
-	}
-	if (star) {
-		path += "_LL_star";
-	}
-	if (links) {
-		path += "_UR_outgoingArrow";
+		if (links) {
+			path += "-inout";
+		} else {
+			path += "-in";
+		}
+	} else if (links) {
+		path += "-out";
 	}
 	return path + ".svg";
 }
 
 export function getSimpleIssueIcon(category: IssueCategory, isOpen: boolean): string {
-	return "img/simple/" + getFileStart(category, isOpen) + ".svg";
+	return "img/icons-md/normal/" + getFileStart(category, isOpen) + ".svg";
 }
 
 function getFileStart(category: IssueCategory, isOpen: boolean): string {
@@ -69,16 +69,16 @@ function getFileStart(category: IssueCategory, isOpen: boolean): string {
 			break;
 		}
 		case IssueCategory.FeatureRequest: {
-			start = "lightbulb";
+			start = "feature";
 			break;
 		}
 		default: {
-			start = "issue";
+			start = "uncategorized";
 			break;
 		}
 	}
 	if (!isOpen) {
-		start += "_closed";
+		start += "-closed";
 	}
 	return start;
 }

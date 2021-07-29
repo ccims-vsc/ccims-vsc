@@ -11,6 +11,8 @@ import { CCIMSCommandType } from "../commands/CCIMSCommandType";
 import { UpdateApiStatusMessage } from "./communication/UpdateApiStatusMessage";
 import { CCIMSContext, getContext } from "../data/CCIMSContext";
 import { ExecuteCommandMessage } from "./communication/ExecuteCommandMessage";
+import { listIconFiles } from "../data/IconProvider";
+import { IconTableMessage } from "./communication/IconTableMessage";
 
 export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMessage, ComponentViewMessageType> {
 
@@ -139,6 +141,7 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 		this._updateComponent();
 		this._updateIssueFilter();
 		this._updateApiStatus();
+		this._updateIconTable();
 	}
 
 	
@@ -166,5 +169,20 @@ export class ComponentViewProvider extends WebviewProviderBase<ComponentViewMess
 			type: ComponentViewMessageType.UPDATE_API_STATUS,
 			apiStatus: getContext(CCIMSContext.API_STATUS)
 		} as UpdateApiStatusMessage);
+	}
+
+	/**
+	 * Sends an updated icon table to the frontend
+	 */
+	private _updateIconTable(): void {
+		const icons = listIconFiles();
+		const iconTable: { [key: string]: string; } = {};
+		for (const icon of icons) {
+			iconTable[icon] = this.getResourceUri(icon).toString()
+		}
+		this.postMessage({
+			type: ComponentViewMessageType.ICON_TABLE,
+			icons: iconTable
+		} as IconTableMessage);
 	}
 }
